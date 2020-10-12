@@ -71,6 +71,7 @@ class Products extends Component {
             [event.target.name]: (event.target.type == "file") ? event.target.files[0] : event.target.value
         });
     }
+
     submitHandler(event) {
         event.preventDefault();
         var categoriesID = "";

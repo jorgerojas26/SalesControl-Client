@@ -347,7 +347,7 @@ class ResourceTable extends Component {
                     }
                 },
                 paging: true,
-                pageLength: (_this.props.sourceURL.includes("sales") || _this.props.sourceURL.includes("supplyings")) ? 1000000 : 10,
+                pageLength: 10,
                 searchDelay: 500,
                 columns: this.props.columns,
                 ordering: false
