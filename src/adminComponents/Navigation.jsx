@@ -22,7 +22,7 @@ class Navigation extends Component {
     render() {
         return (
             <nav className="navbar navbar-expand-lg navbar-dark bg-dark flex-lg-column flex-xl-row">
-                <a className="navbar-brand text-danger" href="/admin">Supermercado Melquisedec</a>
+                <a className="navbar-brand text-danger" href="/">Supermercado Melquisedec</a>
                 <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span className="navbar-toggler-icon"></span>
                 </button>
@@ -30,37 +30,37 @@ class Navigation extends Component {
                 <div className="collapse navbar-collapse row p-0 m-0" id="navbarSupportedContent">
                     <ul className="navbar-nav flex-lg-row mx-auto container-fluid p-0 m-0">
                         <li className="nav-item" data-toggle="collapse" data-target="#navbarSupportedContent">
-                            <NavLink className="nav-link" onClick={this.clickHandler} to="/admin/dashboard/control-de-ventas"><span className="d-md-inline">Control de Ventas</span></NavLink>
+                            <NavLink className="nav-link" onClick={this.clickHandler} to="/control-de-ventas"><span className="d-md-inline">Control de Ventas</span></NavLink>
                         </li>
                         <li className="nav-item" data-toggle="collapse" data-target="#navbarSupportedContent">
-                            <NavLink className="nav-link" onClick={this.clickHandler} to="/admin/dashboard/inventario"><span className="d-md-inline">Inventario</span></NavLink>
+                            <NavLink className="nav-link" onClick={this.clickHandler} to="/inventario"><span className="d-md-inline">Inventario</span></NavLink>
                         </li>
                         <li className="nav-item" data-toggle="collapse" data-target="#navbarSupportedContent">
-                            <NavLink className="nav-link" onClick={this.clickHandler} to="/admin/dashboard/reportes"><span className="d-md-inline">Reportes</span></NavLink>
+                            <NavLink className="nav-link" onClick={this.clickHandler} to="/reportes"><span className="d-md-inline">Reportes</span></NavLink>
                         </li>
                         <li className="nav-item" data-toggle="collapse" data-target="#navbarSupportedContent">
-                            <NavLink className="nav-link" onClick={this.clickHandler} to="/admin/dashboard/categorias"><span className="d-md-inline">Categorías</span></NavLink>
+                            <NavLink className="nav-link" onClick={this.clickHandler} to="/categorias"><span className="d-md-inline">Categorías</span></NavLink>
                         </li>
                         <li className="nav-item" data-toggle="collapse" data-target="#navbarSupportedContent">
-                            <NavLink className="nav-link" onClick={this.clickHandler} to="/admin/dashboard/clientes"><span className="d-md-inline">Clientes</span></NavLink>
+                            <NavLink className="nav-link" onClick={this.clickHandler} to="/clientes"><span className="d-md-inline">Clientes</span></NavLink>
                         </li>
                         <li className="nav-item" data-toggle="collapse" data-target="#navbarSupportedContent">
-                            <NavLink className="nav-link" onClick={this.clickHandler} to="/admin/dashboard/productos"><span className="d-md-inline">Productos</span></NavLink>
+                            <NavLink className="nav-link" onClick={this.clickHandler} to="/productos"><span className="d-md-inline">Productos</span></NavLink>
                         </li>
                         <li className="nav-item" data-toggle="collapse" data-target="#navbarSupportedContent">
-                            <NavLink className="nav-link" onClick={this.clickHandler} to="/admin/dashboard/ventas"><span className="d-md-inline">Ventas</span></NavLink>
+                            <NavLink className="nav-link" onClick={this.clickHandler} to="/ventas"><span className="d-md-inline">Ventas</span></NavLink>
                         </li>
                         <li className="nav-item" data-toggle="collapse" data-target="#navbarSupportedContent">
-                            <NavLink className="nav-link" onClick={this.clickHandler} to="/admin/dashboard/abastecimiento"><span className="d-md-inline">Abastecimiento</span></NavLink>
+                            <NavLink className="nav-link" onClick={this.clickHandler} to="/abastecimiento"><span className="d-md-inline">Abastecimiento</span></NavLink>
                         </li>
                         <li className="nav-item" data-toggle="collapse" data-target="#navbarSupportedContent">
-                            <NavLink className="nav-link" onClick={this.clickHandler} to="/admin/dashboard/proveedores"><span className="d-md-inline">Proveedores</span></NavLink>
+                            <NavLink className="nav-link" onClick={this.clickHandler} to="/proveedores"><span className="d-md-inline">Proveedores</span></NavLink>
                         </li>
                         <li className="nav-item" data-toggle="collapse" data-target="#navbarSupportedContent">
-                            <NavLink className="nav-link" onClick={this.clickHandler} to="/admin/dashboard/usuarios"><span className="d-md-inline">Usuarios</span></NavLink>
+                            <NavLink className="nav-link" onClick={this.clickHandler} to="/usuarios"><span className="d-md-inline">Usuarios</span></NavLink>
                         </li>
                         <li className="nav-item" data-toggle="collapse" data-target="#navbarSupportedContent">
-                            <NavLink className="nav-link btn btn-danger px-0" onClick={this.logout} to="/admin/signin">Cerrar Sesión</NavLink>
+                            <NavLink className="nav-link btn btn-danger px-0" onClick={this.logout} to="/signin">Cerrar Sesión</NavLink>
                         </li>
                     </ul>
                 </div>

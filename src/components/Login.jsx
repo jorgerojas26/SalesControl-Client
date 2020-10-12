@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { isAuthenticated } from "../requests/isAuthenticated"
+import isAuthenticated from "../requests/isAuthenticated"
 class Login extends Component {
 
     constructor() {
@@ -17,7 +17,7 @@ class Login extends Component {
     componentDidMount() {
         isAuthenticated().then(authenticated => {
             if (authenticated) {
-                this.props.history.push("/admin/dashboard")
+                this.props.history.push("/")
             }
         })
     }
@@ -44,7 +44,7 @@ class Login extends Component {
                 }
                 else {
                     localStorage.setItem("jwt", result.token);
-                    this.props.history.push("/admin/dashboard");
+                    this.props.history.push("/");
                 }
             });
     }

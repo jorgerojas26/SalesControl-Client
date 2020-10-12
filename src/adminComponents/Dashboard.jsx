@@ -13,7 +13,7 @@ import Inventory from "./Inventory";
 import Reports from "./Reports";
 import PrivateRoute from "../components/PrivateRoute";
 
-import { Switch } from "react-router-dom";
+import { Route } from "react-router-dom";
 class Dashboard extends Component {
 
     constructor() {
@@ -72,18 +72,16 @@ class Dashboard extends Component {
                     </div>
                 </div>
                 <main className="mt-5">
-                    <Switch>
-                        <PrivateRoute path="/admin/dashboard/control-de-ventas" component={SalesControl} dolarReference={this.state.dolarReference} />
-                        <PrivateRoute path="/admin/dashboard/inventario" component={Inventory} />
-                        <PrivateRoute path="/admin/dashboard/reportes" component={Reports} dolarReference={this.state.dolarReference} />
-                        <PrivateRoute path="/admin/dashboard/categorias" component={Categories} />
-                        <PrivateRoute path="/admin/dashboard/clientes" component={Clients} />
-                        <PrivateRoute path="/admin/dashboard/productos" component={Products} dolarReference={this.state.dolarReference} />
-                        <PrivateRoute path="/admin/dashboard/ventas" component={Sales} />
-                        <PrivateRoute path="/admin/dashboard/abastecimiento" component={Supplyings} dolarReference={this.state.dolarReference} />
-                        <PrivateRoute path="/admin/dashboard/proveedores" component={Suppliers} />
-                        <PrivateRoute path="/admin/dashboard/usuarios" component={Users} />
-                    </Switch>
+                    <Route path="/control-de-ventas" render={(props) => (<SalesControl {...props} dolarReference={this.state.dolarReference} />)} />
+                    <Route path="/inventario" component={Inventory} />
+                    <Route path="/reportes" render={(props) => (<Reports {...props} dolarReference={this.state.dolarReference} />)} />
+                    <Route path="/categorias" component={Categories} />
+                    <Route path="/clientes" component={Clients} />
+                    <Route path="/productos" render={(props) => (<Products {...props} dolarReference={this.state.dolarReference} />)} />
+                    <Route path="/ventas" component={Sales} />
+                    <Route path="/abastecimiento" render={(props) => (<Supplyings {...props} dolarReference={this.state.dolarReference} />)} />
+                    <Route path="/proveedores" component={Suppliers} />
+                    <Route path="/usuarios" component={Users} />
                 </main>
             </div>
 

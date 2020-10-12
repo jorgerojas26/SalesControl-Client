@@ -20,17 +20,8 @@ const store = configureStore();
 
 function App() {
 
-  return (
-    <Provider store={store}>
-      <div className="App">
-        <Router>
-          <Switch>
-            <PrivateRoute path="/admin/dashboard" component={Dashboard} />
-            <Route path="/admin/signin" component={Login} />
-            <Route exact path="/admin">
-              <Redirect to="/admin/dashboard" />
-            </Route>
-            <Route path="/">
+  /*
+  <Route path="/">
               <div className="container-fluid">
                 <div className="row bg-dark" style={{ height: "30px" }} />
                 <div className="row sticky-top">
@@ -63,6 +54,14 @@ function App() {
                 </div>
               </div>
             </Route>
+  */
+  return (
+    <Provider store={store}>
+      <div className="App">
+        <Router>
+          <Switch>
+            <Route exact path="/signin" component={Login} />
+            <PrivateRoute path="/" component={Dashboard} />
           </Switch>
         </Router>
       </div>

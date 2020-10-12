@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Route, Redirect } from 'react-router-dom';
-import { isAuthenticated } from "../requests/isAuthenticated";
+import isAuthenticated from "../requests/isAuthenticated";
 
 class PrivateRoute extends React.Component {
     constructor() {
@@ -31,7 +31,7 @@ class PrivateRoute extends React.Component {
                             this.state.loading ? (
                                 <div>LOADING</div>
                             ) : (
-                                    <Redirect to={{ pathname: '/admin/signin', state: { from: this.props.location } }} />
+                                    <Redirect to={{ pathname: '/signin', state: { from: this.props.location } }} />
                                 )
                         )
                 }
