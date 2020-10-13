@@ -39,6 +39,7 @@ class SalesControl extends Component {
             }
         });
     }
+
     optionChangeHandler(selectedOption, actionType) {
         if (actionType.action == "select-option") {
             this.quantityInput.current.focus();
@@ -78,10 +79,9 @@ class SalesControl extends Component {
                         product.discount = discount;
                         product.quantity = this.state.quantity || 1;
 
-
                         product.totalDollars = product.price * product.quantity - (product.price * (discount / 100));
-                        product.totalBs = this.roundToNiceNumber(product.totalDollars * this.props.dolarReference);
                         product.priceBs = this.roundToNiceNumber(product.price * this.props.dolarReference);
+                        product.totalBs = this.roundToNiceNumber(product.priceBs * product.quantity - (product.priceBs * (discount / 100)));
 
                         if (discount) {
                             product.totalFormattedDollars = <span className={(discount) ? "text-danger" : ""}>{Intl.NumberFormat('es-VE', { style: 'currency', currency: 'USD' }).format(product.totalDollars) + ` (-${discount}%)`}</span>;
@@ -150,6 +150,19 @@ class SalesControl extends Component {
                                 quantity: 1,
                                 selectedProduct: null,
                                 stockError: ""
+                            }, function () {
+                                let totalDollars = 0;
+                                let totalBs = 0;
+                                this.state.addedProducts.map(product => {
+                                    totalDollars += parseFloat(product.totalDollars);
+                                    totalBs += parseFloat(product.totalBs);
+                                });
+                                this.setState({
+                                    subtotalDollars: totalDollars,
+                                    subtotalBs: totalBs,
+                                    totalDollars,
+                                    totalBs
+                                })
                             })
                         }
                     }
@@ -271,7 +284,7 @@ class SalesControl extends Component {
                     </div>
                     <div className="row">
                         <div className="col-12 col-md-7 mt-2">
-                            <CustomSelect isMulti={false} innerRef={this.CustomSelectRef} changeHandler={this.optionChangeHandler} name={"ProductSelect"} />
+                            <CustomSelect dolarReference={_this.props.dolarReference} isMulti={false} innerRef={this.CustomSelectRef} changeHandler={this.optionChangeHandler} name={"ProductSelect"} />
                         </div>
                         <div className="col-12 col-md-3 mt-2">
                             <input onChange={this.onChangeHandler} ref={this.quantityInput} type="text" className="form-control" placeholder="Cantidad" id="quantity" name="quantity" defaultValue="1" />

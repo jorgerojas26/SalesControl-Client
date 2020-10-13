@@ -49,7 +49,7 @@ class ResourceTable extends Component {
                         else {
                             $(this.header()).append("<br><input class='p-0 m-0 h-100' type='text' placeholder='Filtrar'/>");
                         }
-                        $('input', this.header()).on("keyup change", debounce(function () {
+                        $('input', this.header()).on("keyup change", function () {
                             let splittedDataSrc = column.dataSrc().split(".");
                             let parameter = "";
                             splittedDataSrc.forEach((split, index) => {
@@ -61,7 +61,7 @@ class ResourceTable extends Component {
                                 }
                             });
                             $recordsTable.ajax.url(`${_this.state.sourceURL}?${parameter}=${this.value.trim()}`).load();
-                        }, 500));
+                        });
 
                     });
                 },
@@ -348,7 +348,6 @@ class ResourceTable extends Component {
                 },
                 paging: true,
                 pageLength: 10,
-                searchDelay: 500,
                 columns: this.props.columns,
                 ordering: false
             });
