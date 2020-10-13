@@ -339,6 +339,7 @@ class ResourceTable extends Component {
                     },
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("jwt")}` },
                     data: function (d) {
+                        console.log(d);
                         d.page = d.start / d.length + 1;
                         d.limit = d.length;
                     },
