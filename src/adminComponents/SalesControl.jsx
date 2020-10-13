@@ -296,8 +296,8 @@ class SalesControl extends Component {
                 </form>
                 <div className="row">
                     <div className="col-12">
-                        <div className="table-responsive">
-                            <table className="table table-striped table-dark">
+                        <div className="table-responsive w-100" style={{ height: "400px" }}>
+                            <table className="table table-striped table-dark overflow-auto">
                                 <thead>
                                     <tr>
                                         <th scope="col">Count</th>
