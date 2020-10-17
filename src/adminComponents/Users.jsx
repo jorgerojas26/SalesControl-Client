@@ -79,16 +79,8 @@ class Users extends Component {
                             { title: "ID", data: "id" },
                             { title: "Email", data: "email" },
                             { title: "Permisos", data: "permissions" },
-                            {
-                                render: function (data, type, row, meta) {
-                                    return moment.utc(row.createdAt).format("DD/MM/YYYY");
-                                }, title: "Fecha creación", data: "createdAt", type: "date"
-                            },
-                            {
-                                render: function (data, type, row, meta) {
-                                    return moment.utc(row.updatedAt).format("DD/MM/YYYY");
-                                }, title: "Fecha actualización", data: "updatedAt", type: "date"
-                            },
+                            { title: "Fecha creación", data: "createdAt" }
+
                         ]} actions={["add", "delete"]} modalStructure={
                             <form ref={this.form} onSubmit={this.submitHandler} className="float-left">
                                 <div className="modal-header">

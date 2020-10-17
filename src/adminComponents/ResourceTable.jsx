@@ -9,6 +9,7 @@ require('pdfmake');
 require('datatables.net-buttons-dt');
 require('datatables.net-buttons/js/buttons.html5.js');
 require('datatables.net-buttons/js/buttons.print.js');
+require('datatables.net-buttons/js/buttons.colVis.js');
 require('datatables.net-select-dt');
 window.JSZip = jsZip;
 
@@ -49,7 +50,8 @@ class ResourceTable extends Component {
                         else {
                             $(this.header()).append("<br><input class='p-0 m-0 h-100' type='text' placeholder='Filtrar'/>");
                         }
-                        $('input', this.header()).on("keyup change", function () {
+                        $('input', this.header()).on("keypress change", function () {
+                            console.log(column.dataSrc());
                             let splittedDataSrc = column.dataSrc().split(".");
                             let parameter = "";
                             splittedDataSrc.forEach((split, index) => {
@@ -165,7 +167,7 @@ class ResourceTable extends Component {
                         }
                     })
                 },
-                dom: 'Brtip',
+                dom: 'Brltip',
                 select: "single",
                 buttons: [{
                     text: "Imprimir",
@@ -177,7 +179,8 @@ class ResourceTable extends Component {
                     exportOptions: {
                         modifier: {
                             page: 'all'
-                        }
+                        },
+                        columns: (_this.props.sourceURL.includes("products")) ? [1, 2, 3, 4] : ":visible"
                     }
                 }].concat(this.props.actions.map(action => {
                     if (action == "add") {
@@ -226,7 +229,6 @@ class ResourceTable extends Component {
                                     }
                                 })
                                     .then(res => {
-                                        console.log(res);
                                         if (res.status == 204) {
                                             datatable.ajax.reload();
                                         }
@@ -312,6 +314,7 @@ class ResourceTable extends Component {
                     url: this.state.sourceURL,
                     dataSrc: function (results) {
                         if (typeof results.count == "object") {
+                            console.log("yes");
                             results.data.forEach((row, index) => {
                                 if (row.productId == results.count[index].id) {
                                     row.count = results.count[index].count
@@ -322,16 +325,17 @@ class ResourceTable extends Component {
                         if (_this.props.sourceURL.includes("/api/sales") && _this.props.sourceURL.includes("group=true")) {
                             results.data.forEach((row, index) => {
                                 row.product = row.product[0];
-                                row.transactions = results.count[index].count;
+                                console.log(row);
+                                row.transactions = results.count.reverse()[index].count;
                                 row.grossTotalBs = row.grossTotalDollars * row.dolarReference;
 
                                 row.netIncomeDollars = row.grossTotalDollars * (row.product.profitPercent / 100);
                                 row.netIncomeBs = row.netIncomeDollars * row.dolarReference;
                             })
                         }
-                        else if (_this.props.sourceURL.includes("/api/supplyings")) {
-                            results.data.forEach(row => {
-                                row.transactions = row.count;
+                        else if (_this.props.sourceURL.includes("/api/supplyings") && _this.props.sourceURL.includes("group=true")) {
+                            results.data.forEach((row, index) => {
+                                row.transactions = results.count.reverse()[index].count;
                                 row.grossTotalBs = row.grossTotalDollars * row.dolarReference;
                             })
                         }
@@ -339,18 +343,26 @@ class ResourceTable extends Component {
                     },
                     headers: { 'Authorization': `Bearer ${localStorage.getItem("jwt")}` },
                     data: function (d) {
-                        console.log(d);
-                        d.page = d.start / d.length + 1;
-                        d.limit = d.length;
+                        if (d.length != -1) {
+                            d.page = d.start / d.length + 1;
+                            d.limit = d.length;
+                        }
+                        else {
+                            d.page = 1;
+                            d.limit = 0;
+                        }
+
                     },
                     error: function (xhr, error, code) {
                         //alert(code)
                     }
                 },
                 paging: true,
+                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
                 pageLength: 10,
                 columns: this.props.columns,
-                ordering: false
+                ordering: true,
+                order: _this.props.sorting || [[0, "desc"]]
             });
 
             if (this.props.actions.includes("date-range")) {
@@ -377,7 +389,6 @@ class ResourceTable extends Component {
                 }
                 else {
                     // Open this row
-                    console.log(_this.props.childFormat(row.data()));
                     row.child(_this.props.childFormat(row.data())).show();
                     tr.addClass('shown');
                 }

@@ -6,11 +6,25 @@ class Sales extends Component {
     constructor() {
         super()
         this.submitHandler = this.submitHandler.bind(this);
+        this.roundToNiceNumber = this.roundToNiceNumber.bind(this);
+        this.childFormat = this.childFormat.bind(this);
     }
 
     submitHandler(event) {
         event.preventDefault()
         console.log("hola");
+    }
+
+    roundToNiceNumber(value) {
+        var val = 0;
+        if (value.toString().length == 4) {
+            val = Math.ceil(value / 100) * 100
+        }
+        else if (value.toString().length > 4) {
+            val = Math.ceil(value / 1000) * 1000
+        }
+
+        return val;
     }
 
     childFormat(d) {
@@ -27,8 +41,12 @@ class Sales extends Component {
                         <input class="form-control" id="productName" value="${saleProduct.product[0].name}" disabled/>
                     </div>
                     <div class="col-1">
-                        <label for="productPrice">Price</label>
+                        <label for="productPrice">Price $</label>
                         <input class="form-control" id="productPrice" value="$${saleProduct.price}" disabled/>
+                    </div>
+                    <div class="col-1">
+                        <label for="productPriceBs">Price Bs</label>
+                        <input class="form-control" id="productPriceBs" value="Bs.S ${this.roundToNiceNumber(saleProduct.price * saleProduct.dolarReference)}" disabled/>
                     </div>
                     <div class="col-1">
                         <label for="discount">Discount</label>
@@ -65,19 +83,11 @@ class Sales extends Component {
                                 "title": "Productos",
                                 "className": 'details-control',
                                 "orderable": false,
-                                "data": null,
-                                "defaultContent": '<button class="btn btn-success">Ver Productos</button>'
+                                "data": "productName",
+                                defaultContent: '<button class="btn btn-success">Ver Productos</button>'
                             },
-                            {
-                                render: function (data, type, row, meta) {
-                                    return moment.utc(row.createdAt).format("DD/MM/YYYY");
-                                }, title: "Fecha creación", data: "sales.createdAt", type: "date"
-                            },
-                            {
-                                render: function (data, type, row, meta) {
-                                    return moment.utc(row.updatedAt).format("DD/MM/YYYY");
-                                }, title: "Fecha actualización", data: "sales.updatedAt", type: "date"
-                            },
+                            { title: "Fecha creación", data: "createdAt" }
+
                         ]} actions={["edit", "delete", "date-range"]} />
                     </div>
                 </div>

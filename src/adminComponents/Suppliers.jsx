@@ -78,16 +78,8 @@ class Suppliers extends Component {
                             { title: "ID", data: "id" },
                             { title: "Nombre", data: "name" },
                             { title: "RIF", data: "rif" },
-                            {
-                                render: function (data, type, row, meta) {
-                                    return moment.utc(row.createdAt).format("DD/MM/YYYY");
-                                }, title: "Fecha creación", data: "createdAt", type: "date"
-                            },
-                            {
-                                render: function (data, type, row, meta) {
-                                    return moment.utc(row.updatedAt).format("DD/MM/YYYY");
-                                }, title: "Fecha actualización", data: "updatedAt", type: "date"
-                            },
+                            { title: "Fecha creación", data: "createdAt" }
+
                         ]} actions={["add", "edit", "delete"]} modalStructure={
                             <form onSubmit={this.submitHandler} className="float-left">
                                 <div className="modal-header">

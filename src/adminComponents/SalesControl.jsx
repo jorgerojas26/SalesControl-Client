@@ -25,17 +25,20 @@ class SalesControl extends Component {
         this.onChangeHandler = this.onChangeHandler.bind(this);
         this.clickHandler = this.clickHandler.bind(this);
 
+        this.saleSubmitButton = React.createRef();
+
 
         this.sendSaleForm = React.createRef();
         this.quantityInput = React.createRef();
         this.CustomSelectRef = React.createRef();
+        this.productsTable = React.createRef();
     }
 
     componentDidMount() {
         document.body.addEventListener("keyup", (event) => {
             let key = event.key;
             if (event.ctrlKey && key == "Enter") {
-                this.submitHandler();
+                if (this.saleSubmitButton.current) this.saleSubmitButton.current.click()
             }
         });
     }
@@ -165,6 +168,7 @@ class SalesControl extends Component {
                                 })
                             })
                         }
+                        this.productsTable.current.scrollTop = this.productsTable.current.scrollHeight;
                     }
                     else {
                         this.setState({
@@ -183,6 +187,7 @@ class SalesControl extends Component {
         let newProducts = [];
         let totalToSubtractDollars = 0;
         let totalToSubtractBs = 0;
+
         this.state.addedProducts.forEach(product => {
             if (product.id != event.currentTarget.parentElement.parentElement.getAttribute("productid")) {
                 newProducts.push(product);
@@ -209,6 +214,7 @@ class SalesControl extends Component {
             })
             return
         }
+        this.saleSubmitButton.current.disabled = true;
         let saleProducts = [];
         this.state.addedProducts.forEach(product => {
             saleProducts.push({
@@ -231,7 +237,7 @@ class SalesControl extends Component {
             })
         }).then(res => res.json())
             .then(res => {
-                if (res.err) {
+                if (res.err || res.error) {
                     this.setState({
                         error: res.err
                     });
@@ -239,11 +245,15 @@ class SalesControl extends Component {
                 else {
                     this.setState({
                         success: "La venta se ha realizado con éxito",
-                        subtotalDollars: 0,
-                        subtotalBs: 0,
-                        totalDollars: 0,
-                        totalBs: 0,
-                        addedProducts: []
+                        selectedProduct: null,
+                        addedProducts: [],
+                        subtotalDollars: null,
+                        subtotalBs: null,
+                        totalDollars: null,
+                        totalBs: null,
+                        quantity: 1,
+                        stockError: "",
+                        error: "",
                     })
                     setTimeout(() => {
                         this.setState({
@@ -253,6 +263,7 @@ class SalesControl extends Component {
                     this.CustomSelectRef.current.select.state.value = [];
                     this.quantityInput.current.value = 1
                     this.CustomSelectRef.current.focus();
+                    this.saleSubmitButton.current.disabled = false;
 
                 }
             })
@@ -278,9 +289,12 @@ class SalesControl extends Component {
                         <h1 className="text-danger">Control de Ventas</h1>
                     </div>
                 </div>
+                <input ref={this.saleSubmitButton} onClick={this.submitHandler} type="submit" className="form-control btn btn-primary mt-2" value="Enviar" />
                 <form className="mt-5" onSubmit={this.productsHandler}>
                     <div className="col">
                         <span className="text-danger">{this.state.stockError}</span>
+                        <span className="text-danger h3">{this.state.error}</span>
+                        <span className="text-success h3">{this.state.success}</span>
                     </div>
                     <div className="row">
                         <div className="col-12 col-md-7 mt-2">
@@ -296,7 +310,7 @@ class SalesControl extends Component {
                 </form>
                 <div className="row">
                     <div className="col-12">
-                        <div className="table-responsive w-100" style={{ height: "400px" }}>
+                        <div ref={this.productsTable} className="table-responsive w-100" style={{ height: "380px" }}>
                             <table className="table table-striped table-dark overflow-auto">
                                 <thead>
                                     <tr>
@@ -353,12 +367,6 @@ class SalesControl extends Component {
 
                     </div>
                 </div>
-                <input onClick={this.submitHandler} type="submit" className="form-control btn btn-primary mt-2" value="Enviar" />
-                <div className="mt-2">
-                    <span className="text-danger h3">{this.state.error}</span>
-                    <span className="text-success h3">{this.state.success}</span>
-                </div>
-
             </div>
         )
     }
