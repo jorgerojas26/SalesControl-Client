@@ -227,29 +227,33 @@ class ResourceTable extends Component {
                             extend: "selected",
                             action: function (e, datatable, node, config) {
                                 var selectedRowData = datatable.row({ selected: true }).data();
-                                fetch(`${_this.props.sourceURL}/${selectedRowData.id}`, {
-                                    method: "DELETE",
-                                    headers: {
-                                        "Authorization": "Bearer " + localStorage.getItem("jwt")
-                                    }
-                                })
-                                    .then(res => {
-                                        if (res.status == 204) {
-                                            datatable.ajax.reload();
+                                var r = window.confirm("¿Está seguro que desea eliminar este registro?");
+                                if (r == true) {
+                                    fetch(`${_this.props.sourceURL}/${selectedRowData.id}`, {
+                                        method: "DELETE",
+                                        headers: {
+                                            "Authorization": "Bearer " + localStorage.getItem("jwt")
                                         }
-                                        else {
-                                            res.json().then(error => {
-                                                _this.setState({
-                                                    error
+                                    })
+                                        .then(res => {
+                                            if (res.status == 204) {
+                                                datatable.ajax.reload();
+                                            }
+                                            else {
+                                                res.json().then(error => {
+                                                    _this.setState({
+                                                        error
+                                                    })
                                                 })
-                                            })
-                                        }
-                                    })
-                                    .catch(error => {
-                                        _this.setState({
-                                            error
+                                            }
                                         })
-                                    })
+                                        .catch(error => {
+                                            _this.setState({
+                                                error
+                                            })
+                                        })
+                                }
+
                             }
                         }
                     }
