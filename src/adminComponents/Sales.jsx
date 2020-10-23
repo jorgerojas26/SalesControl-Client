@@ -88,7 +88,7 @@ class Sales extends Component {
                             },
                             { title: "Fecha creación", data: "createdAt" }
 
-                        ]} actions={["edit", "delete", "date-range"]} />
+                        ]} actions={["edit", "delete"]} />
                     </div>
                 </div>
             </div >

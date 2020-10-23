@@ -129,15 +129,17 @@ class Reports extends Component {
     }
     render() {
         var salesColumns = [
+            /*
             {
                 render: function (data, type, row, meta) {
                     return `<img src="${row.product.imagePath}" style="max-width:35px;"/>`
                 },
                 title: "Imagen", data: "product.imagePath"
             },
+            */
             { title: "Product ID", data: "product.id" },
             { title: "Nombre", data: "product.name" },
-            { title: "Transacciones", data: "transactions" },
+            //{ title: "Transacciones", data: "transactions" },
             { title: "Cantidad de productos", data: "salesTotal" },
             {
                 render: function (data, type, row, meta) {
@@ -168,15 +170,17 @@ class Reports extends Component {
         ];
 
         var supplyingsColumns = [
+            /*
             {
                 render: function (data, type, row, meta) {
                     return `<img src="${row.product.imagePath}" style="max-width:35px;"/>`
                 },
                 title: "Imagen", data: "product.imagePath"
             },
+            */
             { title: "Product ID", data: "product.id" },
             { title: "Nombre", data: "product.name" },
-            { title: "Transacciones", data: "transactions" },
+            //{ title: "Transacciones", data: "transactions" },
             { title: "Cantidad de productos", data: "quantity" },
             {
                 render: function (data, type, row, meta) {

@@ -289,7 +289,7 @@ class SalesControl extends Component {
                         <h1 className="text-danger">Control de Ventas</h1>
                     </div>
                 </div>
-                <input ref={this.saleSubmitButton} onClick={this.submitHandler} type="submit" className="form-control btn btn-primary mt-2" value="Enviar" />
+                <input ref={this.saleSubmitButton} onClick={this.submitHandler} type="button" className="form-control btn btn-primary" value="Enviar" />
                 <form className="mt-5" onSubmit={this.productsHandler}>
                     <div className="col">
                         <span className="text-danger">{this.state.stockError}</span>

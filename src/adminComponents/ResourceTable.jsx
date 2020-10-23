@@ -50,8 +50,7 @@ class ResourceTable extends Component {
                         else {
                             $(this.header()).append("<br><input class='p-0 m-0 h-100' type='text' placeholder='Filtrar'/>");
                         }
-                        $('input', this.header()).on("keypress change", function () {
-                            console.log(column.dataSrc());
+                        $('input', this.header()).on("keyup change", function () {
                             let splittedDataSrc = column.dataSrc().split(".");
                             let parameter = "";
                             splittedDataSrc.forEach((split, index) => {
@@ -62,7 +61,13 @@ class ResourceTable extends Component {
                                     parameter += splittedDataSrc[index].charAt(0).toUpperCase() + splittedDataSrc[index].slice(1);
                                 }
                             });
-                            $recordsTable.ajax.url(`${_this.state.sourceURL}?${parameter}=${this.value.trim()}`).load();
+                            if (_this.props.sourceURL.includes("?")) {
+                                $recordsTable.ajax.url(`${_this.props.sourceURL}&${parameter}=${this.value.trim()}`).load();
+                            }
+                            else {
+                                $recordsTable.ajax.url(`${_this.props.sourceURL}?${parameter}=${this.value.trim()}`).load();
+
+                            }
                         });
 
                     });
@@ -73,13 +78,13 @@ class ResourceTable extends Component {
                         var column = this;
                         if (column.dataSrc() == "grossTotalDollars") {
                             let totalDollars = api
-                                .column(5)
+                                .column(3)
                                 .data()
                                 .reduce(function (a, b) {
                                     return a + b
                                 }, 0);
                             let pageTotalDollars = api
-                                .column(5, { page: 'current' })
+                                .column(3, { page: 'current' })
                                 .data()
                                 .reduce(function (a, b) {
                                     return a + b
@@ -98,14 +103,14 @@ class ResourceTable extends Component {
                         }
                         if (column.dataSrc() == "grossTotalBs") {
                             let totalBs = api
-                                .column(6)
+                                .column(4)
                                 .data()
                                 .reduce(function (a, b) {
                                     return a + b
                                 }, 0);
 
                             let pageTotalBs = api
-                                .column(6, { page: 'current' })
+                                .column(4, { page: 'current' })
                                 .data()
                                 .reduce(function (a, b) {
                                     return a + b
@@ -121,14 +126,14 @@ class ResourceTable extends Component {
                         }
                         if (column.dataSrc() == "netIncomeDollars") {
                             let totalDollars = api
-                                .column(7)
+                                .column(5)
                                 .data()
                                 .reduce(function (a, b) {
                                     return a + b
                                 }, 0);
 
                             let pageTotalDollars = api
-                                .column(7, { page: 'current' })
+                                .column(5, { page: 'current' })
                                 .data()
                                 .reduce(function (a, b) {
                                     return a + b
@@ -144,14 +149,14 @@ class ResourceTable extends Component {
                         }
                         if (column.dataSrc() == "netIncomeBs") {
                             let totalBs = api
-                                .column(8)
+                                .column(6)
                                 .data()
                                 .reduce(function (a, b) {
                                     return a + b
                                 }, 0);
 
                             let pageTotalBs = api
-                                .column(8, { page: 'current' })
+                                .column(6, { page: 'current' })
                                 .data()
                                 .reduce(function (a, b) {
                                     return a + b
@@ -309,7 +314,7 @@ class ResourceTable extends Component {
                     }
 
                 })),
-                //serverSide: true,
+                serverSide: true,
                 ajax: {
                     url: this.state.sourceURL,
                     dataSrc: function (results) {
@@ -326,7 +331,7 @@ class ResourceTable extends Component {
                             results.data.forEach((row, index) => {
                                 row.product = row.product[0];
                                 console.log(row);
-                                row.transactions = results.count.reverse()[index].count;
+                                //row.transactions = results.count.reverse()[index].count;
                                 row.grossTotalBs = row.grossTotalDollars * row.dolarReference;
 
                                 row.netIncomeDollars = row.grossTotalDollars * (row.product.profitPercent / 100);
@@ -335,7 +340,7 @@ class ResourceTable extends Component {
                         }
                         else if (_this.props.sourceURL.includes("/api/supplyings") && _this.props.sourceURL.includes("group=true")) {
                             results.data.forEach((row, index) => {
-                                row.transactions = results.count.reverse()[index].count;
+                                //row.transactions = results.count.reverse()[index].count;
                                 row.grossTotalBs = row.grossTotalDollars * row.dolarReference;
                             })
                         }
@@ -358,10 +363,10 @@ class ResourceTable extends Component {
                     }
                 },
                 paging: true,
-                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
-                pageLength: 10,
+                lengthMenu: [[10, 25, 50, 100, 1000000000000000], [10, 25, 50, 100, "All"]],
+                pageLength: (this.props.sourceURL.includes("group=true")) ? 1000000000000000 : 10,
                 columns: this.props.columns,
-                ordering: true,
+                ordering: false,
                 order: _this.props.sorting || [[0, "desc"]]
             });
 

@@ -14,6 +14,8 @@ import Reports from "./Reports";
 import PrivateRoute from "../components/PrivateRoute";
 
 import { Route } from "react-router-dom";
+
+import $ from "jquery";
 class Dashboard extends Component {
 
     constructor() {
@@ -21,10 +23,14 @@ class Dashboard extends Component {
         this.state = {
             formattedDolareReference: "",
             dolarReference: 0,
-            loading: false
+            loading: false,
+            newDolarReference: null
         }
 
         this.fetchDolarReference = this.fetchDolarReference.bind(this);
+        this.dolarReferenceSubmitHandler = this.dolarReferenceSubmitHandler.bind(this);
+        this.changeHandler = this.changeHandler.bind(this);
+        this.closeEditDolarModalButton = React.createRef();
     }
 
     componentDidMount() {
@@ -58,6 +64,32 @@ class Dashboard extends Component {
                 }
             })
     }
+
+    changeHandler(event) {
+        this.setState({
+            [event.target.name]: event.target.value
+        })
+    }
+
+    dolarReferenceSubmitHandler(event) {
+        event.preventDefault();
+
+        fetch("/api/dolarReference", {
+            method: "POST",
+            headers: {
+                "Authorization": "Bearer " + localStorage.getItem("jwt"),
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ price: this.state.newDolarReference })
+        })
+            .then(res => {
+                if (res.status == 204) {
+                    window.location.reload();
+                } else {
+                    alert("Error")
+                }
+            })
+    }
     render() {
         return (
             <div className="container-fluid">
@@ -69,7 +101,9 @@ class Dashboard extends Component {
                 <div className="row">
                     <div className="bg-danger text-light col-12">
                         Precio del Dolar <span id="dolarReference" className="badge badge-light">{(this.state.loading) ? "Loading..." : this.state.formattedDolareReference}</span>
+                        <button className="btn btn-secondary ml-4" data-toggle="modal" data-target="#dolarEditmodal" >Editar</button>
                     </div>
+
                 </div>
                 <main className="mt-5">
                     <Route path="/control-de-ventas" render={(props) => (<SalesControl {...props} dolarReference={this.state.dolarReference} />)} />
@@ -83,8 +117,28 @@ class Dashboard extends Component {
                     <Route path="/proveedores" component={Suppliers} />
                     <Route path="/usuarios" component={Users} />
                 </main>
+                <div className="modal fade" id="dolarEditModal" tabindex="-1" aria-labelledby="dolarEditModalLabel" aria-hidden="true">
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title" id="dolarEditModalLabel">Nuevo precio del dolar</h5>
+                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <form onSubmit={this.dolarReferenceSubmitHandler}>
+                                <div className="modal-body">
+                                    <input name="newDolarReference" onChange={this.changeHandler} className="form-control" type="number" placeholder="Ingrese el nuevo precio del dolar. Ej: 400000" />
+                                </div>
+                                <div className="modal-footer">
+                                    <button ref={this.closeEditDolarModalButton} type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="button" className="btn btn-primary">Save changes</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
-
 
         )
     }
