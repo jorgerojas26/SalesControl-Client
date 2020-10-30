@@ -179,13 +179,17 @@ class ResourceTable extends Component {
                     name: "imprimir",
                     className: "btn btn-secondary float-right",
                     extend: "print",
-                    messageTop: "Reporte",
+                    messageTop: "Lista de precios",
                     footer: true,
+                    title: (_this.props.sourceURL.includes("productss")) ? "Lista de precios" : "",
+                    customize: function (win) {
+                        $(win.document.body).find('#messageTop').css('text-align', 'center');
+                    },
                     exportOptions: {
                         modifier: {
                             page: 'all'
                         },
-                        columns: (_this.props.sourceURL.includes("products")) ? [1, 2, 3, 4] : ":visible"
+                        columns: (_this.props.sourceURL.includes("products")) ? [1, 2, 4] : ":visible"
                     }
                 }].concat(this.props.actions.map(action => {
                     if (action == "add") {

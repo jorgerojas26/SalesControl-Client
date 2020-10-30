@@ -101,7 +101,7 @@ class Dashboard extends Component {
                 <div className="row">
                     <div className="bg-danger text-light col-12">
                         Precio del Dolar <span id="dolarReference" className="badge badge-light">{(this.state.loading) ? "Loading..." : this.state.formattedDolareReference}</span>
-                        <button className="btn btn-secondary ml-4" data-toggle="modal" data-target="#dolarEditmodal" >Editar</button>
+                        <button className="btn btn-secondary ml-4" data-toggle="modal" data-target="#dolarEditModal" >Editar</button>
                     </div>
 
                 </div>
@@ -132,7 +132,7 @@ class Dashboard extends Component {
                                 </div>
                                 <div className="modal-footer">
                                     <button ref={this.closeEditDolarModalButton} type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
-                                    <button type="button" className="btn btn-primary">Save changes</button>
+                                    <button type="submit" className="btn btn-primary">Save changes</button>
                                 </div>
                             </form>
                         </div>
