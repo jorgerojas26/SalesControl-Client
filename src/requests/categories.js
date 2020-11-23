@@ -1,42 +1,41 @@
 const BASE_URL = "/api/categories";
-const authorizationHeader = "Bearer " + localStorage.getItem("jwt");
 
 const functions = {
     fetchAll: async function () {
-        let response = await fetch(BASE_URL, {
+        let categories = await fetch(BASE_URL, {
             headers: {
                 "Authorization": "Bearer " + localStorage.getItem("jwt")
             }
         })
 
-        let categories = await response.json();
+        let response = await categories.json();
 
-        return categories;
+        return response;
     },
     fetchById: async function (id) {
-        let response = await fetch(BASE_URL + `?id=${id}`, {
+        let category = await fetch(BASE_URL + `?id=${id}`, {
             headers: {
                 "Authorization": "Bearer " + localStorage.getItem("jwt")
             }
         })
 
-        let categories = await response.json();
+        let response = await category.json();
 
-        return categories;
+        return response;
     },
     fetchByName: async function (name) {
-        let response = await fetch(BASE_URL + `?name=${name}`, {
+        let categories = await fetch(BASE_URL + `?name=${name}`, {
             headers: {
                 "Authorization": "Bearer " + localStorage.getItem("jwt")
             }
         })
 
-        let categories = await response.json();
+        let response = await categories.json();
 
-        return categories;
+        return response;
     },
     create: async function (category) {
-        let response = await fetch(BASE_URL, {
+        let newCategory = await fetch(BASE_URL, {
             method: "POST",
             headers: {
                 "Authorization": "Bearer " + localStorage.getItem("jwt"),
@@ -45,23 +44,23 @@ const functions = {
             body: JSON.stringify(category)
         })
 
-        let categories = await response.json();
+        let response = await newCategory.json();
 
-        return categories;
+        return response;
     },
-    edit: async function (category) {
-        let response = await fetch(BASE_URL + `/${category.id}`, {
+    update: async function (category) {
+        let newCategory = await fetch(BASE_URL + `/${category.id}`, {
             method: "PUT",
             headers: {
                 "Authorization": "Bearer " + localStorage.getItem("jwt"),
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ name: category.name })
+            body: JSON.stringify()
         })
 
-        let categories = await response.json();
+        let response = await newCategory.json();
 
-        return categories;
+        return response;
     }
 }
 

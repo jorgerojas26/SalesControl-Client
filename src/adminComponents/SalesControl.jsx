@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 
 import CustomSelect from "../globalComponents/CustomSelect";
+import $ from "jquery";
 
 class SalesControl extends Component {
 
@@ -103,7 +104,7 @@ class SalesControl extends Component {
                             quantity: product.quantity,
                             totalDollars: product.totalDollars,
                             totalBs: product.totalBs,
-                            imagePath: product.imagePath,
+                            image: product.image,
                             totalFormattedDollars: product.totalFormattedDollars,
                             totalFormattedBs: product.totalFormattedBs,
                             discount: product.discount
@@ -289,7 +290,6 @@ class SalesControl extends Component {
                         <h1 className="text-danger">Control de Ventas</h1>
                     </div>
                 </div>
-                <input ref={this.saleSubmitButton} onClick={this.submitHandler} type="button" className="form-control btn btn-primary" value="Enviar" />
                 <form className="mt-5" onSubmit={this.productsHandler}>
                     <div className="col">
                         <span className="text-danger">{this.state.stockError}</span>
@@ -304,14 +304,22 @@ class SalesControl extends Component {
                             <input onChange={this.onChangeHandler} ref={this.quantityInput} type="text" className="form-control" placeholder="Cantidad" id="quantity" name="quantity" defaultValue="1" />
                         </div>
                         <div className="col-12 col-md-10 col-lg-2 mt-2">
-                            <input type="submit" className="form-control btn btn-primary" hidden />
+                            <input type="submit" className="form-control btn btn-info" value="Enviar" />
                         </div>
                     </div>
                 </form>
                 <div className="row">
-                    <div className="col-12">
-                        <div ref={this.productsTable} className="table-responsive w-100" style={{ height: "380px" }}>
-                            <table className="table table-striped table-dark overflow-auto">
+                    <div className="col-2">
+                        <div className="form-group">
+                            <input ref={this.saleSubmitButton} onClick={this.submitHandler} type="button" className="form-control btn btn-primary" value="Procesar venta" />
+                        </div>
+                        <div className="form-group">
+                            <input ref={this.saleSubmitButton} onClick={this.submitHandler} type="button" className="form-control btn btn-warning" value="Enviar a deuda" />
+                        </div>
+                    </div>
+                    <div className="col-10">
+                        <div className="table-responsive w-100 h-100" >
+                            <table ref={this.productsTable} className="table table-dark table-striped overflow-auto">
                                 <thead>
                                     <tr>
                                         <th scope="col">Count</th>
@@ -320,34 +328,70 @@ class SalesControl extends Component {
                                         <th scope="col">Precio $</th>
                                         <th scope="col">Precio Bs</th>
                                         <th scope="col">Cantidad</th>
-                                        <th scope="col">Total $</th>
-                                        <th scope="col">Total Bs</th>
+                                        <th scope="col">Total<span className="font-weight-bold text-danger">{" " + Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(this.state.totalDollars)}</span>
+                                        </th>
+                                        <th scope="col">Total<span className="font-weight-bold text-danger">{" " + Intl.NumberFormat('es-VE', { style: 'currency', currency: 'VES' }).format(this.state.totalBs)}</span>
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {this.state.addedProducts.map((product, index) => {
-                                        return (
-                                            <tr key={index} productid={product.id}>
-                                                <th>{index + 1}</th>
-                                                <th>{product.id}</th>
-                                                <th><img className="float-left mr-2" style={{ maxWidth: "20px" }} src={product.imagePath} />{product.name}</th>
-                                                <th>{Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(product.price)}</th>
-                                                <th>{Intl.NumberFormat('es-VE', { style: 'currency', currency: 'VES' }).format(product.priceBs)}</th>
-                                                <th>{product.quantity}</th>
-                                                <th>{product.totalFormattedDollars}</th>
-                                                <th>{product.totalFormattedBs}</th>
-                                                <th>
-                                                    <button onClick={this.clickHandler} className="btn btn-danger">Delete</button>
-                                                </th>
-                                            </tr>
-                                        )
+                                        if (product.image) {
+                                            var bufferBase64 = new Buffer.from(product.image, 'binary').toString('base64');
+                                            return (
+                                                <tr key={index} productid={product.id}>
+                                                    <th>{index + 1}</th>
+                                                    <th>{product.id}</th>
+                                                    <th><img className="" style={{ maxWidth: "40px" }} src={`data:image/png;base64,${bufferBase64}`} />{product.name}</th>
+                                                    <th>{Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(product.price)}</th>
+                                                    <th>{Intl.NumberFormat('es-VE', { style: 'currency', currency: 'VES' }).format(product.priceBs)}</th>
+                                                    <th>{product.quantity}</th>
+                                                    <th>{product.totalFormattedDollars}</th>
+                                                    <th>{product.totalFormattedBs}</th>
+                                                    <th>
+                                                        <button onClick={this.clickHandler} className="btn btn-danger p-0">Delete</button>
+                                                    </th>
+                                                </tr>
+                                            )
+                                        }
+                                        else {
+                                            return (
+                                                <tr key={index} productid={product.id}>
+                                                    <th>{index + 1}</th>
+                                                    <th>{product.id}</th>
+                                                    <th>{product.name}</th>
+                                                    <th>{Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(product.price)}</th>
+                                                    <th>{Intl.NumberFormat('es-VE', { style: 'currency', currency: 'VES' }).format(product.priceBs)}</th>
+                                                    <th>{product.quantity}</th>
+                                                    <th>{product.totalFormattedDollars}</th>
+                                                    <th>{product.totalFormattedBs}</th>
+                                                    <th>
+                                                        <button onClick={this.clickHandler} className="btn btn-danger p-0">Delete</button>
+                                                    </th>
+                                                </tr>
+                                            )
+                                        }
+
                                     })}
                                 </tbody>
+                                <tfoot>
+
+                                </tfoot>
                             </table>
                         </div>
                     </div>
+
                 </div>
-                <div className="row">
+
+            </div>
+        )
+    }
+}
+
+export default SalesControl;
+
+/*
+<div className="row">
                     <div className="col-12">
                         <div className="d-flex flex-column align-items-end">
                             <label className="font-weight-bold h4">{"Subtotal Bs: "}
@@ -367,9 +411,4 @@ class SalesControl extends Component {
 
                     </div>
                 </div>
-            </div>
-        )
-    }
-}
-
-export default SalesControl;
+                */

@@ -189,7 +189,7 @@ class ResourceTable extends Component {
                         modifier: {
                             page: 'all'
                         },
-                        columns: (_this.props.sourceURL.includes("products")) ? [1, 2, 4] : ":visible"
+                        columns: (_this.props.sourceURL.includes("products")) ? [1, 2, 3] : ":visible"
                     }
                 }].concat(this.props.actions.map(action => {
                     if (action == "add") {
@@ -327,7 +327,6 @@ class ResourceTable extends Component {
                     url: this.state.sourceURL,
                     dataSrc: function (results) {
                         if (typeof results.count == "object") {
-                            console.log("yes");
                             results.data.forEach((row, index) => {
                                 if (row.productId == results.count[index].id) {
                                     row.count = results.count[index].count
@@ -338,7 +337,6 @@ class ResourceTable extends Component {
                         if (_this.props.sourceURL.includes("/api/sales") && _this.props.sourceURL.includes("group=true")) {
                             results.data.forEach((row, index) => {
                                 row.product = row.product[0];
-                                console.log(row);
                                 //row.transactions = results.count.reverse()[index].count;
                                 row.grossTotalBs = row.grossTotalDollars * row.dolarReference;
 
@@ -374,6 +372,9 @@ class ResourceTable extends Component {
                 lengthMenu: [[10, 25, 50, 100, 1000000000000000], [10, 25, 50, 100, "All"]],
                 pageLength: (this.props.sourceURL.includes("group=true")) ? 1000000000000000 : 10,
                 columns: this.props.columns,
+                columnDefs: (this.props.sourceURL.includes("products")) ? [
+                    { width: "30%", "targets": 1 }
+                ] : null,
                 ordering: false,
                 order: _this.props.sorting || [[0, "desc"]]
             });
@@ -411,7 +412,8 @@ class ResourceTable extends Component {
             $recordsTable = $recordsTable.DataTable({
                 dom: "",
                 data: this.props.data,
-                columns: this.props.columns
+                columns: this.props.columns,
+
             });
         }
 

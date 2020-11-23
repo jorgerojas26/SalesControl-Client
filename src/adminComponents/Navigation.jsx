@@ -39,6 +39,9 @@ class Navigation extends Component {
                             <NavLink className="nav-link" onClick={this.clickHandler} to="/reportes"><span className="d-md-inline">Reportes</span></NavLink>
                         </li>
                         <li className="nav-item" data-toggle="collapse" data-target="#navbarSupportedContent">
+                            <NavLink className="nav-link" onClick={this.clickHandler} to="/deuda"><span className="d-md-inline">Deuda</span></NavLink>
+                        </li>
+                        <li className="nav-item" data-toggle="collapse" data-target="#navbarSupportedContent">
                             <NavLink className="nav-link" onClick={this.clickHandler} to="/categorias"><span className="d-md-inline">Categorías</span></NavLink>
                         </li>
                         <li className="nav-item" data-toggle="collapse" data-target="#navbarSupportedContent">

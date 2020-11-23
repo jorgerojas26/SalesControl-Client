@@ -14,11 +14,11 @@ class Products extends Component {
 
         this.state = {
             selectedCategories: null,
-            name: "",
-            productImageFile: "",
-            profitPercent: "",
-            success: "",
-            error: "",
+            name: null,
+            productImageFile: null,
+            profitPercent: null,
+            success: null,
+            error: null,
             modalAction: null,
             discountPercent: null,
             discountStartDate: null,
@@ -49,11 +49,12 @@ class Products extends Component {
         selectedRowData.category.forEach(category => {
             categories.push({ id: category.id, label: category.name, value: category.name });
         })
+
         this.setState({
             selectedRowData,
             selectedCategories: categories,
             name: selectedRowData.name,
-            profitPercent: selectedRowData.profitPercent
+            profitPercent: selectedRowData.profitPercent,
         }, () => {
             $("#name").val(this.state.selectedRowData.name);
             $("#profitPercent").val(this.state.selectedRowData.profitPercent);
@@ -109,7 +110,7 @@ class Products extends Component {
                     });
                     this.productForm.current.reset();
                     this.closeButton.current.click();
-                    $("#resourceTable").DataTable().ajax.reload();
+                    $("#resourceTable").DataTable().ajax.reload(null, false);
                 }
                 else if (res.status == 409) {
                     res.json().then(response => {
@@ -184,19 +185,19 @@ class Products extends Component {
                 <div className="row mt-3">
                     <div className="col-md-12">
                         <ResourceTable asyncTable={true} setSelectedRowData={this.setSelectedRowData} setModalAction={this.setModalAction} sourceURL={"/api/products"} columns={[
+                            { title: "ID", data: "id" },
                             {
                                 render: function (data, type, row, meta) {
-                                    if (row.imagePath) {
-                                        return `<img src="${row.imagePath}" style="max-width:35px;"/>`
+                                    if (row.image) {
+                                        var bufferBase64 = new Buffer.from(row.image, 'binary').toString('base64');
+                                        return `<span class="p-0"><img class="img-responsive m-0 p-0" src="data:image/png;base64,${bufferBase64}" style="max-width:40px;"></img>${data}</span>`
                                     }
                                     else {
-                                        return "";
+                                        return data
                                     }
                                 },
-                                title: "Imagen"
+                                title: "Nombre", data: "name"
                             },
-                            { title: "ID", data: "id" },
-                            { title: "Nombre", data: "name" },
                             { title: "Precio $", data: "price" },
                             {
                                 render: (data) => {
@@ -217,12 +218,14 @@ class Products extends Component {
                                     return (disc.length) ? disc + "%" : 0 + "%"
                                 }, title: "Descuento", data: "discount"
                             },
+                            /*
                             {
                                 title: "Descuento desde", data: "discount[0].startDate"
                             },
                             {
                                 title: "Descuento hasta", data: "discount[0].endDate"
                             },
+                            */
                             { title: "Fecha creación", data: "createdAt" },
                             { title: "Fecha actualización", data: "updatedAt" }
                         ]} actions={["add", "edit", "delete", "discount"]} modalStructure={

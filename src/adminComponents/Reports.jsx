@@ -124,7 +124,6 @@ class Reports extends Component {
     }
     submitHandler(event) {
         event.preventDefault();
-        console.log(this.state.parameters);
         this.reportForm.current.reset();
     }
     render() {

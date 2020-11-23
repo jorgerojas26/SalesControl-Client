@@ -1,3 +1,4 @@
+import { localsName } from "ejs";
 import React, { Component } from "react";
 import Async from 'react-select/async';
 
@@ -26,14 +27,19 @@ class CustomSelect extends Component {
     }
 
     searchHandler(inputValue, callback) {
-        fetch(this.props.sourceURL || `/api/products?name=${inputValue}`)
+        fetch(this.props.sourceURL || `/api/products?name=${inputValue}`, {
+            headers: {
+                "Authorization": "Bearer " + localStorage.getItem("jwt")
+            }
+        })
             .then(result => result.json())
             .then(results => {
                 if (results.data.length > 0) {
                     results.data.forEach(item => {
                         item.value = item.name;
-                        if (item.imagePath) {
-                            item.label = [<img className="float-left" style={{ maxWidth: "20px" }} src={item.imagePath} />, `${item.name} (${this.roundToNiceNumber(item.price * this.props.dolarReference)})`];
+                        if (item.image) {
+                            var bufferBase64 = new Buffer.from(item.image, 'binary').toString('base64');
+                            item.label = [<img className="img img-fluid" style={{ maxWidth: "40px" }} src={`data:image/png;base64,${bufferBase64}`} />, `${item.name} (${Intl.NumberFormat("es-VE", { style: "currency", currency: "VES" }).format(this.roundToNiceNumber(item.price * this.props.dolarReference))})`];
                         }
                         else {
                             item.label = `${item.name} (${Intl.NumberFormat("es-VE", { style: "currency", currency: "VES" }).format(this.roundToNiceNumber(item.price * this.props.dolarReference))})`

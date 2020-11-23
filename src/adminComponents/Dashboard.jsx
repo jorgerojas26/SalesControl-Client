@@ -11,6 +11,7 @@ import Navigation from "./Navigation";
 import SalesControl from "./SalesControl";
 import Inventory from "./Inventory";
 import Reports from "./Reports";
+import Debt from "./Debt";
 import PrivateRoute from "../components/PrivateRoute";
 
 import { Route } from "react-router-dom";
@@ -109,6 +110,7 @@ class Dashboard extends Component {
                     <Route path="/control-de-ventas" render={(props) => (<SalesControl {...props} dolarReference={this.state.dolarReference} />)} />
                     <Route path="/inventario" component={Inventory} />
                     <Route path="/reportes" render={(props) => (<Reports {...props} dolarReference={this.state.dolarReference} />)} />
+                    <Route path="/deuda" render={(props) => (<Debt {...props} dolarReference={this.state.dolarReference} />)} />
                     <Route path="/categorias" component={Categories} />
                     <Route path="/clientes" component={Clients} />
                     <Route path="/productos" render={(props) => (<Products {...props} dolarReference={this.state.dolarReference} />)} />

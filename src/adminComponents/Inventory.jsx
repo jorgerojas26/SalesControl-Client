@@ -13,7 +13,7 @@ class Inventory extends Component {
             <div className="">
                 <div className="row">
                     <div className="col-md-12">
-                        <h1 className="text-danger float-left">Ventas</h1>
+                        <h1 className="text-danger float-left">Inventario</h1>
                     </div>
                 </div>
                 <div className="row mt-3">
