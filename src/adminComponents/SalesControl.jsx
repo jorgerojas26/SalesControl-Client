@@ -32,10 +32,16 @@ class SalesControl extends Component {
         this.sendSaleForm = React.createRef();
         this.quantityInput = React.createRef();
         this.CustomSelectRef = React.createRef();
+        this.productsTableDiv = React.createRef();
         this.productsTable = React.createRef();
     }
 
     componentDidMount() {
+        let bodySize = document.body.getBoundingClientRect();
+        let tableSize = this.productsTableDiv.current.getBoundingClientRect();
+        let tableMaxHeight = bodySize.height - tableSize.top - tableSize.height - 30;
+        this.productsTableDiv.current.style.maxHeight = tableMaxHeight;
+
         document.body.addEventListener("keyup", (event) => {
             let key = event.key;
             if (event.ctrlKey && key == "Enter") {
@@ -69,7 +75,7 @@ class SalesControl extends Component {
             })
                 .then(res => res.json())
                 .then(res => {
-                    let stock = res.data[0].stock;
+                    let stock = parseInt(res.data[0].stock);
                     if (stock > 0 && stock >= this.state.quantity) {
                         let product = this.state.selectedProduct;
 
@@ -101,7 +107,7 @@ class SalesControl extends Component {
                             name: product.name,
                             price: product.price,
                             priceBs: product.priceBs,
-                            quantity: product.quantity,
+                            quantity: parseInt(product.quantity),
                             totalDollars: product.totalDollars,
                             totalBs: product.totalBs,
                             image: product.image,
@@ -118,13 +124,14 @@ class SalesControl extends Component {
                         this.state.addedProducts.forEach(product => {
                             if (productFormatted.id == product.id) {
                                 productExistsInTable = true;
-                                product.quantity += productFormatted.quantity;
+                                productFormatted.quantity += product.quantity;
                             }
                         })
+
                         if (!productExistsInTable) {
                             this.setState({
-                                quantity: 1,
                                 addedProducts: this.state.addedProducts.concat(productFormatted),
+                                quantity: 1,
                                 selectedProduct: null,
                                 stockError: ""
                             }, function () {
@@ -140,11 +147,11 @@ class SalesControl extends Component {
                                     totalDollars,
                                     totalBs
                                 })
+                                this.productsTable.current.parentElement.scrollTop = this.productsTable.current.scrollHeight;
                             });
                         }
                         else {
                             var index = this.state.addedProducts.findIndex(product => product.id === productFormatted.id);
-
                             this.setState({
                                 addedProducts: [
                                     ...this.state.addedProducts.slice(0, index),
@@ -169,7 +176,6 @@ class SalesControl extends Component {
                                 })
                             })
                         }
-                        this.productsTable.current.scrollTop = this.productsTable.current.scrollHeight;
                     }
                     else {
                         this.setState({
@@ -285,31 +291,46 @@ class SalesControl extends Component {
         var _this = this;
         return (
             <div className="container-fluid" id="container">
-                <div className="row">
+                <div className="row d-none d-lg-inline-block">
                     <div className="col-md-12">
                         <h1 className="text-danger">Control de Ventas</h1>
                     </div>
                 </div>
-                <form className="mt-5" onSubmit={this.productsHandler}>
-                    <div className="col">
-                        <span className="text-danger">{this.state.stockError}</span>
-                        <span className="text-danger h3">{this.state.error}</span>
-                        <span className="text-success h3">{this.state.success}</span>
+                <div className="row mt-0 mt-lg-5">
+                    <div className="col-12">
+                        <div className="row">
+                            <div className="col-12">
+                                <span className="text-danger">{this.state.stockError}</span>
+                                <span className="text-danger h3">{this.state.error}</span>
+                                <span className="text-success h3">{this.state.success}</span>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-12">
+
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-12">
+                                <form className="" onSubmit={this.productsHandler}>
+                                    <div className="row mb-3">
+                                        <div className="col-12 col-lg-7 mt-2">
+                                            <CustomSelect dolarReference={_this.props.dolarReference} isMulti={false} innerRef={this.CustomSelectRef} changeHandler={this.optionChangeHandler} name={"ProductSelect"} />
+                                        </div>
+                                        <div className="col-12 col-lg-3 mt-2">
+                                            <input onChange={this.onChangeHandler} ref={this.quantityInput} type="text" className="form-control" placeholder="Cantidad" id="quantity" name="quantity" defaultValue="1" />
+                                        </div>
+                                        <div className="col-12 col-lg-2 mt-2">
+                                            <input type="submit" className="form-control btn btn-info" value="Enviar" />
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
-                    <div className="row">
-                        <div className="col-12 col-md-7 mt-2">
-                            <CustomSelect dolarReference={_this.props.dolarReference} isMulti={false} innerRef={this.CustomSelectRef} changeHandler={this.optionChangeHandler} name={"ProductSelect"} />
-                        </div>
-                        <div className="col-12 col-md-3 mt-2">
-                            <input onChange={this.onChangeHandler} ref={this.quantityInput} type="text" className="form-control" placeholder="Cantidad" id="quantity" name="quantity" defaultValue="1" />
-                        </div>
-                        <div className="col-12 col-md-10 col-lg-2 mt-2">
-                            <input type="submit" className="form-control btn btn-info" value="Enviar" />
-                        </div>
-                    </div>
-                </form>
+                </div>
                 <div className="row">
-                    <div className="col-2">
+                    <div className="col-12 col-lg-2">
                         <div className="form-group">
                             <input ref={this.saleSubmitButton} onClick={this.submitHandler} type="button" className="form-control btn btn-primary" value="Procesar venta" />
                         </div>
@@ -317,8 +338,8 @@ class SalesControl extends Component {
                             <input ref={this.saleSubmitButton} onClick={this.submitHandler} type="button" className="form-control btn btn-warning" value="Enviar a deuda" />
                         </div>
                     </div>
-                    <div className="col-10">
-                        <div className="table-responsive w-100 h-100" >
+                    <div className="col-12 col-lg-10">
+                        <div ref={this.productsTableDiv} className="table-responsive" >
                             <table ref={this.productsTable} className="table table-dark table-striped overflow-auto">
                                 <thead>
                                     <tr>
@@ -328,9 +349,9 @@ class SalesControl extends Component {
                                         <th scope="col">Precio $</th>
                                         <th scope="col">Precio Bs</th>
                                         <th scope="col">Cantidad</th>
-                                        <th scope="col">Total<span className="font-weight-bold text-danger">{" " + Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(this.state.totalDollars)}</span>
+                                        <th scope="col">Total<span className="font-weight-bold text-warning">{" " + Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(this.state.totalDollars)}</span>
                                         </th>
-                                        <th scope="col">Total<span className="font-weight-bold text-danger">{" " + Intl.NumberFormat('es-VE', { style: 'currency', currency: 'VES' }).format(this.state.totalBs)}</span>
+                                        <th scope="col">Total<span className="font-weight-bold text-warning">{" " + Intl.NumberFormat('es-VE', { style: 'currency', currency: 'VES' }).format(this.state.totalBs)}</span>
                                         </th>
                                     </tr>
                                 </thead>
@@ -375,12 +396,10 @@ class SalesControl extends Component {
                                     })}
                                 </tbody>
                                 <tfoot>
-
                                 </tfoot>
                             </table>
                         </div>
                     </div>
-
                 </div>
 
             </div>

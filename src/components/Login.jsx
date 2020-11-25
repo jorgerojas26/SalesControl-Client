@@ -57,22 +57,24 @@ class Login extends Component {
 
     render() {
         return (
-            <div className="container h-100 col-10 col-md-4">
-                <div className="row h-100 justify-content-center align-items-center">
-                    <form onSubmit={this.onSubmitHandler} className="col-12" action="/sessions" method="POST">
-                        <div className="form-group">
-                            <input onChange={this.inputHandler} type="text" className="form-control" name="email" id="email" placeholder="Email" />
-                        </div>
-                        <div className="form-group">
-                            <input onChange={this.inputHandler} type="password" className="form-control" name="password" id="password" placeholder="Password" />
-                        </div>
-                        <div className="form-group">
-                            <button className="btn btn-primary" type="submit">Enviar</button>
-                        </div>
-                        <div className="form-group">
-                            <p className="text-danger">{this.state.logginError}</p>
-                        </div>
-                    </form>
+            <div className="container-fluid">
+                <div className="row h-100">
+                    <div className="col-10 col-md-5 my-auto mx-auto">
+                        <form onSubmit={this.onSubmitHandler} className="col-12" action="/sessions" method="POST">
+                            <div className="form-group">
+                                <input onChange={this.inputHandler} type="text" className="form-control" name="email" id="email" placeholder="Email" />
+                            </div>
+                            <div className="form-group">
+                                <input onChange={this.inputHandler} type="password" className="form-control" name="password" id="password" placeholder="Password" />
+                            </div>
+                            <div className="form-group">
+                                <button className="btn btn-primary" type="submit">Enviar</button>
+                            </div>
+                            <div className="form-group">
+                                <p className="text-danger">{this.state.logginError}</p>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         )

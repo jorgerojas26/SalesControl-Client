@@ -65,7 +65,6 @@ function App() {
           </Switch>
         </Router>
       </div>
-
     </Provider>
   );
 }

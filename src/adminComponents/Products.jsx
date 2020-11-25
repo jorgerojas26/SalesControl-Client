@@ -106,7 +106,8 @@ class Products extends Component {
             .then(res => {
                 if (res.status == 200) {
                     this.setState({
-                        success: "El producto se ha registrado con exito"
+                        success: "El producto se ha registrado con exito",
+                        productImageFile: null
                     });
                     this.productForm.current.reset();
                     this.closeButton.current.click();
@@ -115,7 +116,7 @@ class Products extends Component {
                 else if (res.status == 409) {
                     res.json().then(response => {
                         this.setState({
-                            error: response.error || response.err
+                            error: response.error || response.err,
                         })
                     })
 
@@ -188,9 +189,8 @@ class Products extends Component {
                             { title: "ID", data: "id" },
                             {
                                 render: function (data, type, row, meta) {
-                                    if (row.image) {
-                                        var bufferBase64 = new Buffer.from(row.image, 'binary').toString('base64');
-                                        return `<span class="p-0"><img class="img-responsive m-0 p-0" src="data:image/png;base64,${bufferBase64}" style="max-width:40px;"></img>${data}</span>`
+                                    if (row.imagePath) {
+                                        return `<span class="p-0"><img class="img-responsive m-0 p-0" src="${row.imagePath}" style="max-width:40px;"></img>${data}</span>`
                                     }
                                     else {
                                         return data
