@@ -37,9 +37,8 @@ class CustomSelect extends Component {
                 if (results.data.length > 0) {
                     results.data.forEach(item => {
                         item.value = item.name;
-                        if (item.image) {
-                            var bufferBase64 = new Buffer.from(item.image, 'binary').toString('base64');
-                            item.label = [<img className="img img-fluid" style={{ maxWidth: "40px" }} src={`data:image/png;base64,${bufferBase64}`} />, `${item.name} (${Intl.NumberFormat("es-VE", { style: "currency", currency: "VES" }).format(this.roundToNiceNumber(item.price * this.props.dolarReference))})`];
+                        if (item.imagePath) {
+                            item.label = [<img className="img img-fluid" style={{ maxWidth: "40px" }} src={item.imagePath} />, `${item.name} (${Intl.NumberFormat("es-VE", { style: "currency", currency: "VES" }).format(this.roundToNiceNumber(item.price * this.props.dolarReference))})`];
                         }
                         else {
                             item.label = `${item.name} (${Intl.NumberFormat("es-VE", { style: "currency", currency: "VES" }).format(this.roundToNiceNumber(item.price * this.props.dolarReference))})`
