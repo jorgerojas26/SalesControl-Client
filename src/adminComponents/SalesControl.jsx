@@ -121,10 +121,11 @@ class SalesControl extends Component {
                         this.CustomSelectRef.current.focus();
 
                         let productExistsInTable = false;
+
                         this.state.addedProducts.forEach(product => {
                             if (productFormatted.id == product.id) {
                                 productExistsInTable = true;
-                                productFormatted.quantity += product.quantity;
+                                product.quantity += productFormatted.quantity;
                             }
                         })
 
@@ -162,6 +163,7 @@ class SalesControl extends Component {
                                 selectedProduct: null,
                                 stockError: ""
                             }, function () {
+                                console.log(this.state.addedProducts);
                                 let totalDollars = 0;
                                 let totalBs = 0;
                                 this.state.addedProducts.map(product => {
