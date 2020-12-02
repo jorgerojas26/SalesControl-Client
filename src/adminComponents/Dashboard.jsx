@@ -9,6 +9,7 @@ import Supplyings from "./Supplyings";
 import Users from "./Users";
 import Navigation from "./Navigation";
 import SalesControl from "./SalesControl";
+import BetterSalesControl from "./BetterSalesControl";
 import Inventory from "./Inventory";
 import Reports from "./Reports";
 import Debt from "./Debt";

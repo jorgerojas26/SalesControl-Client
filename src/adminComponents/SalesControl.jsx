@@ -18,7 +18,8 @@ class SalesControl extends Component {
             quantity: 1,
             stockError: "",
             error: "",
-            success: ""
+            success: "",
+            submittingSale: false
         }
         this.productsHandler = this.productsHandler.bind(this);
         this.submitHandler = this.submitHandler.bind(this);
@@ -75,6 +76,7 @@ class SalesControl extends Component {
             })
                 .then(res => res.json())
                 .then(res => {
+                    console.log(res);
                     let stock = parseInt(res.data[0].stock);
                     if (stock > 0 && stock >= this.state.quantity) {
                         let product = this.state.selectedProduct;
@@ -223,59 +225,70 @@ class SalesControl extends Component {
             })
             return
         }
-        this.saleSubmitButton.current.disabled = true;
-        let saleProducts = [];
-        this.state.addedProducts.forEach(product => {
-            saleProducts.push({
-                id: product.id,
-                quantity: product.quantity,
-                price: product.price,
-                dolarReference: this.props.dolarReference,
-                discount: product.discount
-            })
-        });
-        fetch("/api/sales", {
-            method: "POST",
-            headers: {
-                "Authorization": "Bearer " + localStorage.getItem("jwt"),
-                'Content-Type': 'application/json'
-
-            },
-            body: JSON.stringify({
-                products: saleProducts
-            })
-        }).then(res => res.json())
-            .then(res => {
-                if (res.err || res.error) {
-                    this.setState({
-                        error: res.err
-                    });
-                }
-                else {
-                    this.setState({
-                        success: "La venta se ha realizado con éxito",
-                        selectedProduct: null,
-                        addedProducts: [],
-                        subtotalDollars: null,
-                        subtotalBs: null,
-                        totalDollars: null,
-                        totalBs: null,
-                        quantity: 1,
-                        stockError: "",
-                        error: "",
+        if (!this.state.submittingSale) {
+            this.setState({
+                submittingSale: true
+            }, () => {
+                let saleProducts = [];
+                this.state.addedProducts.forEach(product => {
+                    saleProducts.push({
+                        id: product.id,
+                        quantity: product.quantity,
+                        price: product.price,
+                        dolarReference: this.props.dolarReference,
+                        discount: product.discount
                     })
-                    setTimeout(() => {
-                        this.setState({
-                            success: ""
-                        })
-                    }, 3000);
-                    this.CustomSelectRef.current.select.state.value = [];
-                    this.quantityInput.current.value = 1
-                    this.CustomSelectRef.current.focus();
-                    this.saleSubmitButton.current.disabled = false;
+                });
+                fetch("/api/sales", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": "Bearer " + localStorage.getItem("jwt"),
+                        'Content-Type': 'application/json'
 
-                }
+                    },
+                    body: JSON.stringify({
+                        products: saleProducts
+                    })
+                }).then(res => res.json())
+                    .then(res => {
+                        if (res.err || res.error) {
+                            this.setState({
+                                error: res.err
+                            });
+                        }
+                        else {
+                            this.setState({
+                                success: "La venta se ha realizado con éxito",
+                                selectedProduct: null,
+                                addedProducts: [],
+                                subtotalDollars: null,
+                                subtotalBs: null,
+                                totalDollars: null,
+                                totalBs: null,
+                                quantity: 1,
+                                stockError: "",
+                                error: "",
+                                submittingSale: false
+                            })
+                            setTimeout(() => {
+                                this.setState({
+                                    success: ""
+                                })
+                            }, 3000);
+                            this.CustomSelectRef.current.select.state.value = [];
+                            this.quantityInput.current.value = 1
+                            this.CustomSelectRef.current.focus();
+                            this.saleSubmitButton.current.disabled = false;
+
+                        }
+                    })
             })
+        }
+        else {
+            this.setState({
+                error: "Se está ejecutando una venta, por favor espere..."
+            })
+        }
     }
 
     roundToNiceNumber(value) {

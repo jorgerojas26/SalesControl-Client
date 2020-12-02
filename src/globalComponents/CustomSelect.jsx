@@ -1,4 +1,3 @@
-import { localsName } from "ejs";
 import React, { Component } from "react";
 import Async from 'react-select/async';
 
