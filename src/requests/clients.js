@@ -9,7 +9,6 @@ const functions = {
         })
 
         let response = await clients.json();
-
         return response;
     },
     fetchById: async function (id) {

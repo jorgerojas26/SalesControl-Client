@@ -184,12 +184,16 @@ class ResourceTable extends Component {
                     title: (_this.props.sourceURL.includes("productss")) ? "Lista de precios" : "",
                     customize: function (win) {
                         $(win.document.body).find('#messageTop').css('text-align', 'center');
+                        win.document.body.querySelector("table").querySelector("thead").querySelectorAll("input").forEach(input => {
+                            input.style.display = "none"
+                        })
                     },
                     exportOptions: {
+                        stripHtml: false,
                         modifier: {
                             page: 'all'
                         },
-                        columns: (_this.props.sourceURL.includes("products")) ? [1, 2, 3] : ":visible"
+                        columns: (_this.props.sourceURL.includes("products")) ? [1, 3] : ":visible"
                     }
                 }].concat(this.props.actions.map(action => {
                     if (action == "add") {
