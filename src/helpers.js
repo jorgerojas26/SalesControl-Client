@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 module.exports = {
     roundUpProductPrice(price) {
         var val = 0;
@@ -25,3 +26,18 @@ module.exports = {
 	}
 
 }
+=======
+module.exports = {
+    roundUpProductPrice(price) {
+        var val = 0;
+        if (price.toString().length == 4) {
+            val = Math.ceil(price / 100) * 100
+        }
+        else if (price.toString().length > 4) {
+            val = Math.ceil(price / 1000) * 1000
+        }
+
+        return val;
+    }
+}
+>>>>>>> 03db5aa56eb18f1d2585aadc5f784647e920b053
