@@ -1,6 +1,4 @@
-<<<<<<< HEAD
 import React, {Component} from "react";
-
 import Categories from "./Categories";
 import Clients from "./Clients";
 import Products from "./Products";
@@ -15,9 +13,7 @@ import Inventory from "./Inventory";
 import Reports from "./Reports";
 import Debt from "./Debt";
 import PrivateRoute from "../components/PrivateRoute";
-
 import {Route} from "react-router-dom";
-
 import $ from "jquery";
 class Dashboard extends Component {
 
