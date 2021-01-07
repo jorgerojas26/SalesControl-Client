@@ -105,7 +105,6 @@ class BetterSalesControl extends Component {
                                                             bankList: bankList.data,
                                                         },
                                                         () => {
-                                                            console.log(this.state.bankList);
                                                             this.addPaymentMethod({
                                                                 name: paymentMethodName.toLowerCase(),
                                                                 amount: null,
@@ -185,7 +184,7 @@ class BetterSalesControl extends Component {
     }
 
     async searchClientsHandler(name) {
-        let results = await clientsRequests.fetchByName(name);
+        let results = await clientsRequests.fetchByNameWithDebts(name);
         if (results.data.length > 0) {
             results.data.forEach(client => {
                 client.label = (
@@ -214,6 +213,27 @@ class BetterSalesControl extends Component {
         if (actionType.action == 'select-option') {
             selectedClient.label = selectedClient.name;
             selectedClient.phoneNumber = formatPhoneNumber(selectedClient.phoneNumber);
+            console.log(selectedClient);
+            let invoiceTotal = 0,
+                paymentTotal = 0;
+
+            selectedClient.sales.forEach(sale => {
+                sale.saleProducts.forEach(product => {
+                    invoiceTotal += roundUpProductPrice(product.price * product.dolarReference);
+                });
+
+                sale.payment.forEach(payment => {
+                    paymentTotal += payment.amount;
+                });
+            });
+
+            console.log(
+                `Invoice Total: ${invoiceTotal}
+            `,
+                ` Total Pagado: ${paymentTotal}
+            `,
+                `Deuda Total: ${invoiceTotal - paymentTotal}`,
+            );
 
             this.paymentMethodContainer.current.querySelector('.codeNumber').focus();
 
@@ -509,14 +529,26 @@ class BetterSalesControl extends Component {
             {
                 paymentInfo,
             },
-            () => {
-                console.log(this.state.paymentInfo);
-            },
+            () => {},
         );
     }
 
     async loadBanks() {
         return await banksRequests.fetchAll();
+    }
+
+    changeCurrencyHandler(event) {
+        let currency = event.target.value;
+
+        if (currency == '$') {
+            document.querySelector('#dolarValueContainer').classList.remove('d-none');
+            document.querySelector('#cashContainer').classList.remove('col-9');
+            document.querySelector('#cashContainer').classList.add('col-7', 'pr-0');
+        } else {
+            document.querySelector('#dolarValueContainer').classList.add('d-none');
+            document.querySelector('#cashContainer').classList.remove('col-7', 'pr-0');
+            document.querySelector('#cashContainer').classList.add('col-9');
+        }
     }
     showMessageInfo(type, message) {
         if (this.timeout) clearTimeout(this.timeout);
@@ -690,7 +722,6 @@ class BetterSalesControl extends Component {
                                                 loadOptions={this.searchClientsHandler}
                                                 ref={this.clientSelect}
                                                 className="w-100"
-                                                autoFocus
                                                 placeholder="Buscar cliente"
                                                 isClearable
                                                 inputId="clientSelect"
@@ -764,21 +795,22 @@ class BetterSalesControl extends Component {
                                                                     -
                                                                 </button>
                                                             </div>
-                                                            <div className="col-9">
+                                                            <div id="cashContainer" className="col-9 ">
                                                                 <div className="input-group">
                                                                     <button className="btn btn-dark" style={{ width: '136px' }} disabled="disabled">
                                                                         Efectivo
                                                                     </button>
-                                                                    <input onChange={event => this.updatePaymentMethodAmount('cash', event.target.value)} onKeyUp={event => this.formatInvoiceAmountHandler(event)} type="text" className="form-control text-right text-danger" defaultValue={Intl.NumberFormat('es-VE', { currency: 'VES' }).format(roundUpProductPrice(this.state.totalBs))} />
+                                                                    <input onChange={event => this.updatePaymentMethodAmount('cash', event.target.value)} onKeyUp={this.formatInvoiceAmountHandler} type="text" className="form-control text-right text-danger" defaultValue={Intl.NumberFormat('es-VE', { currency: 'VES' }).format(roundUpProductPrice(this.state.totalBs))} />
+                                                                    <select onChange={this.changeCurrencyHandler} className="btn btn-dark p-0">
+                                                                        <option selected value="Bs.">
+                                                                            Bs.
+                                                                        </option>
+                                                                        <option value="$">$</option>
+                                                                    </select>
                                                                 </div>
                                                             </div>
-                                                            <div className="col-2 pl-0">
-                                                                <select className=" btn btn-dark">
-                                                                    <option selected value="Bs">
-                                                                        Bs
-                                                                    </option>
-                                                                    <option value="$">$</option>
-                                                                </select>
+                                                            <div id="dolarValueContainer" className="col-4 d-none">
+                                                                <input onKeyUp={this.formatInvoiceAmountHandler} className="form-control" type="text" name="dolarValue" id="dolarValue" placeholder="Valor dolar" />
                                                             </div>
                                                         </div>
                                                     );
