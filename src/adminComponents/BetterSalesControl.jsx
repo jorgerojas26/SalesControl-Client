@@ -21,6 +21,7 @@ class BetterSalesControl extends Component {
                 name: null,
                 cedula: null,
                 phoneNumber: null,
+                sales: [],
             },
             quantity: 1,
             paymentMethods: [],
@@ -40,6 +41,7 @@ class BetterSalesControl extends Component {
         this.paymentMethodContainer = React.createRef();
         this.addPaymentMethodContainer = React.createRef();
         this.invoiceModal = React.createRef();
+        this.openInvoiceModalButton = React.createRef();
 
         this.productSelectionHandler = this.productSelectionHandler.bind(this);
         this.searchProductsHandler = this.searchProductsHandler.bind(this);
@@ -53,10 +55,28 @@ class BetterSalesControl extends Component {
         this.sendToDebts = this.sendToDebts.bind(this);
         this.clientSelectionHandler = this.clientSelectionHandler.bind(this);
         this.addPaymentMethod = this.addPaymentMethod.bind(this);
+        this.onChangeTicketIdHandler = this.onChangeTicketIdHandler.bind(this);
+        this.onChangeDolarReferenceHandler = this.onChangeDolarReferenceHandler.bind(this);
+        this.onChangeReferenceCodeHandler = this.onChangeReferenceCodeHandler.bind(this);
+        this.onChangeBankHandler = this.onChangeBankHandler.bind(this);
+        this.showInvoiceModal = this.showInvoiceModal.bind(this);
+        this.changeCashCurrencyHandler = this.changeCashCurrencyHandler.bind(this);
     }
 
     componentDidMount() {
-        window.$('#clientsModal').on('shown.bs.modal', () => {
+        document.body.addEventListener('keyup', event => {
+            if (event.keyCode == 13 && event.ctrlKey) {
+                this.openInvoiceModalButton.current.click();
+            }
+        });
+
+        document.querySelector('#invoiceModal').addEventListener('keyup', event => {
+            if (event.keyCode == 13 && event.ctrlKey) {
+                this.saleSubmitButton.current.click();
+            }
+        });
+
+        window.$('#invoiceModal').on('shown.bs.modal', () => {
             this.clientSelect.current.focus();
             if (Object.keys(this.state.paymentInfo).length == 0) {
                 this.addPaymentMethod({
@@ -68,14 +88,15 @@ class BetterSalesControl extends Component {
             }
         });
 
-        window.$('#clientsModal').on('hide.bs.modal', () => {
-            this.setState({
-                currentSelectedClient: {
-                    name: null,
-                    cedula: null,
-                    phoneNumber: null,
-                },
-            });
+        window.$('#invoiceModal').on('hide.bs.modal', () => {
+            //this.setState({
+            //currentSelectedClient: {
+            //name: null,
+            //cedula: null,
+            //phoneNumber: null,
+            //sales: [],
+            //},
+            //});
         });
 
         window.$('#paymentMethodsModal').on('show.bs.modal', () => {
@@ -88,54 +109,95 @@ class BetterSalesControl extends Component {
                         },
                         () => {
                             response.data.map(paymentMethod => {
-                                if (!(paymentMethod.name.toLowerCase() in this.state.paymentInfo)) {
-                                    let paymentMethodButton = document.createElement('button');
-                                    paymentMethodButton.className = 'btn btn-secondary ml-3';
-                                    paymentMethodButton.setAttribute('data-paymentMethodName', paymentMethod.name);
-                                    paymentMethodButton.setAttribute('data-dismiss', 'modal');
-                                    paymentMethodButton.innerText = paymentMethod.name;
-                                    paymentMethodButton.addEventListener('click', async event => {
-                                        let paymentMethodName = event.target.getAttribute('data-paymentMethodName');
-                                        switch (paymentMethodName) {
-                                            case 'Bank Transfer':
-                                                let bankList = await this.loadBanks();
-                                                if (bankList.data) {
-                                                    this.setState(
-                                                        {
-                                                            bankList: bankList.data,
-                                                        },
-                                                        () => {
+                                let paymentMethodButton = document.createElement('button');
+                                paymentMethodButton.className = 'btn btn-secondary ml-3';
+                                paymentMethodButton.setAttribute('data-paymentMethodName', paymentMethod.name);
+                                paymentMethodButton.setAttribute('data-dismiss', 'modal');
+                                paymentMethodButton.innerText = paymentMethod.name;
+                                paymentMethodButton.addEventListener('click', async event => {
+                                    let paymentMethodName = event.target.getAttribute('data-paymentMethodName');
+                                    let coincidences = 0;
+                                    switch (paymentMethodName) {
+                                        case 'Bank Transfer':
+                                            let bankList = await this.loadBanks();
+                                            if (bankList.data) {
+                                                this.setState(
+                                                    {
+                                                        bankList: bankList.data,
+                                                    },
+                                                    () => {
+                                                        for (let paymentMethod of Object.keys(this.state.paymentInfo)) {
+                                                            if (paymentMethod.startsWith('bank transfer')) {
+                                                                coincidences++;
+                                                            }
+                                                        }
+                                                        if (coincidences == 0) {
                                                             this.addPaymentMethod({
                                                                 name: paymentMethodName.toLowerCase(),
-                                                                amount: null,
+                                                                amount: 0,
                                                                 currency: 'Bs',
                                                                 referenceCode: null,
-                                                                bankId: null,
+                                                                bankId: 1,
                                                             });
-                                                        },
-                                                    );
+                                                        } else {
+                                                            this.addPaymentMethod({
+                                                                name: `${paymentMethodName.toLowerCase()} ${coincidences}`,
+                                                                amount: 0,
+                                                                currency: 'Bs',
+                                                                referenceCode: null,
+                                                                bankId: 1,
+                                                            });
+                                                        }
+                                                    },
+                                                );
+                                            }
+                                            break;
+                                        case 'Cash':
+                                            for (let paymentMethod of Object.keys(this.state.paymentInfo)) {
+                                                if (paymentMethod.startsWith('cash')) {
+                                                    coincidences++;
                                                 }
-                                                break;
-                                            case 'Cash':
+                                            }
+                                            if (coincidences == 0) {
                                                 this.addPaymentMethod({
                                                     name: paymentMethodName.toLowerCase(),
-                                                    amount: null,
+                                                    amount: 0,
                                                     currency: 'Bs',
                                                 });
-                                                break;
-                                            case 'Point Of Sale':
+                                            } else {
+                                                this.addPaymentMethod({
+                                                    name: `${paymentMethodName.toLowerCase()} ${coincidences}`,
+                                                    amount: 0,
+                                                    currency: 'Bs',
+                                                });
+                                            }
+                                            break;
+                                        case 'Point Of Sale':
+                                            for (let paymentMethod of Object.keys(this.state.paymentInfo)) {
+                                                if (paymentMethod.startsWith('point of sale')) {
+                                                    coincidences++;
+                                                }
+                                            }
+                                            if (coincidences == 0) {
                                                 this.addPaymentMethod({
                                                     name: paymentMethodName.toLowerCase(),
-                                                    amount: null,
+                                                    amount: 0,
                                                     currency: 'Bs',
                                                     ticketId: null,
                                                 });
-                                                break;
-                                        }
-                                    });
+                                            } else {
+                                                this.addPaymentMethod({
+                                                    name: `${paymentMethodName.toLowerCase()} ${coincidences}`,
+                                                    amount: 0,
+                                                    currency: 'Bs',
+                                                    ticketId: null,
+                                                });
+                                            }
+                                            break;
+                                    }
+                                });
 
-                                    window.$('#paymentMethodsModal').find('.modal-body').append(paymentMethodButton);
-                                }
+                                window.$('#paymentMethodsModal').find('.modal-body').append(paymentMethodButton);
                             });
                         },
                     );
@@ -171,7 +233,6 @@ class BetterSalesControl extends Component {
                         </div>
                         <span className="my-auto mr-5">
                             {Intl.NumberFormat('es-VE', {
-                                style: 'currency',
                                 currency: 'VES',
                             }).format(roundUpProductPrice(product.price * this.props.dolarReference))}
                         </span>
@@ -213,7 +274,6 @@ class BetterSalesControl extends Component {
         if (actionType.action == 'select-option') {
             selectedClient.label = selectedClient.name;
             selectedClient.phoneNumber = formatPhoneNumber(selectedClient.phoneNumber);
-            console.log(selectedClient);
             let invoiceTotal = 0,
                 paymentTotal = 0;
 
@@ -227,16 +287,9 @@ class BetterSalesControl extends Component {
                 });
             });
 
-            console.log(
-                `Invoice Total: ${invoiceTotal}
-            `,
-                ` Total Pagado: ${paymentTotal}
-            `,
-                `Deuda Total: ${invoiceTotal - paymentTotal}`,
-            );
-
             this.paymentMethodContainer.current.querySelector('.codeNumber').focus();
 
+            console.log(selectedClient);
             this.setState({
                 currentSelectedClient: selectedClient,
             });
@@ -246,6 +299,7 @@ class BetterSalesControl extends Component {
                     name: null,
                     cedula: null,
                     phoneNumber: null,
+                    sales: [],
                 },
             });
         }
@@ -423,10 +477,66 @@ class BetterSalesControl extends Component {
     }
 
     submitSaleHandler() {
-        if (!this.state.productsToSell.length > 0) {
+        if (this.state.productsToSell.length <= 0) {
             this.showMessageInfo('error', 'Por favor seleccione un producto');
             return;
         }
+        if (this.state.currentSelectedClient.name == null || this.state.currentSelectedClient.cedula == null || this.state.currentSelectedClient.phoneNumber == null) {
+            this.showMessageInfo('error', 'Por favor seleccione un cliente');
+            return;
+        }
+        if (Object.keys(this.state.paymentInfo).length == 0) {
+            this.showMessageInfo('error', 'Por favor seleccione un método de pago');
+            return;
+        }
+
+        let paymentInfo = this.state.paymentInfo;
+        let paymentTotal = 0;
+        for (let paymentMethod of Object.keys(paymentInfo)) {
+            let paymentMethodInfo = paymentInfo[paymentMethod];
+            if (isNaN(paymentMethodInfo.amount)) {
+                this.showMessageInfo('error', `El monto del método de pago ${paymentMethod.toUpperCase()} debe ser de un valor numérico`);
+                return;
+            }
+            if (paymentMethodInfo.amount == 0) {
+                this.showMessageInfo('error', 'No puede haber un método de pago con valor 0');
+                return;
+            }
+
+            if (paymentMethod == 'point of sale' && (paymentMethodInfo.ticketId == null || paymentMethodInfo.ticketId == '')) {
+                this.showMessageInfo('error', 'Número de ticket no puede estar vacío');
+                return;
+            }
+            if (paymentMethod == 'cash' && paymentMethodInfo.currency == 'USD' && (paymentMethodInfo.dolarReference == null || paymentMethodInfo.dolarReference == '')) {
+                this.showMessageInfo('error', 'El valor del dolar no puede estar vacío');
+                return;
+            }
+            if (paymentMethod == 'bank transfer' && (paymentMethodInfo.referenceCode == null || paymentMethodInfo.referenceCode == '')) {
+                this.showMessageInfo('error', 'El código de referencia de la transferencia no puede estar vacío');
+                return;
+            }
+            if (paymentMethod == 'bank transfer' && (paymentMethodInfo.bankId == null || paymentMethodInfo.bankId == '')) {
+                this.showMessageInfo('error', 'El banco receptor no puede estar vacío');
+                return;
+            }
+            if (paymentMethod == 'cash' && paymentMethodInfo.currency == 'USD') {
+                paymentTotal += paymentMethodInfo.amount * paymentMethodInfo.dolarReference;
+            } else {
+                paymentTotal += paymentMethodInfo.amount;
+            }
+        }
+        if (paymentTotal < this.state.totalBs) {
+            this.showMessageInfo('error', 'El monto debe ser igual al total de la venta');
+            return;
+        }
+        if (paymentTotal > this.state.totalBs) {
+            this.showMessageInfo('error', 'El monto a pagar es mayor al monto de la venta');
+            return;
+        }
+
+        console.log(paymentTotal);
+        return;
+
         if (!this.state.submittingSale) {
             this.setState(
                 {
@@ -444,6 +554,9 @@ class BetterSalesControl extends Component {
                     });
                     if (response.error) {
                         this.showMessageInfo('error', response.error);
+                        this.setState({
+                            submittingSale: false,
+                        });
                     } else {
                         this.showMessageInfo('success', 'La venta se ha realizado con éxito');
                         this.setState({
@@ -467,7 +580,7 @@ class BetterSalesControl extends Component {
 
     sendToDebts() {
         if (this.state.productsToSell.length > 0) {
-            window.$('#clientsModal').modal();
+            window.$('#invoiceModal').modal();
         } else {
             this.showMessageInfo('error', 'Por favor seleccione un producto');
         }
@@ -476,28 +589,24 @@ class BetterSalesControl extends Component {
     addPaymentMethod(paymentInfo) {
         let currentPaymentInfo = this.state.paymentInfo;
         let paymentDetails = {};
-        switch (paymentInfo.name) {
-            case 'bank transfer':
-                paymentDetails = {
-                    amount: paymentInfo.amount,
-                    currency: paymentInfo.currency,
-                    referenceCode: paymentInfo.referenceCode,
-                    bankId: paymentInfo.bankId,
-                };
-                break;
-            case 'cash':
-                paymentDetails = {
-                    amount: paymentInfo.amount,
-                    currency: paymentInfo.currency,
-                };
-                break;
-            case 'point of sale':
-                paymentDetails = {
-                    amount: paymentInfo.amount,
-                    currency: paymentInfo.currency,
-                    ticketId: paymentInfo.ticketId,
-                };
-                break;
+        if (paymentInfo.name.startsWith('bank transfer')) {
+            paymentDetails = {
+                amount: paymentInfo.amount,
+                currency: paymentInfo.currency,
+                referenceCode: paymentInfo.referenceCode,
+                bankId: paymentInfo.bankId,
+            };
+        } else if (paymentInfo.name.startsWith('cash')) {
+            paymentDetails = {
+                amount: paymentInfo.amount,
+                currency: paymentInfo.currency,
+            };
+        } else if (paymentInfo.name.startsWith('point of sale')) {
+            paymentDetails = {
+                amount: paymentInfo.amount,
+                currency: paymentInfo.currency,
+                ticketId: paymentInfo.ticketId,
+            };
         }
         currentPaymentInfo[paymentInfo.name] = paymentDetails;
         this.setState({
@@ -513,42 +622,117 @@ class BetterSalesControl extends Component {
         });
     }
 
-    formatInvoiceAmountHandler(event) {
+    updatePaymentMethodAmount(paymentName, event) {
+        let paymentInfo = this.state.paymentInfo;
+        paymentInfo[paymentName].amount = parseInt(event.target.value.replace(/\D/g, ''), 10);
+
+        this.setState({
+            paymentInfo,
+        });
         if (event.target.value.length > 0) {
             var amount = parseInt(event.target.value.replace(/\D/g, ''), 10);
             event.target.value = amount.toLocaleString();
         }
     }
 
-    updatePaymentMethodAmount(paymentName, amount) {
-        let paymentInfo = this.state.paymentInfo;
-
-        paymentInfo[paymentName].amount = parseInt(amount.replace(/\D/g, ''), 10);
-
-        this.setState(
-            {
-                paymentInfo,
-            },
-            () => {},
-        );
-    }
-
     async loadBanks() {
         return await banksRequests.fetchAll();
     }
 
-    changeCurrencyHandler(event) {
+    changeCashCurrencyHandler(event, paymentMethodName) {
         let currency = event.target.value;
 
         if (currency == '$') {
-            document.querySelector('#dolarValueContainer').classList.remove('d-none');
-            document.querySelector('#cashContainer').classList.remove('col-9');
-            document.querySelector('#cashContainer').classList.add('col-7', 'pr-0');
-        } else {
-            document.querySelector('#dolarValueContainer').classList.add('d-none');
-            document.querySelector('#cashContainer').classList.remove('col-7', 'pr-0');
-            document.querySelector('#cashContainer').classList.add('col-9');
+            let paymentInfo = this.state.paymentInfo;
+            paymentInfo[paymentMethodName].currency = 'USD';
+            this.setState({
+                paymentInfo,
+            });
+            document.querySelector(`#${paymentMethodName.replace(/\s/g, '') + 'DolarReferenceContainer'}`).classList.remove('d-none');
+            document.querySelector(`#${paymentMethodName.replace(/\s/g, '') + 'Container'}`).classList.remove('col-9');
+            document.querySelector(`#${paymentMethodName.replace(/\s/g, '') + 'Container'}`).classList.add('col-7', 'pr-0');
+        } else if (currency == 'Bs.') {
+            let paymentInfo = this.state.paymentInfo;
+            paymentInfo[paymentMethodName].currency = 'Bs';
+            this.setState({
+                paymentInfo,
+            });
+            document.querySelector(`#${paymentMethodName.replace(/\s/g, '') + 'DolarReferenceContainer'}`).classList.add('d-none');
+            document.querySelector(`#${paymentMethodName.replace(/\s/g, '') + 'Container'}`).classList.remove('col-7', 'pr-0');
+            document.querySelector(`#${paymentMethodName.replace(/\s/g, '') + 'Container'}`).classList.add('col-9');
         }
+    }
+
+    onChangeTicketIdHandler(event) {
+        let paymentInfo = this.state.paymentInfo;
+
+        paymentInfo['point of sale'].ticketId = event.target.value;
+
+        this.setState({
+            paymentInfo,
+        });
+    }
+    onChangeDolarReferenceHandler(event, paymentMethodName) {
+        let paymentInfo = this.state.paymentInfo;
+
+        paymentInfo[paymentMethodName].dolarReference = parseInt(event.target.value.replace(/\D/g, ''), 10);
+
+        this.setState({
+            paymentInfo,
+        });
+        var amount = parseInt(event.target.value.replace(/\D/g, ''), 10);
+        event.target.value = amount.toLocaleString();
+    }
+    onChangeReferenceCodeHandler(event) {
+        let paymentInfo = this.state.paymentInfo;
+
+        paymentInfo['bank transfer'].referenceCode = event.target.value;
+
+        this.setState({
+            paymentInfo,
+        });
+    }
+    onChangeBankHandler(event) {
+        let paymentInfo = this.state.paymentInfo;
+
+        paymentInfo['bank transfer'].bankId = event.target.value;
+
+        this.setState({
+            paymentInfo,
+        });
+    }
+
+    calculatePaymentTotal() {
+        let paymentInfo = this.state.paymentInfo;
+        console.log(paymentInfo);
+        let paymentTotal = 0;
+        for (let paymentMethod of Object.keys(paymentInfo)) {
+            let paymentMethodInfo = paymentInfo[paymentMethod];
+            if (paymentMethod.startsWith('cash') && paymentMethodInfo.currency == 'USD') {
+                paymentTotal += paymentMethodInfo.amount * paymentMethodInfo.dolarReference;
+            } else {
+                paymentTotal += paymentMethodInfo.amount;
+            }
+        }
+
+        return paymentTotal;
+    }
+
+    calculateClientDebt() {
+        let client = this.state.currentSelectedClient;
+        let invoiceTotal = 0,
+            paymentTotal = 0;
+        client.sales.map(sale => {
+            sale.saleProducts.forEach(saleProduct => {
+                invoiceTotal += roundUpProductPrice(saleProduct.product.price * this.props.dolarReference);
+            });
+
+            sale.payment.forEach(payment => {
+                paymentTotal += payment.amount;
+            });
+        });
+
+        return invoiceTotal - paymentTotal;
     }
     showMessageInfo(type, message) {
         if (this.timeout) clearTimeout(this.timeout);
@@ -582,6 +766,13 @@ class BetterSalesControl extends Component {
         );
     }
 
+    showInvoiceModal() {
+        if (this.state.productsToSell.length > 0) {
+            window.$('#invoiceModal').modal();
+        } else {
+            this.showMessageInfo('error', 'Por favor seleccione un producto');
+        }
+    }
     render() {
         return (
             <div className="container-fluid">
@@ -637,21 +828,13 @@ class BetterSalesControl extends Component {
                 </div>
                 <div className="row mb-2 mt-0">
                     <div className="col">
-                        <span
-                            onBlur={() => {
-                                this.setState({
-                                    messageInfo: null,
-                                });
-                            }}
-                            className={this.state.messageInfo.type == 'error' ? 'text-danger' : 'text-success'}>
-                            {this.state.messageInfo.message}
-                        </span>
+                        <span className={this.state.messageInfo.type == 'error' ? 'text-danger' : 'text-success'}>{this.state.messageInfo.message}</span>
                     </div>
                 </div>
                 <div className="row">
                     <div className="col-12 col-lg-2">
                         <div className="form-group">
-                            <input ref={this.saleSubmitButton} onClick={this.submitSaleHandler} type="button" className="form-control btn btn-primary" value="Procesar venta" />
+                            <input ref={this.openInvoiceModalButton} onClick={this.showInvoiceModal} type="button" className="form-control btn btn-primary" value="Procesar venta" />
                         </div>
                         <div className="form-group">
                             <input onClick={this.sendToDebts} className="form-control btn btn-warning" value="Enviar a deudas" />
@@ -675,7 +858,7 @@ class BetterSalesControl extends Component {
                                             Cantidad
                                         </th>
                                         <th className="my-auto" scope="col">
-                                            Total <span className="font-weight-bold text-warning"> {' ' + Intl.NumberFormat('es-VE', { style: 'currency', currency: 'VES' }).format(this.state.totalBs)} </span>
+                                            Total <span className="font-weight-bold text-warning"> {' ' + Intl.NumberFormat('es-VE', { currency: 'VES' }).format(this.state.totalBs)} </span>
                                         </th>
                                     </tr>
                                 </thead>
@@ -688,11 +871,11 @@ class BetterSalesControl extends Component {
                                                     <th>
                                                         <img style={{ maxWidth: '40px' }} src={product.imagePath} /> {product.name}
                                                     </th>
-                                                    <th>{Intl.NumberFormat('es-VE', { style: 'currency', currency: 'VES' }).format(product.unitPriceBs)}</th>
+                                                    <th>{Intl.NumberFormat('es-VE', { currency: 'VES' }).format(product.unitPriceBs)}</th>
                                                     <th onClick={this.editProductQuantityHandler} className="bg-dark" data-toggle="tooltip" data-placement="bottom" title="Editar Cantidad" role="button">
                                                         {product.quantity}
                                                     </th>
-                                                    <th>{Intl.NumberFormat('es-VE', { style: 'currency', currency: 'VES' }).format(product.totalBs)}</th>
+                                                    <th>{Intl.NumberFormat('es-VE', { currency: 'VES' }).format(product.totalBs)}</th>
                                                     <th>
                                                         <button onClick={this.deleteFromTable} className="btn btn-danger p-0">
                                                             Delete
@@ -706,15 +889,15 @@ class BetterSalesControl extends Component {
                         </div>
                     </div>
                 </div>
-                <div ref={this.invoiceModal} className="modal " id="clientsModal" tabIndex="-1" aria-labelledby="clientsModalLabel" aria-hidden="true">
-                    <div className="modal-dialog modal-dialog-centered">
+                <div ref={this.invoiceModal} className="modal " id="invoiceModal" tabIndex="-1" aria-labelledby="invoiceModalLabel" aria-hidden="true">
+                    <div className="modal-dialog modal-dialog-centered  modal-dialog-scrollable">
                         <div className="modal-content">
                             <div className="modal-header">
-                                <h5 className="modal-title" id="clientsModalLabel">
+                                <h5 className="modal-title" id="invoiceModalLabel">
                                     Datos de la factura
                                 </h5>
                             </div>
-                            <div className="modal-body">
+                            <div className="modal-body pb-0">
                                 <div className="row">
                                     <div className="col">
                                         <div className="d-flex justify-content-between mb-3">
@@ -748,128 +931,220 @@ class BetterSalesControl extends Component {
                                     <div className="col-6 pl-0">
                                         <input className="form-control" type="tel" name="phone" id="phone" placeholder="Teléfono" value={this.state.currentSelectedClient.phoneNumber ? this.state.currentSelectedClient.phoneNumber : ''} disabled />
                                     </div>
-                                    <hr className="w-100 ml-3 mr-3" />
                                 </div>
+                                {this.state.currentSelectedClient.sales.length > 0 && (
+                                    <div className="row mt-2 p-0">
+                                        <div className="col-12">
+                                            <table className="table table-sm table-borderless text-danger text-center border border-danger">
+                                                <thead>
+                                                    <tr>
+                                                        <th>ID</th>
+                                                        <th>Deuda</th>
+                                                        <th>Fecha</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {this.state.currentSelectedClient.sales &&
+                                                        this.state.currentSelectedClient.sales.map(sale => {
+                                                            let invoiceTotal = 0,
+                                                                paymentTotal = 0;
+                                                            sale.saleProducts.forEach(saleProduct => {
+                                                                invoiceTotal += roundUpProductPrice(saleProduct.product.price * this.props.dolarReference);
+                                                            });
+
+                                                            sale.payment.forEach(payment => {
+                                                                paymentTotal += payment.amount;
+                                                            });
+
+                                                            return (
+                                                                <tr>
+                                                                    <th className="btn-link" role="button">
+                                                                        {sale.id}
+                                                                    </th>
+                                                                    <th>{Intl.NumberFormat('es-VE', { currency: 'VES' }).format(invoiceTotal - paymentTotal)}</th>
+                                                                    <th>{sale.createdAt}</th>
+                                                                </tr>
+                                                            );
+                                                        })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                )}
                                 <div id="paymentMethodContainer" ref={this.paymentMethodContainer}>
-                                    {this.state.paymentInfo &&
-                                        Object.keys(this.state.paymentInfo).map(key => {
-                                            switch (key) {
-                                                case 'point of sale':
-                                                    return (
-                                                        <div className="paymentDetailsContainer row mb-3">
-                                                            <div className="col-1 ">
-                                                                <button
-                                                                    onClick={() => {
-                                                                        this.removePaymentMethod('point of sale');
-                                                                    }}
-                                                                    className="btn btn-danger ">
-                                                                    -
-                                                                </button>
-                                                            </div>
-                                                            <div className="col-9">
-                                                                <div className="input-group">
-                                                                    <button className="btn btn-dark" disabled="disabled">
-                                                                        Punto de Venta
-                                                                    </button>
-                                                                    <input onChange={event => this.updatePaymentMethodAmount('point of sale', event.target.value)} onKeyUp={event => this.formatInvoiceAmountHandler(event)} type="text" className="form-control text-right text-danger" defaultValue={Intl.NumberFormat('es-VE', { currency: 'VES' }).format(roundUpProductPrice(this.state.totalBs))} />
-                                                                    <button className="btn btn-dark" disabled="disabled">
-                                                                        Bs.
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                            <div className="col-2 pl-0">
-                                                                <input className="form-control codeNumber" type="text" name="ticketId" id="ticketId" placeholder="N°" />
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                    break;
-                                                case 'cash':
-                                                    return (
-                                                        <div className="paymentDetailsContainer row mb-3">
-                                                            <div className="col-1 ">
-                                                                <button
-                                                                    onClick={() => {
-                                                                        this.removePaymentMethod('cash');
-                                                                    }}
-                                                                    className="btn btn-danger ">
-                                                                    -
-                                                                </button>
-                                                            </div>
-                                                            <div id="cashContainer" className="col-9 ">
-                                                                <div className="input-group">
-                                                                    <button className="btn btn-dark" style={{ width: '136px' }} disabled="disabled">
-                                                                        Efectivo
-                                                                    </button>
-                                                                    <input onChange={event => this.updatePaymentMethodAmount('cash', event.target.value)} onKeyUp={this.formatInvoiceAmountHandler} type="text" className="form-control text-right text-danger" defaultValue={Intl.NumberFormat('es-VE', { currency: 'VES' }).format(roundUpProductPrice(this.state.totalBs))} />
-                                                                    <select onChange={this.changeCurrencyHandler} className="btn btn-dark p-0">
-                                                                        <option selected value="Bs.">
-                                                                            Bs.
-                                                                        </option>
-                                                                        <option value="$">$</option>
-                                                                    </select>
-                                                                </div>
-                                                            </div>
-                                                            <div id="dolarValueContainer" className="col-4 d-none">
-                                                                <input onKeyUp={this.formatInvoiceAmountHandler} className="form-control" type="text" name="dolarValue" id="dolarValue" placeholder="Valor dolar" />
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                    break;
-                                                case 'bank transfer':
-                                                    return (
-                                                        <div className="paymentDetailsContainer row mb-3">
-                                                            <div className="col-1 ">
-                                                                <button
-                                                                    onClick={() => {
-                                                                        this.removePaymentMethod('bank transfer');
-                                                                    }}
-                                                                    className="btn btn-danger ">
-                                                                    -
-                                                                </button>
-                                                            </div>
-                                                            <div className="col-9 ">
-                                                                <div className="input-group">
-                                                                    <button className="btn btn-dark" style={{ width: '136px' }} disabled="disabled">
-                                                                        Transferencia
-                                                                    </button>
-                                                                    <input onChange={event => this.updatePaymentMethodAmount('bank transfer', event.target.value)} onKeyUp={event => this.formatInvoiceAmountHandler(event)} type="text" className="form-control text-right text-danger" defaultValue={Intl.NumberFormat('es-VE', { currency: 'VES' }).format(roundUpProductPrice(this.state.totalBs))} autoFocus />
-                                                                    <button className="btn btn-dark" disabled="disabled">
-                                                                        Bs.
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                            <div className="col-2 pl-0 mb-3">
-                                                                <input className="form-control codeNumber" type="text" name="numberId" id="numberId" placeholder="N°" />
-                                                            </div>
-                                                            <div className="col-12">
-                                                                <select className="form-control btn btn-secondary" name="bankData" id="bankData">
-                                                                    {this.state.bankList &&
-                                                                        this.state.bankList.map(bankInfo => {
-                                                                            return (
-                                                                                <option value={bankInfo.id}>
-                                                                                    {bankInfo.bankName} | {bankInfo.ownerName}
-                                                                                </option>
-                                                                            );
-                                                                        })}
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                    break;
-                                            }
-                                        })}
-                                </div>
-                                <div ref={this.addPaymentMethodContainer} className="col-12">
+                                    <hr className="w-100 mt-0 mb-0" />
                                     <span className="btn btn-link" data-toggle="modal" data-target="#paymentMethodsModal">
                                         Agregar método de pago
                                     </span>
+                                    {this.state.paymentInfo &&
+                                        Object.keys(this.state.paymentInfo).map(key => {
+                                            if (key.startsWith('point of sale')) {
+                                                return (
+                                                    <div className="paymentDetailsContainer row mb-3">
+                                                        <div className="col-1 ">
+                                                            <button
+                                                                onClick={() => {
+                                                                    this.removePaymentMethod(key);
+                                                                }}
+                                                                className="btn btn-danger ">
+                                                                -
+                                                            </button>
+                                                        </div>
+                                                        <div className="col-9">
+                                                            <div className="input-group">
+                                                                <button className="btn btn-dark" disabled="disabled">
+                                                                    Punto de Venta
+                                                                </button>
+                                                                <input
+                                                                    onFocus={function (event) {
+                                                                        event.target.select();
+                                                                    }}
+                                                                    onChange={event => this.updatePaymentMethodAmount(key, event)}
+                                                                    type="text"
+                                                                    className="form-control text-right text-danger"
+                                                                    defaultValue={numberWithCommas(this.state.paymentInfo[key].amount, '.')}
+                                                                />
+                                                                <button className="btn btn-dark" disabled="disabled">
+                                                                    Bs.
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <div className="col-2 pl-0">
+                                                            <input onChange={this.onChangeTicketIdHandler} className="form-control codeNumber" type="text" name="ticketId" id="ticketId" placeholder="N°" />
+                                                        </div>
+                                                    </div>
+                                                );
+                                            } else if (key.startsWith('cash')) {
+                                                return (
+                                                    <div className="paymentDetailsContainer row mb-3">
+                                                        <div className="col-1 ">
+                                                            <button
+                                                                onClick={() => {
+                                                                    this.removePaymentMethod(key);
+                                                                }}
+                                                                className="btn btn-danger ">
+                                                                -
+                                                            </button>
+                                                        </div>
+                                                        <div id={key.replace(/\s/g, '') + 'Container'} className="col-9 ">
+                                                            <div className="input-group">
+                                                                <button className="btn btn-dark" style={{ width: '136px' }} disabled="disabled">
+                                                                    Efectivo
+                                                                </button>
+                                                                <input
+                                                                    onFocus={function (event) {
+                                                                        event.target.select();
+                                                                    }}
+                                                                    onChange={event => this.updatePaymentMethodAmount(key, event)}
+                                                                    type="text"
+                                                                    className="form-control text-right text-danger"
+                                                                    defaultValue={numberWithCommas(this.state.paymentInfo[key].amount, '.')}
+                                                                    autoFocus
+                                                                />
+                                                                <select
+                                                                    onChange={event => {
+                                                                        this.changeCashCurrencyHandler(event, key);
+                                                                    }}
+                                                                    className="btn btn-dark p-0">
+                                                                    <option selected value="Bs.">
+                                                                        Bs.
+                                                                    </option>
+                                                                    <option value="$">$</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div id={key.replace(/\s/g, '') + 'DolarReferenceContainer'} className="col-4 d-none">
+                                                            <input
+                                                                onChange={event => {
+                                                                    this.onChangeDolarReferenceHandler(event, key);
+                                                                }}
+                                                                className="form-control"
+                                                                type="text"
+                                                                name="dolarValue"
+                                                                id="dolarValue"
+                                                                placeholder="Valor dolar"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                );
+                                            } else if (key.startsWith('bank transfer')) {
+                                                return (
+                                                    <div className="paymentDetailsContainer row mb-3">
+                                                        <div className="col-1 ">
+                                                            <button
+                                                                onClick={() => {
+                                                                    this.removePaymentMethod(key);
+                                                                }}
+                                                                className="btn btn-danger ">
+                                                                -
+                                                            </button>
+                                                        </div>
+                                                        <div className="col-9 ">
+                                                            <div className="input-group">
+                                                                <button className="btn btn-dark" style={{ width: '136px' }} disabled="disabled">
+                                                                    Transferencia
+                                                                </button>
+                                                                <input
+                                                                    onFocus={function (event) {
+                                                                        event.target.select();
+                                                                    }}
+                                                                    onChange={event => this.updatePaymentMethodAmount(key, event)}
+                                                                    type="text"
+                                                                    className="form-control text-right text-danger"
+                                                                    defaultValue={numberWithCommas(this.state.paymentInfo[key].amount, '.')}
+                                                                    autoFocus
+                                                                />
+                                                                <button className="btn btn-dark" disabled="disabled">
+                                                                    Bs.
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <div className="col-2 pl-0 mb-3">
+                                                            <input onChange={this.onChangeReferenceCodeHandler} className="form-control codeNumber" type="text" name="numberId" id="numberId" placeholder="N°" />
+                                                        </div>
+                                                        <div className="col-12">
+                                                            <select onChange={this.onChangeBankHandler} className="form-control btn btn-secondary" name="bankData" id="bankData">
+                                                                {this.state.bankList &&
+                                                                    this.state.bankList.map(bankInfo => {
+                                                                        return (
+                                                                            <option value={bankInfo.id}>
+                                                                                {bankInfo.bankName} | {bankInfo.ownerName}
+                                                                            </option>
+                                                                        );
+                                                                    })}
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            }
+                                        })}
+                                </div>
+                                <hr className="w-100 mb-1" />
+                                <div className="row p-0">
+                                    <label className="col-sm-9 pr-0 text-right font-weight-bold">Subtotal:</label>
+                                    <label className="col-3 p-0 text-danger font-weight-bold">{numberWithCommas(this.state.totalBs, '.')}</label>
+                                </div>
+                                <div className="row p-0">
+                                    <label className="col-sm-9 pr-0 text-right font-weight-bold">Deuda:</label>
+                                    <label className="col-3 p-0 text-danger font-weight-bold">{numberWithCommas(this.calculateClientDebt(), '.')}</label>
+                                </div>
+                                <div className="row p-0">
+                                    <label className="col-sm-9 pr-0 text-right font-weight-bold">Total:</label>
+                                    <label className="col-3 p-0 text-danger font-weight-bold">{numberWithCommas(this.state.totalBs + this.calculateClientDebt(), '.')}</label>
+                                </div>
+                                <div className="row p-0">
+                                    <label className="col-sm-9 pr-0 text-right font-weight-bold">Total a pagar:</label>
+                                    <label className="col-3 p-0 text-danger font-weight-bold">{numberWithCommas(this.calculatePaymentTotal(), '.')}</label>
                                 </div>
                             </div>
-                            <div className="modal-footer">
+                            <div className="modal-footer p-0 m-0">
+                                <div className="col-12">
+                                    <span className={this.state.messageInfo.type == 'error' ? 'text-danger' : 'text-success'}>{this.state.messageInfo.message}</span>
+                                </div>
                                 <button type="button" className="btn btn-secondary" data-dismiss="modal">
                                     Close
                                 </button>
-                                <button type="button" className="btn btn-primary">
+                                <button ref={this.saleSubmitButton} onClick={this.submitSaleHandler} type="button" className="btn btn-primary">
                                     Enviar
                                 </button>
                             </div>
