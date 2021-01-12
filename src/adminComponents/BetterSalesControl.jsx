@@ -6,6 +6,7 @@ import clientsRequests from '../requests/clients';
 import salesRequests from '../requests/sales';
 import paymentMethodsRequests from '../requests/paymentMethods';
 import banksRequests from '../requests/banks';
+import paymentRequests from '../requests/payments';
 
 class BetterSalesControl extends Component {
     constructor() {
@@ -23,6 +24,7 @@ class BetterSalesControl extends Component {
                 phoneNumber: null,
                 sales: [],
             },
+            totalDebt: 0,
             quantity: 1,
             paymentMethods: [],
             paymentInfo: {},
@@ -42,6 +44,7 @@ class BetterSalesControl extends Component {
         this.addPaymentMethodContainer = React.createRef();
         this.invoiceModal = React.createRef();
         this.openInvoiceModalButton = React.createRef();
+        this.payDebtButton = React.createRef();
 
         this.productSelectionHandler = this.productSelectionHandler.bind(this);
         this.searchProductsHandler = this.searchProductsHandler.bind(this);
@@ -52,7 +55,6 @@ class BetterSalesControl extends Component {
         this.deleteFromTable = this.deleteFromTable.bind(this);
         this.submitSaleHandler = this.submitSaleHandler.bind(this);
         this.showMessageInfo = this.showMessageInfo.bind(this);
-        this.sendToDebts = this.sendToDebts.bind(this);
         this.clientSelectionHandler = this.clientSelectionHandler.bind(this);
         this.addPaymentMethod = this.addPaymentMethod.bind(this);
         this.onChangeTicketIdHandler = this.onChangeTicketIdHandler.bind(this);
@@ -61,12 +63,17 @@ class BetterSalesControl extends Component {
         this.onChangeBankHandler = this.onChangeBankHandler.bind(this);
         this.showInvoiceModal = this.showInvoiceModal.bind(this);
         this.changeCashCurrencyHandler = this.changeCashCurrencyHandler.bind(this);
+        this.addDebtToInvoiceTotal = this.addDebtToInvoiceTotal.bind(this);
+        this.removeDebtFromInvoiceTotal = this.removeDebtFromInvoiceTotal.bind(this);
+        this.getAvailablePaymentMethods = this.getAvailablePaymentMethods.bind(this);
     }
 
     componentDidMount() {
         document.body.addEventListener('keyup', event => {
             if (event.keyCode == 13 && event.ctrlKey) {
-                this.openInvoiceModalButton.current.click();
+                if (this.openInvoiceModalButton.current) {
+                    this.openInvoiceModalButton.current.click();
+                }
             }
         });
 
@@ -79,11 +86,18 @@ class BetterSalesControl extends Component {
         window.$('#invoiceModal').on('shown.bs.modal', () => {
             this.clientSelect.current.focus();
             if (Object.keys(this.state.paymentInfo).length == 0) {
-                this.addPaymentMethod({
-                    name: 'point of sale',
-                    amount: this.state.totalBs,
-                    currency: 'Bs',
-                    ticketId: null,
+                this.getAvailablePaymentMethods().then(paymentMethods => {
+                    paymentMethods.forEach(pm => {
+                        if (pm.name.toLowerCase().includes('point of sale')) {
+                            this.addPaymentMethod({
+                                id: pm.id,
+                                name: pm.name.toLowerCase(),
+                                amount: this.state.totalBs,
+                                currency: 'Bs',
+                                ticketId: null,
+                            });
+                        }
+                    });
                 });
             }
         });
@@ -112,11 +126,15 @@ class BetterSalesControl extends Component {
                                 let paymentMethodButton = document.createElement('button');
                                 paymentMethodButton.className = 'btn btn-secondary ml-3';
                                 paymentMethodButton.setAttribute('data-paymentMethodName', paymentMethod.name);
+                                paymentMethodButton.setAttribute('data-paymentMethodId', paymentMethod.id);
                                 paymentMethodButton.setAttribute('data-dismiss', 'modal');
                                 paymentMethodButton.innerText = paymentMethod.name;
                                 paymentMethodButton.addEventListener('click', async event => {
                                     let paymentMethodName = event.target.getAttribute('data-paymentMethodName');
-                                    let coincidences = 0;
+                                    let paymentMethodId = event.target.getAttribute('data-paymentMethodId');
+                                    let coincidences = 1;
+                                    let paymentMethodNamePattern;
+
                                     switch (paymentMethodName) {
                                         case 'Bank Transfer':
                                             let bankList = await this.loadBanks();
@@ -127,72 +145,62 @@ class BetterSalesControl extends Component {
                                                     },
                                                     () => {
                                                         for (let paymentMethod of Object.keys(this.state.paymentInfo)) {
-                                                            if (paymentMethod.startsWith('bank transfer')) {
+                                                            if (paymentMethod.toLowerCase().startsWith('bank transfer')) {
                                                                 coincidences++;
                                                             }
                                                         }
-                                                        if (coincidences == 0) {
-                                                            this.addPaymentMethod({
-                                                                name: paymentMethodName.toLowerCase(),
-                                                                amount: 0,
-                                                                currency: 'Bs',
-                                                                referenceCode: null,
-                                                                bankId: 1,
-                                                            });
-                                                        } else {
-                                                            this.addPaymentMethod({
-                                                                name: `${paymentMethodName.toLowerCase()} ${coincidences}`,
-                                                                amount: 0,
-                                                                currency: 'Bs',
-                                                                referenceCode: null,
-                                                                bankId: 1,
-                                                            });
+                                                        paymentMethodNamePattern = `${paymentMethodName.toLowerCase()} ${coincidences}`;
+
+                                                        if (this.state.paymentInfo[paymentMethodNamePattern] != null) {
+                                                            paymentMethodNamePattern = `${paymentMethodName.toLowerCase()} ${coincidences + 1}`;
                                                         }
+
+                                                        this.addPaymentMethod({
+                                                            id: paymentMethodId,
+                                                            name: paymentMethodNamePattern,
+                                                            amount: 0,
+                                                            currency: 'Bs',
+                                                            referenceCode: null,
+                                                            bankId: 1,
+                                                        });
                                                     },
                                                 );
                                             }
                                             break;
                                         case 'Cash':
                                             for (let paymentMethod of Object.keys(this.state.paymentInfo)) {
-                                                if (paymentMethod.startsWith('cash')) {
+                                                if (paymentMethod.toLowerCase().startsWith('cash')) {
                                                     coincidences++;
                                                 }
                                             }
-                                            if (coincidences == 0) {
-                                                this.addPaymentMethod({
-                                                    name: paymentMethodName.toLowerCase(),
-                                                    amount: 0,
-                                                    currency: 'Bs',
-                                                });
-                                            } else {
-                                                this.addPaymentMethod({
-                                                    name: `${paymentMethodName.toLowerCase()} ${coincidences}`,
-                                                    amount: 0,
-                                                    currency: 'Bs',
-                                                });
+                                            paymentMethodNamePattern = `${paymentMethodName.toLowerCase()} ${coincidences}`;
+                                            if (this.state.paymentInfo[paymentMethodNamePattern] != null) {
+                                                paymentMethodNamePattern = `${paymentMethodName.toLowerCase()} ${coincidences + 1}`;
                                             }
+                                            this.addPaymentMethod({
+                                                id: paymentMethodId,
+                                                name: paymentMethodNamePattern,
+                                                amount: 0,
+                                                currency: 'Bs',
+                                            });
                                             break;
                                         case 'Point Of Sale':
                                             for (let paymentMethod of Object.keys(this.state.paymentInfo)) {
-                                                if (paymentMethod.startsWith('point of sale')) {
+                                                if (paymentMethod.toLowerCase().startsWith('point of sale')) {
                                                     coincidences++;
                                                 }
                                             }
-                                            if (coincidences == 0) {
-                                                this.addPaymentMethod({
-                                                    name: paymentMethodName.toLowerCase(),
-                                                    amount: 0,
-                                                    currency: 'Bs',
-                                                    ticketId: null,
-                                                });
-                                            } else {
-                                                this.addPaymentMethod({
-                                                    name: `${paymentMethodName.toLowerCase()} ${coincidences}`,
-                                                    amount: 0,
-                                                    currency: 'Bs',
-                                                    ticketId: null,
-                                                });
+                                            paymentMethodNamePattern = `${paymentMethodName.toLowerCase()} ${coincidences}`;
+                                            if (this.state.paymentInfo[paymentMethodNamePattern] != null) {
+                                                paymentMethodNamePattern = `${paymentMethodName.toLowerCase()} ${coincidences + 1}`;
                                             }
+                                            this.addPaymentMethod({
+                                                id: paymentMethodId,
+                                                name: paymentMethodNamePattern,
+                                                amount: 0,
+                                                currency: 'Bs',
+                                                ticketId: null,
+                                            });
                                             break;
                                     }
                                 });
@@ -492,50 +500,98 @@ class BetterSalesControl extends Component {
 
         let paymentInfo = this.state.paymentInfo;
         let paymentTotal = 0;
+        let payments = [];
         for (let paymentMethod of Object.keys(paymentInfo)) {
             let paymentMethodInfo = paymentInfo[paymentMethod];
             if (isNaN(paymentMethodInfo.amount)) {
                 this.showMessageInfo('error', `El monto del método de pago ${paymentMethod.toUpperCase()} debe ser de un valor numérico`);
                 return;
             }
-            if (paymentMethodInfo.amount == 0) {
-                this.showMessageInfo('error', 'No puede haber un método de pago con valor 0');
-                return;
-            }
+            //if (paymentMethodInfo.amount == 0) {
+            //this.showMessageInfo('error', 'No puede haber un método de pago con valor 0');
+            //return;
+            //}
 
-            if (paymentMethod == 'point of sale' && (paymentMethodInfo.ticketId == null || paymentMethodInfo.ticketId == '')) {
+            if (paymentMethod.startsWith('point of sale') && (paymentMethodInfo.ticketId == null || paymentMethodInfo.ticketId == '')) {
                 this.showMessageInfo('error', 'Número de ticket no puede estar vacío');
                 return;
             }
-            if (paymentMethod == 'cash' && paymentMethodInfo.currency == 'USD' && (paymentMethodInfo.dolarReference == null || paymentMethodInfo.dolarReference == '')) {
+            if (paymentMethod.startsWith('cash') && paymentMethodInfo.currency == 'USD' && (paymentMethodInfo.dolarReference == null || paymentMethodInfo.dolarReference == '')) {
                 this.showMessageInfo('error', 'El valor del dolar no puede estar vacío');
                 return;
             }
-            if (paymentMethod == 'bank transfer' && (paymentMethodInfo.referenceCode == null || paymentMethodInfo.referenceCode == '')) {
+            if (paymentMethod.startsWith('bank transfer') && (paymentMethodInfo.referenceCode == null || paymentMethodInfo.referenceCode == '')) {
                 this.showMessageInfo('error', 'El código de referencia de la transferencia no puede estar vacío');
                 return;
             }
-            if (paymentMethod == 'bank transfer' && (paymentMethodInfo.bankId == null || paymentMethodInfo.bankId == '')) {
+            if (paymentMethod.startsWith('bank transfer') && (paymentMethodInfo.bankId == null || paymentMethodInfo.bankId == '')) {
                 this.showMessageInfo('error', 'El banco receptor no puede estar vacío');
                 return;
             }
-            if (paymentMethod == 'cash' && paymentMethodInfo.currency == 'USD') {
+            if (paymentMethod.startsWith('cash') && paymentMethodInfo.currency == 'USD') {
                 paymentTotal += paymentMethodInfo.amount * paymentMethodInfo.dolarReference;
             } else {
                 paymentTotal += paymentMethodInfo.amount;
             }
+            if (paymentMethod.startsWith('point of sale')) {
+                payments.push({
+                    paymentMethodId: paymentMethodInfo.id,
+                    amount: paymentMethodInfo.amount,
+                    currency: paymentMethodInfo.currency,
+                    paymentDetails: {
+                        ticketId: paymentMethodInfo.ticketId,
+                    },
+                });
+            } else if (paymentMethod.startsWith('cash')) {
+                if (paymentMethodInfo.currency == 'USD') {
+                    payments.push({
+                        paymentMethodId: paymentMethodInfo.id,
+                        amount: paymentMethodInfo.amount,
+                        currency: paymentMethodInfo.currency,
+                        paymentDetails: {
+                            dolarReference: paymentMethodInfo.dolarReference,
+                        },
+                    });
+                } else if (paymentMethodInfo.currency == 'Bs') {
+                    payments.push({
+                        paymentMethodId: paymentMethodInfo.id,
+                        amount: paymentMethodInfo.amount,
+                        currency: paymentMethodInfo.currency,
+                        paymentDetails: {},
+                    });
+                }
+            } else if (paymentMethod.startsWith('bank transfer')) {
+                payments.push({
+                    paymentMethodId: paymentMethodInfo.id,
+                    amount: paymentMethodInfo.amount,
+                    currency: paymentMethodInfo.currency,
+                    paymentDetails: {
+                        referenceCode: paymentMethodInfo.referenceCode,
+                        bankId: paymentMethodInfo.bankId,
+                    },
+                });
+            }
         }
-        if (paymentTotal < this.state.totalBs) {
-            this.showMessageInfo('error', 'El monto debe ser igual al total de la venta');
-            return;
-        }
-        if (paymentTotal > this.state.totalBs) {
+
+        let invoiceTotal = this.state.totalBs + this.state.totalDebt;
+        let isPaid = 1;
+
+        if (paymentTotal > invoiceTotal) {
             this.showMessageInfo('error', 'El monto a pagar es mayor al monto de la venta');
             return;
         }
-
-        console.log(paymentTotal);
-        return;
+        if (paymentTotal < this.state.totalDebt) {
+            this.showMessageInfo('error', 'El monto a pagar no cubre la deuda');
+            return;
+        }
+        if (paymentTotal < invoiceTotal) {
+            let confirm = window.confirm('El pago expresado es menor al monto total de la factura, la venta se registrará como DEUDA. ¿Desea continuar?');
+            if (!confirm) {
+                return;
+            } else {
+                isPaid = 0;
+            }
+        }
 
         if (!this.state.submittingSale) {
             this.setState(
@@ -549,11 +605,68 @@ class BetterSalesControl extends Component {
                         product.price = product.unitPriceDollars;
                         product.discount = product.discount || 0;
                     });
+                    //console.log({
+                    //clientId: this.state.currentSelectedClient.id,
+                    //products: productsToSell,
+                    //payments,
+                    //isPaid,
+                    //});
+                    //return;
+                    if (this.state.totalDebt > 0) {
+                        for (let debt of this.state.currentSelectedClient.sales) {
+                            let invoiceAmount = 0;
+                            let debtPaidAmount = 0;
+                            let debtTotal = 0;
+                            debt.saleProducts.forEach(saleProduct => {
+                                invoiceAmount += roundUpProductPrice(saleProduct.product.price * this.props.dolarReference);
+                            });
+
+                            debt.payment.forEach(pm => {
+                                if (pm.currency == 'USD') {
+                                    debtPaidAmount += pm.amount * pm.dolarReference;
+                                } else {
+                                    debtPaidAmount += pm.amount;
+                                }
+                            });
+
+                            debtTotal = invoiceAmount - debtPaidAmount;
+
+                            let higherPayment = {};
+                            let higherPaymentAmount = 0;
+                            payments.forEach((payment, index) => {
+                                if ((payment.currency == 'Bs' && payment.amount > higherPaymentAmount) || (payment.currency == 'USD' && payment.amount * payment.dolarReference > higherPaymentAmount)) {
+                                    higherPaymentAmount = payment.currency == 'Bs' ? payment.amount : payment.currency == 'USD' ? payment.amount * payment.dolarReference : 0;
+                                    higherPayment = payment;
+                                }
+                            });
+
+                            if (higherPaymentAmount >= debtTotal) {
+                                let response = await paymentRequests.create({
+                                    ...higherPayment,
+                                    saleId: debt.id,
+                                    amount: debtTotal,
+                                });
+                                if (response.error) {
+                                    this.showMessageInfo('error', response.error.toString());
+                                    return;
+                                } else {
+                                    higherPayment.amount -= debtTotal;
+                                }
+                            } else {
+                                console.log(this.state.currentSelectedClient);
+                                console.log(higherPaymentAmount, debtTotal);
+                                return;
+                            }
+                        }
+                    }
                     let response = await salesRequests.create({
+                        clientId: this.state.currentSelectedClient.id,
                         products: productsToSell,
+                        payments,
+                        isPaid,
                     });
                     if (response.error) {
-                        this.showMessageInfo('error', response.error);
+                        this.showMessageInfo('error', response.error.toString());
                         this.setState({
                             submittingSale: false,
                         });
@@ -562,13 +675,23 @@ class BetterSalesControl extends Component {
                         this.setState({
                             productsToSell: [],
                             currentSelectedProduct: null,
+                            currentSelectedClient: {
+                                name: null,
+                                cedula: null,
+                                phoneNumber: null,
+                                sales: [],
+                            },
                             quantity: 1,
                             totalDollars: 0,
                             totalBs: 0,
+                            paymentInfo: {},
+                            totalDebt: 0,
                             submittingSale: false,
                         });
+                        this.clientSelect.current.select.state.value = [];
                         this.productSelect.current.select.state.value = [];
                         this.quantityInput.current.value = 1;
+                        window.$(this.invoiceModal.current).modal('hide');
                         this.productSelect.current.focus();
                     }
                 },
@@ -578,19 +701,12 @@ class BetterSalesControl extends Component {
         }
     }
 
-    sendToDebts() {
-        if (this.state.productsToSell.length > 0) {
-            window.$('#invoiceModal').modal();
-        } else {
-            this.showMessageInfo('error', 'Por favor seleccione un producto');
-        }
-    }
-
     addPaymentMethod(paymentInfo) {
         let currentPaymentInfo = this.state.paymentInfo;
         let paymentDetails = {};
         if (paymentInfo.name.startsWith('bank transfer')) {
             paymentDetails = {
+                id: paymentInfo.id,
                 amount: paymentInfo.amount,
                 currency: paymentInfo.currency,
                 referenceCode: paymentInfo.referenceCode,
@@ -598,20 +714,27 @@ class BetterSalesControl extends Component {
             };
         } else if (paymentInfo.name.startsWith('cash')) {
             paymentDetails = {
+                id: paymentInfo.id,
                 amount: paymentInfo.amount,
                 currency: paymentInfo.currency,
             };
         } else if (paymentInfo.name.startsWith('point of sale')) {
             paymentDetails = {
+                id: paymentInfo.id,
                 amount: paymentInfo.amount,
                 currency: paymentInfo.currency,
                 ticketId: paymentInfo.ticketId,
             };
         }
         currentPaymentInfo[paymentInfo.name] = paymentDetails;
-        this.setState({
-            paymentInfo: currentPaymentInfo,
-        });
+        this.setState(
+            {
+                paymentInfo: currentPaymentInfo,
+            },
+            () => {
+                console.log(this.state.paymentInfo);
+            },
+        );
     }
 
     removePaymentMethod(name) {
@@ -663,10 +786,10 @@ class BetterSalesControl extends Component {
         }
     }
 
-    onChangeTicketIdHandler(event) {
+    onChangeTicketIdHandler(event, paymentMethodName) {
         let paymentInfo = this.state.paymentInfo;
 
-        paymentInfo['point of sale'].ticketId = event.target.value;
+        paymentInfo[paymentMethodName].ticketId = event.target.value;
 
         this.setState({
             paymentInfo,
@@ -683,19 +806,19 @@ class BetterSalesControl extends Component {
         var amount = parseInt(event.target.value.replace(/\D/g, ''), 10);
         event.target.value = amount.toLocaleString();
     }
-    onChangeReferenceCodeHandler(event) {
+    onChangeReferenceCodeHandler(event, paymentMethodName) {
         let paymentInfo = this.state.paymentInfo;
 
-        paymentInfo['bank transfer'].referenceCode = event.target.value;
+        paymentInfo[paymentMethodName].referenceCode = event.target.value;
 
         this.setState({
             paymentInfo,
         });
     }
-    onChangeBankHandler(event) {
+    onChangeBankHandler(event, paymentMethodName) {
         let paymentInfo = this.state.paymentInfo;
 
-        paymentInfo['bank transfer'].bankId = event.target.value;
+        paymentInfo[paymentMethodName].bankId = event.target.value;
 
         this.setState({
             paymentInfo,
@@ -704,7 +827,6 @@ class BetterSalesControl extends Component {
 
     calculatePaymentTotal() {
         let paymentInfo = this.state.paymentInfo;
-        console.log(paymentInfo);
         let paymentTotal = 0;
         for (let paymentMethod of Object.keys(paymentInfo)) {
             let paymentMethodInfo = paymentInfo[paymentMethod];
@@ -733,6 +855,51 @@ class BetterSalesControl extends Component {
         });
 
         return invoiceTotal - paymentTotal;
+    }
+
+    addDebtToInvoiceTotal() {
+        let debt = this.calculateClientDebt();
+
+        this.setState({
+            totalDebt: debt,
+        });
+
+        if (this.payDebtButton.current) {
+            this.payDebtButton.current.style.display = 'none';
+        }
+    }
+
+    removeDebtFromInvoiceTotal() {
+        this.setState({
+            totalDebt: 0,
+        });
+
+        if (this.payDebtButton.current) {
+            this.payDebtButton.current.style.display = 'block';
+        }
+    }
+
+    async getAvailablePaymentMethods() {
+        return new Promise((resolve, reject) => {
+            if (this.state.paymentMethods.length == 0) {
+                paymentMethodsRequests.fetchAll().then(response => {
+                    if (response.error) {
+                        reject({ error: response.error });
+                    } else {
+                        this.setState(
+                            {
+                                paymentMethods: response.data,
+                            },
+                            () => {
+                                resolve(response.data);
+                            },
+                        );
+                    }
+                });
+            } else {
+                resolve(this.state.paymentMethods);
+            }
+        });
     }
     showMessageInfo(type, message) {
         if (this.timeout) clearTimeout(this.timeout);
@@ -836,9 +1003,6 @@ class BetterSalesControl extends Component {
                         <div className="form-group">
                             <input ref={this.openInvoiceModalButton} onClick={this.showInvoiceModal} type="button" className="form-control btn btn-primary" value="Procesar venta" />
                         </div>
-                        <div className="form-group">
-                            <input onClick={this.sendToDebts} className="form-control btn btn-warning" value="Enviar a deudas" />
-                        </div>
                     </div>
                     <div className="col-12 col-lg-10">
                         <div ref={this.productsTableDiv} className="table-responsive">
@@ -935,6 +1099,7 @@ class BetterSalesControl extends Component {
                                 {this.state.currentSelectedClient.sales.length > 0 && (
                                     <div className="row mt-2 p-0">
                                         <div className="col-12">
+                                            <input onClick={this.addDebtToInvoiceTotal} ref={this.payDebtButton} type="button" value="Pagar deuda" className="form-control btn-danger rounded-0" />
                                             <table className="table table-sm table-borderless text-danger text-center border border-danger">
                                                 <thead>
                                                     <tr>
@@ -1002,7 +1167,7 @@ class BetterSalesControl extends Component {
                                                                     onChange={event => this.updatePaymentMethodAmount(key, event)}
                                                                     type="text"
                                                                     className="form-control text-right text-danger"
-                                                                    defaultValue={numberWithCommas(this.state.paymentInfo[key].amount, '.')}
+                                                                    value={numberWithCommas(this.state.paymentInfo[key].amount, '.')}
                                                                 />
                                                                 <button className="btn btn-dark" disabled="disabled">
                                                                     Bs.
@@ -1010,11 +1175,21 @@ class BetterSalesControl extends Component {
                                                             </div>
                                                         </div>
                                                         <div className="col-2 pl-0">
-                                                            <input onChange={this.onChangeTicketIdHandler} className="form-control codeNumber" type="text" name="ticketId" id="ticketId" placeholder="N°" />
+                                                            <input
+                                                                onChange={event => {
+                                                                    this.onChangeTicketIdHandler(event, key);
+                                                                }}
+                                                                className="form-control codeNumber"
+                                                                type="text"
+                                                                name="ticketId"
+                                                                id="ticketId"
+                                                                placeholder="N°"
+                                                            />
                                                         </div>
                                                     </div>
                                                 );
-                                            } else if (key.startsWith('cash')) {
+                                            }
+                                            if (key.startsWith('cash')) {
                                                 return (
                                                     <div className="paymentDetailsContainer row mb-3">
                                                         <div className="col-1 ">
@@ -1038,7 +1213,7 @@ class BetterSalesControl extends Component {
                                                                     onChange={event => this.updatePaymentMethodAmount(key, event)}
                                                                     type="text"
                                                                     className="form-control text-right text-danger"
-                                                                    defaultValue={numberWithCommas(this.state.paymentInfo[key].amount, '.')}
+                                                                    value={numberWithCommas(this.state.paymentInfo[key].amount, '.')}
                                                                     autoFocus
                                                                 />
                                                                 <select
@@ -1067,7 +1242,8 @@ class BetterSalesControl extends Component {
                                                         </div>
                                                     </div>
                                                 );
-                                            } else if (key.startsWith('bank transfer')) {
+                                            }
+                                            if (key.startsWith('bank transfer')) {
                                                 return (
                                                     <div className="paymentDetailsContainer row mb-3">
                                                         <div className="col-1 ">
@@ -1091,7 +1267,7 @@ class BetterSalesControl extends Component {
                                                                     onChange={event => this.updatePaymentMethodAmount(key, event)}
                                                                     type="text"
                                                                     className="form-control text-right text-danger"
-                                                                    defaultValue={numberWithCommas(this.state.paymentInfo[key].amount, '.')}
+                                                                    value={numberWithCommas(this.state.paymentInfo[key].amount, '.')}
                                                                     autoFocus
                                                                 />
                                                                 <button className="btn btn-dark" disabled="disabled">
@@ -1100,10 +1276,25 @@ class BetterSalesControl extends Component {
                                                             </div>
                                                         </div>
                                                         <div className="col-2 pl-0 mb-3">
-                                                            <input onChange={this.onChangeReferenceCodeHandler} className="form-control codeNumber" type="text" name="numberId" id="numberId" placeholder="N°" />
+                                                            <input
+                                                                onChange={event => {
+                                                                    this.onChangeReferenceCodeHandler(event, key);
+                                                                }}
+                                                                className="form-control codeNumber"
+                                                                type="text"
+                                                                name="numberId"
+                                                                id="numberId"
+                                                                placeholder="N°"
+                                                            />
                                                         </div>
                                                         <div className="col-12">
-                                                            <select onChange={this.onChangeBankHandler} className="form-control btn btn-secondary" name="bankData" id="bankData">
+                                                            <select
+                                                                onChange={event => {
+                                                                    this.onChangeBankHandler(event, key);
+                                                                }}
+                                                                className="form-control btn btn-secondary"
+                                                                name="bankData"
+                                                                id="bankData">
                                                                 {this.state.bankList &&
                                                                     this.state.bankList.map(bankInfo => {
                                                                         return (
@@ -1121,19 +1312,26 @@ class BetterSalesControl extends Component {
                                 </div>
                                 <hr className="w-100 mb-1" />
                                 <div className="row p-0">
-                                    <label className="col-sm-9 pr-0 text-right font-weight-bold">Subtotal:</label>
+                                    <label className="col-9 pr-0 text-right font-weight-bold">Subtotal:</label>
                                     <label className="col-3 p-0 text-danger font-weight-bold">{numberWithCommas(this.state.totalBs, '.')}</label>
                                 </div>
+                                {this.state.totalDebt > 0 && (
+                                    <div className="row p-0">
+                                        <label className="col-9 pr-0 text-right font-weight-bold">
+                                            <button onClick={this.removeDebtFromInvoiceTotal} className="btn-danger mr-3">
+                                                -
+                                            </button>
+                                            Deuda:
+                                        </label>
+                                        <label className="col-3 p-0 text-danger font-weight-bold">{numberWithCommas(this.calculateClientDebt(), '.')}</label>
+                                    </div>
+                                )}
                                 <div className="row p-0">
-                                    <label className="col-sm-9 pr-0 text-right font-weight-bold">Deuda:</label>
-                                    <label className="col-3 p-0 text-danger font-weight-bold">{numberWithCommas(this.calculateClientDebt(), '.')}</label>
+                                    <label className="col-9 pr-0 text-right font-weight-bold">Total:</label>
+                                    <label className="col-3 p-0 text-danger font-weight-bold">{numberWithCommas(this.state.totalBs + this.state.totalDebt, '.')}</label>
                                 </div>
                                 <div className="row p-0">
-                                    <label className="col-sm-9 pr-0 text-right font-weight-bold">Total:</label>
-                                    <label className="col-3 p-0 text-danger font-weight-bold">{numberWithCommas(this.state.totalBs + this.calculateClientDebt(), '.')}</label>
-                                </div>
-                                <div className="row p-0">
-                                    <label className="col-sm-9 pr-0 text-right font-weight-bold">Total a pagar:</label>
+                                    <label className="col-9 pr-0 text-right font-weight-bold">Total pago expresado:</label>
                                     <label className="col-3 p-0 text-danger font-weight-bold">{numberWithCommas(this.calculatePaymentTotal(), '.')}</label>
                                 </div>
                             </div>
