@@ -33,6 +33,17 @@ const functions = {
 
         return response;
     },
+    fetchByNameOrCedulaWithDebts: async function (nameOrCedula) {
+        let client = await fetch(BASE_URL + `?nameOrCedula=${nameOrCedula}&withDebts=true`, {
+            headers: {
+                Authorization: 'Bearer ' + localStorage.getItem('jwt'),
+            },
+        });
+
+        let response = await client.json();
+
+        return response;
+    },
     fetchByName: async function (name) {
         let clients = await fetch(BASE_URL + `?name=${name}`, {
             headers: {

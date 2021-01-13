@@ -7,6 +7,7 @@ import salesRequests from '../requests/sales';
 import paymentMethodsRequests from '../requests/paymentMethods';
 import banksRequests from '../requests/banks';
 import paymentRequests from '../requests/payments';
+import pointofsaleRequests from '../requests/pointofsales';
 
 class BetterSalesControl extends Component {
     constructor() {
@@ -89,30 +90,20 @@ class BetterSalesControl extends Component {
                 this.getAvailablePaymentMethods().then(paymentMethods => {
                     paymentMethods.forEach(pm => {
                         if (pm.name.toLowerCase().includes('point of sale')) {
-                            this.addPaymentMethod({
-                                id: pm.id,
-                                name: pm.name.toLowerCase(),
-                                amount: this.state.totalBs,
-                                currency: 'Bs',
-                                ticketId: null,
+                            this.getLastTicketId().then(ticketId => {
+                                this.addPaymentMethod({
+                                    id: pm.id,
+                                    name: pm.name.toLowerCase(),
+                                    amount: this.state.totalBs,
+                                    currency: 'Bs',
+                                    ticketId: parseInt(ticketId) + 1,
+                                });
                             });
                         }
                     });
                 });
             }
         });
-
-        window.$('#invoiceModal').on('hide.bs.modal', () => {
-            //this.setState({
-            //currentSelectedClient: {
-            //name: null,
-            //cedula: null,
-            //phoneNumber: null,
-            //sales: [],
-            //},
-            //});
-        });
-
         window.$('#paymentMethodsModal').on('show.bs.modal', () => {
             window.$('#paymentMethodsModal').find('.modal-body').html('');
             paymentMethodsRequests.fetchAll().then(response => {
@@ -194,12 +185,14 @@ class BetterSalesControl extends Component {
                                             if (this.state.paymentInfo[paymentMethodNamePattern] != null) {
                                                 paymentMethodNamePattern = `${paymentMethodName.toLowerCase()} ${coincidences + 1}`;
                                             }
-                                            this.addPaymentMethod({
-                                                id: paymentMethodId,
-                                                name: paymentMethodNamePattern,
-                                                amount: 0,
-                                                currency: 'Bs',
-                                                ticketId: null,
+                                            this.getLastTicketId().then(ticketId => {
+                                                this.addPaymentMethod({
+                                                    id: paymentMethodId,
+                                                    name: paymentMethodNamePattern,
+                                                    amount: this.state.totalBs,
+                                                    currency: 'Bs',
+                                                    ticketId: parseInt(ticketId) + 1,
+                                                });
                                             });
                                             break;
                                     }
@@ -216,6 +209,17 @@ class BetterSalesControl extends Component {
         });
     }
 
+    getLastTicketId() {
+        return new Promise((resolve, reject) => {
+            pointofsaleRequests.fetchLastOne().then(response => {
+                if (response.data) {
+                    resolve(response.data[0].ticketId);
+                } else {
+                    reject(response.error);
+                }
+            });
+        });
+    }
     loadPaymentMethods() {
         paymentMethodsRequests.fetchAll().then(paymentMethods => {
             if (paymentMethods.data) {
@@ -253,7 +257,7 @@ class BetterSalesControl extends Component {
     }
 
     async searchClientsHandler(name) {
-        let results = await clientsRequests.fetchByNameWithDebts(name);
+        let results = await clientsRequests.fetchByNameOrCedulaWithDebts(name);
         if (results.data.length > 0) {
             results.data.forEach(client => {
                 client.label = (
@@ -282,18 +286,6 @@ class BetterSalesControl extends Component {
         if (actionType.action == 'select-option') {
             selectedClient.label = selectedClient.name;
             selectedClient.phoneNumber = formatPhoneNumber(selectedClient.phoneNumber);
-            let invoiceTotal = 0,
-                paymentTotal = 0;
-
-            selectedClient.sales.forEach(sale => {
-                sale.saleProducts.forEach(product => {
-                    invoiceTotal += roundUpProductPrice(product.price * product.dolarReference);
-                });
-
-                sale.payment.forEach(payment => {
-                    paymentTotal += payment.amount;
-                });
-            });
 
             this.paymentMethodContainer.current.querySelector('.codeNumber').focus();
 
@@ -605,57 +597,78 @@ class BetterSalesControl extends Component {
                         product.price = product.unitPriceDollars;
                         product.discount = product.discount || 0;
                     });
-                    //console.log({
-                    //clientId: this.state.currentSelectedClient.id,
-                    //products: productsToSell,
-                    //payments,
-                    //isPaid,
-                    //});
-                    //return;
                     if (this.state.totalDebt > 0) {
                         for (let debt of this.state.currentSelectedClient.sales) {
-                            let invoiceAmount = 0;
-                            let debtPaidAmount = 0;
-                            let debtTotal = 0;
-                            debt.saleProducts.forEach(saleProduct => {
-                                invoiceAmount += roundUpProductPrice(saleProduct.product.price * this.props.dolarReference);
-                            });
-
-                            debt.payment.forEach(pm => {
-                                if (pm.currency == 'USD') {
-                                    debtPaidAmount += pm.amount * pm.dolarReference;
-                                } else {
-                                    debtPaidAmount += pm.amount;
-                                }
-                            });
-
-                            debtTotal = invoiceAmount - debtPaidAmount;
+                            let debtTotal = this.calculateSaleTotal(debt) - this.calculatePaymentTotal(debt);
 
                             let higherPayment = {};
                             let higherPaymentAmount = 0;
                             payments.forEach((payment, index) => {
-                                if ((payment.currency == 'Bs' && payment.amount > higherPaymentAmount) || (payment.currency == 'USD' && payment.amount * payment.dolarReference > higherPaymentAmount)) {
-                                    higherPaymentAmount = payment.currency == 'Bs' ? payment.amount : payment.currency == 'USD' ? payment.amount * payment.dolarReference : 0;
+                                if ((payment.currency == 'Bs' && payment.amount > higherPaymentAmount) || (payment.currency == 'USD' && payment.amount * payment.paymentDetails.dolarReference > higherPaymentAmount)) {
+                                    higherPaymentAmount = payment.currency == 'Bs' ? payment.amount : payment.currency == 'USD' ? payment.amount * payment.paymentDetails.dolarReference : 0;
                                     higherPayment = payment;
                                 }
                             });
-
                             if (higherPaymentAmount >= debtTotal) {
+                                let amount = 0;
+                                if (higherPayment.currency == 'Bs') {
+                                    if (higherPayment.amount < debtTotal) {
+                                        amount = higherPayment.amount;
+                                    } else {
+                                        amount = debtTotal;
+                                    }
+                                } else if (higherPayment.currency == 'USD') {
+                                    if (higherPayment.amount * higherPayment.paymentDetails.dolarReference < debtTotal) {
+                                        amount = higherPayment.amount;
+                                    } else {
+                                        amount = debtTotal / higherPayment.paymentDetails.dolarReference;
+                                    }
+                                }
                                 let response = await paymentRequests.create({
                                     ...higherPayment,
                                     saleId: debt.id,
-                                    amount: debtTotal,
+                                    amount,
                                 });
                                 if (response.error) {
                                     this.showMessageInfo('error', response.error.toString());
+                                    this.setState({
+                                        submittingSale: false,
+                                    });
                                     return;
                                 } else {
-                                    higherPayment.amount -= debtTotal;
+                                    higherPayment.amount -= response.amount;
                                 }
                             } else {
-                                console.log(this.state.currentSelectedClient);
-                                console.log(higherPaymentAmount, debtTotal);
-                                return;
+                                for (let payment of payments) {
+                                    let amount = 0;
+                                    if (payment.currency == 'Bs') {
+                                        if (payment.amount < debtTotal) {
+                                            amount = payment.amount;
+                                        } else {
+                                            amount = debtTotal;
+                                        }
+                                    } else if (payment.currency == 'USD') {
+                                        if (payment.amount * payment.paymentDetails.dolarReference < debtTotal) {
+                                            amount = payment.amount;
+                                        } else {
+                                            amount = debtTotal / payment.paymentDetails.dolarReference;
+                                        }
+                                    }
+                                    let response = await paymentRequests.create({
+                                        ...payment,
+                                        saleId: debt.id,
+                                        amount,
+                                    });
+                                    if (response.error) {
+                                        this.showMessageInfo('error', response.error.toString());
+                                        this.setState({
+                                            submittingSale: false,
+                                        });
+                                        return;
+                                    }
+                                    payment.amount -= response.amount;
+                                    debtTotal -= response.amount;
+                                }
                             }
                         }
                     }
@@ -739,7 +752,7 @@ class BetterSalesControl extends Component {
 
     removePaymentMethod(name) {
         let paymentInfo = this.state.paymentInfo;
-        delete paymentInfo[name];
+        paymentInfo[name] = null;
         this.setState({
             paymentInfo,
         });
@@ -747,14 +760,18 @@ class BetterSalesControl extends Component {
 
     updatePaymentMethodAmount(paymentName, event) {
         let paymentInfo = this.state.paymentInfo;
-        paymentInfo[paymentName].amount = parseInt(event.target.value.replace(/\D/g, ''), 10);
+        if (paymentInfo[paymentName].currency == 'Bs') {
+            paymentInfo[paymentName].amount = parseInt(event.target.value.replace(/\D/g, ''), 10);
+        } else if (paymentInfo[paymentName].currency == 'USD') {
+            paymentInfo[paymentName].amount = event.target.value;
+        }
 
         this.setState({
             paymentInfo,
         });
         if (event.target.value.length > 0) {
-            var amount = parseInt(event.target.value.replace(/\D/g, ''), 10);
-            event.target.value = amount.toLocaleString();
+            //var amount = parseInt(event.target.value.replace(/\D/g, ''), 10);
+            //event.target.value = amount.toLocaleString();
         }
     }
 
@@ -825,15 +842,17 @@ class BetterSalesControl extends Component {
         });
     }
 
-    calculatePaymentTotal() {
+    calculateTotalPaymentExpressed() {
         let paymentInfo = this.state.paymentInfo;
         let paymentTotal = 0;
         for (let paymentMethod of Object.keys(paymentInfo)) {
             let paymentMethodInfo = paymentInfo[paymentMethod];
-            if (paymentMethod.startsWith('cash') && paymentMethodInfo.currency == 'USD') {
-                paymentTotal += paymentMethodInfo.amount * paymentMethodInfo.dolarReference;
-            } else {
-                paymentTotal += paymentMethodInfo.amount;
+            if (paymentMethodInfo) {
+                if (paymentMethod.startsWith('cash') && paymentMethodInfo.currency == 'USD') {
+                    paymentTotal += paymentMethodInfo.amount * paymentMethodInfo.dolarReference;
+                } else {
+                    paymentTotal += paymentMethodInfo.amount;
+                }
             }
         }
 
@@ -845,13 +864,8 @@ class BetterSalesControl extends Component {
         let invoiceTotal = 0,
             paymentTotal = 0;
         client.sales.map(sale => {
-            sale.saleProducts.forEach(saleProduct => {
-                invoiceTotal += roundUpProductPrice(saleProduct.product.price * this.props.dolarReference);
-            });
-
-            sale.payment.forEach(payment => {
-                paymentTotal += payment.amount;
-            });
+            invoiceTotal += this.calculateSaleTotal(sale);
+            paymentTotal += this.calculatePaymentTotal(sale);
         });
 
         return invoiceTotal - paymentTotal;
@@ -877,6 +891,32 @@ class BetterSalesControl extends Component {
         if (this.payDebtButton.current) {
             this.payDebtButton.current.style.display = 'block';
         }
+    }
+    calculatePaymentTotal(sale) {
+        let paymentTotal = 0;
+        sale.payment.forEach(pm => {
+            if (pm.currency == 'USD') {
+                let dolarReference = 0;
+                let paymentTypeArray = pm[pm.paymentmethod.name.toLowerCase().replace(/-/g, '')];
+                paymentTypeArray.forEach(type => {
+                    if (type.paymentId == pm.id) {
+                        dolarReference = type.dolarReference;
+                    }
+                });
+                paymentTotal += pm.amount * dolarReference;
+            } else {
+                paymentTotal += pm.amount;
+            }
+        });
+        return Math.round(paymentTotal);
+    }
+
+    calculateSaleTotal(sale) {
+        let saleTotal = 0;
+        sale.saleProducts.forEach(saleProduct => {
+            saleTotal += roundUpProductPrice(saleProduct.product.price * this.props.dolarReference) * saleProduct.quantity;
+        });
+        return Math.round(saleTotal);
     }
 
     async getAvailablePaymentMethods() {
@@ -984,7 +1024,7 @@ class BetterSalesControl extends Component {
                                     />
                                 </div>
                                 <div className="col-12 col-lg-3 mt-2">
-                                    <input onFocus={this.onFocusHandler} ref={this.quantityInput} onChange={this.onInputChangeHandler} type="number" className="form-control" placeholder="Cantidad" id="quantity" name="quantity" defaultValue="1" />
+                                    <input onFocus={this.onFocusHandler} ref={this.quantityInput} onChange={this.onInputChangeHandler} type="number" step="0.01" className="form-control" placeholder="Cantidad" id="quantity" name="quantity" defaultValue="1" />
                                 </div>
                                 <div className="col-12 col-lg-2 mt-2">
                                     <input type="submit" className="form-control btn btn-info" value="Enviar" />
@@ -1111,22 +1151,12 @@ class BetterSalesControl extends Component {
                                                 <tbody>
                                                     {this.state.currentSelectedClient.sales &&
                                                         this.state.currentSelectedClient.sales.map(sale => {
-                                                            let invoiceTotal = 0,
-                                                                paymentTotal = 0;
-                                                            sale.saleProducts.forEach(saleProduct => {
-                                                                invoiceTotal += roundUpProductPrice(saleProduct.product.price * this.props.dolarReference);
-                                                            });
-
-                                                            sale.payment.forEach(payment => {
-                                                                paymentTotal += payment.amount;
-                                                            });
-
                                                             return (
                                                                 <tr>
                                                                     <th className="btn-link" role="button">
                                                                         {sale.id}
                                                                     </th>
-                                                                    <th>{Intl.NumberFormat('es-VE', { currency: 'VES' }).format(invoiceTotal - paymentTotal)}</th>
+                                                                    <th>{Intl.NumberFormat('es-VE', { currency: 'VES' }).format(this.calculateSaleTotal(sale) - this.calculatePaymentTotal(sale))}</th>
                                                                     <th>{sale.createdAt}</th>
                                                                 </tr>
                                                             );
@@ -1167,7 +1197,7 @@ class BetterSalesControl extends Component {
                                                                     onChange={event => this.updatePaymentMethodAmount(key, event)}
                                                                     type="text"
                                                                     className="form-control text-right text-danger"
-                                                                    value={numberWithCommas(this.state.paymentInfo[key].amount, '.')}
+                                                                    value={this.state.paymentInfo[key] && numberWithCommas(this.state.paymentInfo[key].amount, '.')}
                                                                 />
                                                                 <button className="btn btn-dark" disabled="disabled">
                                                                     Bs.
@@ -1179,6 +1209,7 @@ class BetterSalesControl extends Component {
                                                                 onChange={event => {
                                                                     this.onChangeTicketIdHandler(event, key);
                                                                 }}
+                                                                value={this.state.paymentInfo[key] && this.state.paymentInfo[key].ticketId}
                                                                 className="form-control codeNumber"
                                                                 type="text"
                                                                 name="ticketId"
@@ -1213,7 +1244,7 @@ class BetterSalesControl extends Component {
                                                                     onChange={event => this.updatePaymentMethodAmount(key, event)}
                                                                     type="text"
                                                                     className="form-control text-right text-danger"
-                                                                    value={numberWithCommas(this.state.paymentInfo[key].amount, '.')}
+                                                                    value={this.state.paymentInfo[key] && numberWithCommas(this.state.paymentInfo[key].amount, '.')}
                                                                     autoFocus
                                                                 />
                                                                 <select
@@ -1267,7 +1298,7 @@ class BetterSalesControl extends Component {
                                                                     onChange={event => this.updatePaymentMethodAmount(key, event)}
                                                                     type="text"
                                                                     className="form-control text-right text-danger"
-                                                                    value={numberWithCommas(this.state.paymentInfo[key].amount, '.')}
+                                                                    value={this.state.paymentInfo[key] && numberWithCommas(this.state.paymentInfo[key].amount, '.')}
                                                                     autoFocus
                                                                 />
                                                                 <button className="btn btn-dark" disabled="disabled">
@@ -1332,7 +1363,7 @@ class BetterSalesControl extends Component {
                                 </div>
                                 <div className="row p-0">
                                     <label className="col-9 pr-0 text-right font-weight-bold">Total pago expresado:</label>
-                                    <label className="col-3 p-0 text-danger font-weight-bold">{numberWithCommas(this.calculatePaymentTotal(), '.')}</label>
+                                    <label className="col-3 p-0 text-danger font-weight-bold">{numberWithCommas(this.calculateTotalPaymentExpressed(), '.')}</label>
                                 </div>
                             </div>
                             <div className="modal-footer p-0 m-0">
