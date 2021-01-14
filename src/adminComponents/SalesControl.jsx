@@ -330,7 +330,7 @@ class SalesControl extends Component {
                                             <CustomSelect dolarReference={_this.props.dolarReference} isMulti={false} innerRef={this.CustomSelectRef} changeHandler={this.optionChangeHandler} name={'ProductSelect'} />
                                         </div>
                                         <div className="col-12 col-lg-3 mt-2">
-                                            <input onChange={this.onChangeHandler} ref={this.quantityInput} step="0.01" type="number" className="form-control" placeholder="Cantidad" id="quantity" name="quantity" defaultValue="1" />
+                                            <input onChange={this.onChangeHandler} ref={this.quantityInput} step="0.001" type="number" className="form-control" placeholder="Cantidad" id="quantity" name="quantity" defaultValue="1" />
                                         </div>
                                         <div className="col-12 col-lg-2 mt-2">
                                             <input type="submit" className="form-control btn btn-info" value="Enviar" />
