@@ -15,6 +15,7 @@ module.exports = {
     },
 
     formatPhoneNumber(number) {
+        if (!number) return
         var cleaned = number.replace(/\D/g, '');
         var match = cleaned.match(/^(\d{4})(\d{3})(\d{4})$/);
         if (match) {
@@ -22,4 +23,16 @@ module.exports = {
         }
         return number;
     },
+    parsePaymentMethodName(name) {
+        if (name.toLowerCase().startsWith("bank transfer")) {
+            return "Transferencia Bancaria"
+        }
+        else if (name.toLowerCase().startsWith("cash")) {
+            return "Efectivo"
+        }
+        else if (name.toLowerCase().startsWith("point of sale")) {
+            return "Punto de Venta"
+        }
+
+    }
 };

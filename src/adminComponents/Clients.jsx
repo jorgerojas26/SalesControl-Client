@@ -1,6 +1,7 @@
-import React, { Component } from "react";
+import React, {Component} from "react";
 import clientRequests from "../requests/clients";
 import $ from "jquery";
+import ClientRegistration from "./ClientRegistration"
 
 require("datatables.net")
 class Clients extends Component {
@@ -20,9 +21,10 @@ class Clients extends Component {
             clientAction: null
 
         }
-        this.submitHandler = this.submitHandler.bind(this);
-        this.changeHandler = this.changeHandler.bind(this);
         this.optionChangeHandler = this.optionChangeHandler.bind(this);
+
+        this.insertClientHandler = this.insertClientHandler.bind(this)
+        this.updateClientHandler = this.updateClientHandler.bind(this)
 
         this.clientTable = React.createRef();
         this.customSelectRef = React.createRef();
@@ -56,7 +58,7 @@ class Clients extends Component {
                 "data-target": "#clientModal"
             },
             action: (e, datatable, node, config) => {
-                let selectedRowData = datatable.row({ selected: true }).data();
+                let selectedRowData = datatable.row({selected: true}).data();
                 $(".modal-title").text("Edit client");
                 $("#name").val(selectedRowData.name);
                 $("#cedula").val(selectedRowData.cedula);
@@ -75,15 +77,14 @@ class Clients extends Component {
     async componentDidMount() {
         let response = await clientRequests.fetchAll();
         if (response.data) {
-            console.log(response.data);
             $(this.clientTable.current).DataTable({
                 data: response.data,
                 columns: [
-                    { title: "ID", data: "id" },
-                    { title: "Nombre", data: "name" },
-                    { title: "Cédula", data: "cedula" },
-                    { title: "Teléfono", data: "phoneNumber" },
-                    { title: "Fecha creación", data: "createdAt" }
+                    {title: "ID", data: "id"},
+                    {title: "Nombre", data: "name"},
+                    {title: "Cédula", data: "cedula"},
+                    {title: "Teléfono", data: "phoneNumber"},
+                    {title: "Fecha creación", data: "createdAt"}
                 ],
                 dom: "Blftip",
                 buttons: [this.addButton, this.editButton],
@@ -98,80 +99,27 @@ class Clients extends Component {
         }
     }
 
-    changeHandler(event) {
-        this.setState({
-            [event.target.name]: event.target.value
-        })
-    }
-
     optionChangeHandler(selectedOption, actionType) {
         this.setState({
             selectedClient: selectedOption
         })
     }
 
-    submitHandler(event) {
-        event.preventDefault();
+    updateClientHandler(client) {
+        return clientRequests.update({
+            id: this.state.selectedRowData.id,
+            name: client.name || this.state.name,
+            cedula: client.cedula || this.state.cedula,
+            phoneNumber: client.phoneNumber || this.state.phoneNumber
+        });
+    }
 
-        var response = null;
-
-        this.setState({
-            submitLoading: true
-        }, async () => {
-            if (this.state.clientAction == "Add") {
-                response = await clientRequests.create({
-                    name: this.state.name,
-                    cedula: this.state.cedula,
-                    phoneNumber: this.state.phoneNumber
-                });
-            }
-            else if (this.state.clientAction == "Edit") {
-                console.log(this.state);
-                response = await clientRequests.update({
-                    id: this.state.selectedRowData.id,
-                    name: this.state.name,
-                    cedula: this.state.cedula,
-                    phoneNumber: this.state.phoneNumber
-                });
-                let rowData = $(this.clientTable.current).DataTable().rows().data();
-                rowData.map((row, index) => {
-                    if (row.id == this.state.selectedRowData.id) {
-                        let row = $(this.clientTable.current).DataTable().row(index);
-                        let rowData = row.data();
-                        row.data({
-                            ...rowData,
-                            name: this.state.name,
-                            cedula: this.state.cedula,
-                            phoneNumber: this.state.phoneNumber
-                        })
-                    }
-                })
-
-            }
-
-            if (response && response.error) {
-                this.setState({
-                    submitMessage: JSON.stringify(response.error),
-                    submitMessageType: "Error",
-                    submitLoading: false
-                })
-            }
-            else {
-                this.setState({
-                    submitMessage: "Se ha registrado con éxito",
-                    submitMessageType: "Success",
-                    submitLoading: false
-                })
-                setTimeout(() => {
-                    this.setState({
-                        submitMessage: null,
-                        submitMessageType: null
-                    })
-                }, 3000);
-            }
-        })
-
-
+    insertClientHandler(client) {
+        return clientRequests.create({
+            name: client.name,
+            cedula: client.cedula,
+            phoneNumber: client.phoneNumber,
+        });
     }
 
     render() {
@@ -197,27 +145,8 @@ class Clients extends Component {
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
-                            <form onSubmit={this.submitHandler}>
-                                <div className="modal-body">
-                                    <div className="form-group">
-                                        <label>Nombre: </label>
-                                        <input onChange={this.changeHandler} type="text" className="form-control" name="name" id="name" required />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Cédula: </label>
-                                        <input onChange={this.changeHandler} type="text" className="form-control" name="cedula" id="cedula" required />
-                                    </div>
-                                    <label htmlFor="debtTotal">Teléfono: </label>
-                                    <input onChange={this.changeHandler} type="text" className="form-control" name="phoneNumber" id="phoneNumber" />
-                                </div>
-                                <div className="modal-footer">
-                                    <button type="button" className="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                                    <button type="submit" className="btn btn-primary">
-                                        {this.state.submitLoading && <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true" />}
-                                        Enviar</button>
-                                </div>
-                                {this.state.submitMessage && <span className={(this.state.submitMessageType == "Error") ? "text-danger" : "text-success"}>{this.state.submitMessage}</span>}
-                            </form>
+                            <ClientRegistration action={this.state.clientAction} insertHandler={this.insertClientHandler} updateHandler={this.updateClientHandler} />
+
                         </div>
                     </div>
                 </div>

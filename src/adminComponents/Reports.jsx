@@ -1,6 +1,7 @@
-import React, { Component } from "react"
+import React, {Component} from "react"
 import ResourceTable from "./ResourceTable";
-
+import paymentRequests from "../requests/payments"
+import {roundUpProductPrice, parsePaymentMethodName} from "../helpers"
 const moment = require("moment");
 
 const $ = require("jquery");
@@ -13,7 +14,8 @@ class Reports extends Component {
 
         this.state = {
             resource: "sales",
-            parameters: ""
+            parameters: "",
+            paymentInfo: []
         }
 
         this.submitHandler = this.submitHandler.bind(this);
@@ -32,29 +34,44 @@ class Reports extends Component {
 
         var previousParameters = this.state.parameters;
         var parameters = "";
+        var from, to;
         if (event.target.name == "dateRadios") {
             $("form").find("input[type=date]").val("");
             switch (event.target.id) {
                 case "today":
                     parameters = `from=${moment(new Date()).format("YYYY-MM-DD")}&to=${moment(new Date()).format("YYYY-MM-DD")}`
+                    from = `${moment(new Date()).format("YYYY-MM-DD")}`
+                    to = `${moment(new Date()).format("YYYY-MM-DD")}`
                     break;
                 case "yesterday":
                     parameters = `from=${moment(new Date()).subtract(1, "days").format("YYYY-MM-DD")}&to=${moment(new Date()).subtract(1, "days").format("YYYY-MM-DD")}`
+                    from = `${moment(new Date()).subtract(1, "days").format("YYYY-MM-DD")}`
+                    to = `${moment(new Date()).subtract(1, "days").format("YYYY-MM-DD")}`
                     break;
                 case "lastWeek":
                     parameters = `from=${moment(new Date()).subtract(7, "days").format("YYYY-MM-DD")}&to=${moment(new Date()).format("YYYY-MM-DD")}`
+                    from = `${moment(new Date()).subtract(7, "days").format("YYYY-MM-DD")}`
+                    to = `${moment(new Date()).format("YYYY-MM-DD")}`
                     break;
                 case "fortnight":
                     parameters = `from=${moment(new Date()).subtract(15, "days").format("YYYY-MM-DD")}&to=${moment(new Date()).format("YYYY-MM-DD")}`
+                    from = `${moment(new Date()).subtract(15, "days").format("YYYY-MM-DD")}`
+                    to = `${moment(new Date()).format("YYYY-MM-DD")}`
                     break;
                 case "month":
                     parameters = `from=${moment(new Date()).subtract(1, "months").format("YYYY-MM-DD")}&to=${moment(new Date()).format("YYYY-MM-DD")}`
+                    from = `${moment(new Date()).subtract(1, "months").format("YYYY-MM-DD")}`
+                    to = `${moment(new Date()).format("YYYY-MM-DD")}`
                     break;
                 case "quarter":
                     parameters = `from=${moment(new Date()).subtract(3, "months").format("YYYY-MM-DD")}&to=${moment(new Date()).format("YYYY-MM-DD")}`
+                    from = `${moment(new Date()).subtract(3, "months").format("YYYY-MM-DD")}`
+                    to = `${moment(new Date()).format("YYYY-MM-DD")}`
                     break;
                 case "semester":
                     parameters = `from=${moment(new Date()).subtract(6, "months").format("YYYY-MM-DD")}&to=${moment(new Date()).format("YYYY-MM-DD")}`
+                    from = `${moment(new Date()).subtract(6, "months").format("YYYY-MM-DD")}`
+                    to = `${moment(new Date()).format("YYYY-MM-DD")}`
                     break;
                 default:
                     break;
@@ -113,6 +130,12 @@ class Reports extends Component {
             }
             parameters += "&group=true"
         }
+        paymentRequests.fetchByCustomParameters(parameters).then(paymentInfo => {
+            console.log(paymentInfo.data)
+            this.setState({
+                paymentInfo: paymentInfo.data
+            })
+        })
         this.setState({
             parameters
         });
@@ -136,18 +159,19 @@ class Reports extends Component {
                 title: "Imagen", data: "product.imagePath"
             },
             */
-            { title: "Product ID", data: "product.id" },
-            { title: "Nombre", data: "product.name" },
+            {title: "Product ID", data: "product.id"},
+            {title: "Nombre", data: "product.name"},
             //{ title: "Transacciones", data: "transactions" },
-            { title: "Cantidad de productos", data: "salesTotal" },
+            {title: "Cantidad de productos", data: "salesTotal"},
             {
                 render: function (data, type, row, meta) {
-                    return Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(row.grossTotalDollars)
+                    return Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'}).format(row.grossTotalDollars)
                 }, title: (this.state.resource == "sales") ? "Ganancia bruta $" : "Costo bruto $", data: "grossTotalDollars"
             },
             {
                 render: function (data, type, row, meta) {
-                    return Intl.NumberFormat('es-VE', { style: 'currency', currency: 'VES' }).format(row.grossTotalBs)
+                    row.grossTotalBs = roundUpProductPrice(row.grossTotalBs)
+                    return Intl.NumberFormat('es-VE', {style: 'currency', currency: 'VES'}).format(roundUpProductPrice(row.grossTotalBs))
                 }, title: (this.state.resource == "sales") ? "Ganancia bruta Bs" : "Costo bruto Bs", data: "grossTotalBs"
             },
             {
@@ -160,10 +184,11 @@ class Reports extends Component {
             },
             {
                 render: function (data, type, row, meta) {
+                    row.netIncomeBs = roundUpProductPrice(row.netIncomeBs)
                     return Intl.NumberFormat('es-VE', {
                         style: 'currency',
                         currency: 'VES',
-                    }).format(row.netIncomeBs)
+                    }).format(roundUpProductPrice(row.netIncomeBs))
                 }, title: (this.state.resource == "sales") ? "Ganancia Neta Bs" : "Ganancia Neta Bs", data: "netIncomeBs"
             }
         ];
@@ -177,18 +202,18 @@ class Reports extends Component {
                 title: "Imagen", data: "product.imagePath"
             },
             */
-            { title: "Product ID", data: "product.id" },
-            { title: "Nombre", data: "product.name" },
+            {title: "Product ID", data: "product.id"},
+            {title: "Nombre", data: "product.name"},
             //{ title: "Transacciones", data: "transactions" },
-            { title: "Cantidad de productos", data: "quantity" },
+            {title: "Cantidad de productos", data: "quantity"},
             {
                 render: function (data, type, row, meta) {
-                    return Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(row.grossTotalDollars)
+                    return Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'}).format(row.grossTotalDollars)
                 }, title: (this.state.resource == "sales") ? "Ganancia bruta $" : "Costo bruto $", data: "grossTotalDollars"
             },
             {
                 render: function (data, type, row, meta) {
-                    return Intl.NumberFormat('es-VE', { style: 'currency', currency: 'VES' }).format(row.grossTotalBs)
+                    return Intl.NumberFormat('es-VE', {style: 'currency', currency: 'VES'}).format(row.grossTotalBs)
                 }, title: (this.state.resource == "sales") ? "Ganancia bruta Bs" : "Costo bruto Bs", data: "grossTotalBs"
             }
         ];
@@ -294,9 +319,24 @@ class Reports extends Component {
 
                     <hr />
                 </form>
+                <div className="row mt-3 justify-content-center">
+                    {this.state.paymentInfo && this.state.paymentInfo.map(paymentType => {
+                        return (
+                            <div className="col-md-3">
+                                <div class="card" >
+                                    <span className="btn btn-danger text-light rounded-0"><span className="h4">{parsePaymentMethodName(paymentType.paymentmethod.name) + " " + paymentType.currency}</span></span>
+                                    <div class="card-body">
+                                        {paymentType.currency == "Bs" ? <p class="card-text h4">{Intl.NumberFormat("es-VE", {currency: "VES"}).format(paymentType.amountTotal) + " " + paymentType.currency}</p>
+                                            : <p class="card-text h4">{Intl.NumberFormat("en-US", {style: "currency", currency: "USD"}).format(paymentType.amountTotal)}</p>}
 
-                <div className="row mt-3">
-                    <div className="col-md-12">
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    })}
+                </div>
+                <div className="row mt-3 justify-content-center">
+                    <div className="col-md-12 mt-3 border  ">
                         {this.state.parameters != "" && <ResourceTable ref={this.resourceTable} asyncTable={true} sourceURL={`/api/${this.state.resource}?${this.state.parameters}`} columns={
                             (this.state.resource == "sales") ? salesColumns : supplyingsColumns
                         } actions={[]} dolarReference={this.props.dolarReference} />}

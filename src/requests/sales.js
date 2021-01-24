@@ -13,6 +13,17 @@ const functions = {
 
         return response;
     },
+    fetchAllDebts: async function () {
+        let sales = await fetch(BASE_URL + "?debtsOnly=true", {
+            headers: {
+                "Authorization": "Bearer " + localStorage.getItem("jwt")
+            }
+        })
+
+        let response = await sales.json();
+
+        return response;
+    },
     fetchById: async function (id) {
         let sale = await fetch(BASE_URL + `?id=${id}`, {
             headers: {

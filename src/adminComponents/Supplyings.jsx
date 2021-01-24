@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, {Component} from "react";
 import moment from "moment";
 import ResourceTable from "./ResourceTable";
 import CustomSelect from "../globalComponents/CustomSelect";
@@ -104,11 +104,11 @@ class Supplyings extends Component {
                 <div className="row mt-3">
                     <div className="col-md-12">
                         <ResourceTable asyncTable={true} setModalAction={this.setModalAction} sourceURL={"/api/supplyings"} columns={[
-                            { title: "ID", data: "id" },
-                            { title: "ID Proveedor", data: "supplierId" },
-                            { title: "Nombre Proveedor", data: "supplier.name" },
-                            { title: "ID Product", data: "productId" },
-                            { title: "Nombre Producto", data: "product.name" },
+                            {title: "ID", data: "id"},
+                            {title: "ID Proveedor", data: "supplierId"},
+                            {title: "Nombre Proveedor", data: "supplier.name"},
+                            {title: "ID Product", data: "productId"},
+                            {title: "Nombre Producto", data: "product.name"},
                             {
                                 render: function (data) {
                                     return "$" + data
@@ -119,8 +119,8 @@ class Supplyings extends Component {
                                     return (data > 1) ? data + " Unidades" : data + " Unidad"
                                 }, title: "Cantidad", data: "quantity"
                             },
-                            { title: "Fecha creación", data: "createdAt" },
-                            { title: "Fecha actualización", data: "updatedAt" }
+                            {title: "Fecha creación", data: "createdAt"},
+                            {title: "Fecha actualización", data: "updatedAt"}
 
                         ]} actions={["add", "edit", "delete"]} modalStructure={
                             <form ref={this.supplyingForm} onSubmit={this.submitHandler} className="float-left">

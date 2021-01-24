@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import AsyncSelect from 'react-select/async';
-import { roundUpProductPrice, numberWithCommas, formatPhoneNumber } from '../helpers';
+import {roundUpProductPrice, numberWithCommas, formatPhoneNumber, parsePaymentMethodName} from '../helpers';
 import inventoryRequests from '../requests/inventory';
 import clientsRequests from '../requests/clients';
 import salesRequests from '../requests/sales';
@@ -8,6 +8,7 @@ import paymentMethodsRequests from '../requests/paymentMethods';
 import banksRequests from '../requests/banks';
 import paymentRequests from '../requests/payments';
 import pointofsaleRequests from '../requests/pointofsales';
+import ClientRegistration from "./ClientRegistration"
 
 class BetterSalesControl extends Component {
     constructor() {
@@ -67,6 +68,7 @@ class BetterSalesControl extends Component {
         this.addDebtToInvoiceTotal = this.addDebtToInvoiceTotal.bind(this);
         this.removeDebtFromInvoiceTotal = this.removeDebtFromInvoiceTotal.bind(this);
         this.getAvailablePaymentMethods = this.getAvailablePaymentMethods.bind(this);
+        this.insertClientHandler = this.insertClientHandler.bind(this)
     }
 
     componentDidMount() {
@@ -83,6 +85,10 @@ class BetterSalesControl extends Component {
                 this.saleSubmitButton.current.click();
             }
         });
+
+        window.$("#clientModal").on("shown.bs.modal", function () {
+            this.querySelector("input").focus();
+        })
 
         window.$('#invoiceModal').on('shown.bs.modal', () => {
             this.clientSelect.current.focus();
@@ -119,7 +125,7 @@ class BetterSalesControl extends Component {
                                 paymentMethodButton.setAttribute('data-paymentMethodName', paymentMethod.name);
                                 paymentMethodButton.setAttribute('data-paymentMethodId', paymentMethod.id);
                                 paymentMethodButton.setAttribute('data-dismiss', 'modal');
-                                paymentMethodButton.innerText = paymentMethod.name;
+                                paymentMethodButton.innerText = parsePaymentMethodName(paymentMethod.name)
                                 paymentMethodButton.addEventListener('click', async event => {
                                     let paymentMethodName = event.target.getAttribute('data-paymentMethodName');
                                     let paymentMethodId = event.target.getAttribute('data-paymentMethodId');
@@ -212,14 +218,15 @@ class BetterSalesControl extends Component {
     getLastTicketId() {
         return new Promise((resolve, reject) => {
             pointofsaleRequests.fetchLastOne().then(response => {
-                if (response.data) {
+                if (response.data.length > 0) {
                     resolve(response.data[0].ticketId);
                 } else {
-                    reject(response.error);
+                    resolve(0);
                 }
             });
         });
     }
+
     loadPaymentMethods() {
         paymentMethodsRequests.fetchAll().then(paymentMethods => {
             if (paymentMethods.data) {
@@ -240,7 +247,7 @@ class BetterSalesControl extends Component {
                 product.label = (
                     <div className="row">
                         <div className="mx-auto">
-                            <img className="my-auto" style={{ maxWidth: '40px' }} src={product.imagePath} />
+                            <img className="my-auto" style={{maxWidth: '40px'}} src={product.imagePath} />
                             <span className="my-auto">{product.name}</span>
                         </div>
                         <span className="my-auto mr-5">
@@ -287,12 +294,10 @@ class BetterSalesControl extends Component {
             selectedClient.label = selectedClient.name;
             selectedClient.phoneNumber = formatPhoneNumber(selectedClient.phoneNumber);
 
-            this.paymentMethodContainer.current.querySelector('.codeNumber').focus();
-
-            console.log(selectedClient);
             this.setState({
                 currentSelectedClient: selectedClient,
             });
+            window.$("#invoiceModal").find("input").focus()
         } else if (actionType.action == 'clear') {
             this.setState({
                 currentSelectedClient: {
@@ -312,7 +317,7 @@ class BetterSalesControl extends Component {
     async onInputChangeHandler(event) {
         if (event.target.name == 'quantity') {
             this.setState({
-                quantity: Number(event.target.value),
+                quantity: parseFloat(event.target.value)
             });
         } else if (event.target.id == 'productQuantity') {
             let productId = event.target.parentElement.parentElement.getAttribute('productId');
@@ -341,7 +346,7 @@ class BetterSalesControl extends Component {
     async isProductStockEnough(id, quantity) {
         let productInfo = await inventoryRequests.fetchByProductId(id);
         if (productInfo.data) {
-            let stock = Number(productInfo.data[0].stock);
+            let stock = parseFloat(productInfo.data[0].stock);
             if (stock <= 0 || quantity > stock) {
                 this.showMessageInfo('error', 'No hay suficientes productos en el inventario');
             } else {
@@ -356,8 +361,8 @@ class BetterSalesControl extends Component {
         if (this.state.currentSelectedProduct != null) {
             let productInfo = await inventoryRequests.fetchByProductId(this.state.currentSelectedProduct.id);
             if (productInfo.data) {
-                let stock = parseInt(productInfo.data[0].stock);
-                let quantityToSell = parseInt(this.state.quantity);
+                let stock = parseFloat(productInfo.data[0].stock);
+                let quantityToSell = parseFloat(this.state.quantity);
                 if (stock <= 0 || quantityToSell > stock) {
                     this.showMessageInfo('error', 'No hay suficientes productos en el inventario');
                 } else {
@@ -385,7 +390,7 @@ class BetterSalesControl extends Component {
                             newProduct.unitPriceDollars = newProduct.unitPriceDollars - newProduct.unitPriceDollars * (newProduct.discount / 100);
                         }
                         newProduct.unitPriceBs = roundUpProductPrice(newProduct.unitPriceDollars * this.props.dolarReference);
-                        newProduct.totalBs = newProduct.unitPriceBs * newProduct.quantity;
+                        newProduct.totalBs = roundUpProductPrice(newProduct.unitPriceBs * newProduct.quantity);
                         newProduct.totalDollars = newProduct.unitPriceDollars * newProduct.quantity;
 
                         productsToSell.push(newProduct);
@@ -420,7 +425,7 @@ class BetterSalesControl extends Component {
     updateProductTotal(product, quantity) {
         if (product != null && quantity != null) {
             product.quantity = quantity;
-            product.totalBs = product.unitPriceBs * product.quantity;
+            product.totalBs = roundUpProductPrice(product.unitPriceBs * product.quantity);
             product.totalDollars = product.unitPriceDollars * product.quantity;
         }
         return product;
@@ -752,7 +757,7 @@ class BetterSalesControl extends Component {
 
     removePaymentMethod(name) {
         let paymentInfo = this.state.paymentInfo;
-        paymentInfo[name] = null;
+        delete paymentInfo[name]
         this.setState({
             paymentInfo,
         });
@@ -791,7 +796,7 @@ class BetterSalesControl extends Component {
             document.querySelector(`#${paymentMethodName.replace(/\s/g, '') + 'DolarReferenceContainer'}`).classList.remove('d-none');
             document.querySelector(`#${paymentMethodName.replace(/\s/g, '') + 'Container'}`).classList.remove('col-9');
             document.querySelector(`#${paymentMethodName.replace(/\s/g, '') + 'Container'}`).classList.add('col-7', 'pr-0');
-        } else if (currency == 'Bs.') {
+        } else if (currency == 'Bs') {
             let paymentInfo = this.state.paymentInfo;
             paymentInfo[paymentMethodName].currency = 'Bs';
             this.setState({
@@ -924,7 +929,7 @@ class BetterSalesControl extends Component {
             if (this.state.paymentMethods.length == 0) {
                 paymentMethodsRequests.fetchAll().then(response => {
                     if (response.error) {
-                        reject({ error: response.error });
+                        reject({error: response.error});
                     } else {
                         this.setState(
                             {
@@ -973,6 +978,34 @@ class BetterSalesControl extends Component {
         );
     }
 
+    insertClientHandler(client) {
+        return new Promise((resolve, reject) => {
+            clientsRequests.create({
+                name: client.name,
+                cedula: client.cedula,
+                phoneNumber: client.phoneNumber
+            }).then(response => {
+
+                if (response.error) return resolve(response)
+
+                clientsRequests.fetchById(response.id).then(client => {
+                    if (client.error) return resolve(client)
+                    client = client.data[0]
+                    client.label = client.name;
+                    client.sales = [];
+                    this.setState({
+                        currentSelectedClient: client
+                    })
+                    window.$("#clientModal").toggle("modal")
+                    window.$("#invoiceModal").find("input").focus()
+                    resolve(client)
+                })
+            })
+
+
+        })
+    }
+
     showInvoiceModal() {
         if (this.state.productsToSell.length > 0) {
             window.$('#invoiceModal').modal();
@@ -1011,12 +1044,12 @@ class BetterSalesControl extends Component {
                                         inputId="selectedProduct"
                                         onChange={this.productSelectionHandler}
                                         styles={{
-                                            option: (styles, { data, isDisabled, isFocused, isSelected }) => ({
+                                            option: (styles, {data, isDisabled, isFocused, isSelected}) => ({
                                                 ...styles,
                                                 color: data.stock > 0 && data.stock <= 10 ? 'orange' : data.stock > 0 ? 'green' : 'red',
                                                 cursor: data.stock == 0 ? 'not-allowed' : 'pointer',
                                             }),
-                                            singleValue: (styles, { data }) => ({
+                                            singleValue: (styles, {data}) => ({
                                                 ...styles,
                                                 width: '100%',
                                             }),
@@ -1024,7 +1057,7 @@ class BetterSalesControl extends Component {
                                     />
                                 </div>
                                 <div className="col-12 col-lg-3 mt-2">
-                                    <input onFocus={this.onFocusHandler} ref={this.quantityInput} onChange={this.onInputChangeHandler} type="number" step="0.01" className="form-control" placeholder="Cantidad" id="quantity" name="quantity" defaultValue="1" />
+                                    <input onFocus={this.onFocusHandler} ref={this.quantityInput} onChange={this.onInputChangeHandler} type="number" step="0.001" className="form-control" placeholder="Cantidad" id="quantity" name="quantity" defaultValue="1" />
                                 </div>
                                 <div className="col-12 col-lg-2 mt-2">
                                     <input type="submit" className="form-control btn btn-info" value="Enviar" />
@@ -1062,7 +1095,7 @@ class BetterSalesControl extends Component {
                                             Cantidad
                                         </th>
                                         <th className="my-auto" scope="col">
-                                            Total <span className="font-weight-bold text-warning"> {' ' + Intl.NumberFormat('es-VE', { currency: 'VES' }).format(this.state.totalBs)} </span>
+                                            Total <span className="font-weight-bold text-warning"> {' ' + Intl.NumberFormat('es-VE', {currency: 'VES'}).format(this.state.totalBs)} </span>
                                         </th>
                                     </tr>
                                 </thead>
@@ -1073,13 +1106,13 @@ class BetterSalesControl extends Component {
                                                 <tr key={index} productid={product.id}>
                                                     <th>{product.id}</th>
                                                     <th>
-                                                        <img style={{ maxWidth: '40px' }} src={product.imagePath} /> {product.name}
+                                                        <img style={{maxWidth: '40px'}} src={product.imagePath} /> {product.name}
                                                     </th>
-                                                    <th>{Intl.NumberFormat('es-VE', { currency: 'VES' }).format(product.unitPriceBs)}</th>
+                                                    <th>{Intl.NumberFormat('es-VE', {currency: 'VES'}).format(product.unitPriceBs)}</th>
                                                     <th onClick={this.editProductQuantityHandler} className="bg-dark" data-toggle="tooltip" data-placement="bottom" title="Editar Cantidad" role="button">
                                                         {product.quantity}
                                                     </th>
-                                                    <th>{Intl.NumberFormat('es-VE', { currency: 'VES' }).format(product.totalBs)}</th>
+                                                    <th>{Intl.NumberFormat('es-VE', {currency: 'VES'}).format(product.totalBs)}</th>
                                                     <th>
                                                         <button onClick={this.deleteFromTable} className="btn btn-danger p-0">
                                                             Delete
@@ -1112,15 +1145,16 @@ class BetterSalesControl extends Component {
                                                 placeholder="Buscar cliente"
                                                 isClearable
                                                 inputId="clientSelect"
+                                                value={this.state.currentSelectedClient}
                                                 onChange={this.clientSelectionHandler}
                                                 styles={{
-                                                    singleValue: (styles, { data }) => ({
+                                                    singleValue: (styles, {data}) => ({
                                                         ...styles,
                                                         width: '100%',
                                                     }),
                                                 }}
                                             />
-                                            <button className="btn btn-secondary" type="button" id="newClientButton">
+                                            <button data-toggle="modal" data-target="#clientModal" className="btn btn-secondary" type="button" id="newClientButton">
                                                 <svg width="1em" height="1em" viewBox="0 0 16 16" className="bi bi-person-plus-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                                     <path fillRule="evenodd" d="M1 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm7.5-3a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5z" />
                                                 </svg>
@@ -1136,7 +1170,7 @@ class BetterSalesControl extends Component {
                                         <input className="form-control" type="tel" name="phone" id="phone" placeholder="Teléfono" value={this.state.currentSelectedClient.phoneNumber ? this.state.currentSelectedClient.phoneNumber : ''} disabled />
                                     </div>
                                 </div>
-                                {this.state.currentSelectedClient.sales.length > 0 && (
+                                {(this.state.currentSelectedClient.sales && this.state.currentSelectedClient.sales.length > 0) && (
                                     <div className="row mt-2 p-0">
                                         <div className="col-12">
                                             <input onClick={this.addDebtToInvoiceTotal} ref={this.payDebtButton} type="button" value="Pagar deuda" className="form-control btn-danger rounded-0" />
@@ -1152,11 +1186,11 @@ class BetterSalesControl extends Component {
                                                     {this.state.currentSelectedClient.sales &&
                                                         this.state.currentSelectedClient.sales.map(sale => {
                                                             return (
-                                                                <tr>
+                                                                <tr key={sale.id}>
                                                                     <th className="btn-link" role="button">
                                                                         {sale.id}
                                                                     </th>
-                                                                    <th>{Intl.NumberFormat('es-VE', { currency: 'VES' }).format(this.calculateSaleTotal(sale) - this.calculatePaymentTotal(sale))}</th>
+                                                                    <th>{Intl.NumberFormat('es-VE', {currency: 'VES'}).format(this.calculateSaleTotal(sale) - this.calculatePaymentTotal(sale))}</th>
                                                                     <th>{sale.createdAt}</th>
                                                                 </tr>
                                                             );
@@ -1175,7 +1209,7 @@ class BetterSalesControl extends Component {
                                         Object.keys(this.state.paymentInfo).map(key => {
                                             if (key.startsWith('point of sale')) {
                                                 return (
-                                                    <div className="paymentDetailsContainer row mb-3">
+                                                    <div key={key} className="paymentDetailsContainer row mb-3">
                                                         <div className="col-1 ">
                                                             <button
                                                                 onClick={() => {
@@ -1191,7 +1225,7 @@ class BetterSalesControl extends Component {
                                                                     Punto de Venta
                                                                 </button>
                                                                 <input
-                                                                    onFocus={function (event) {
+                                                                    onClick={function (event) {
                                                                         event.target.select();
                                                                     }}
                                                                     onChange={event => this.updatePaymentMethodAmount(key, event)}
@@ -1222,7 +1256,7 @@ class BetterSalesControl extends Component {
                                             }
                                             if (key.startsWith('cash')) {
                                                 return (
-                                                    <div className="paymentDetailsContainer row mb-3">
+                                                    <div key={key} className="paymentDetailsContainer row mb-3">
                                                         <div className="col-1 ">
                                                             <button
                                                                 onClick={() => {
@@ -1234,11 +1268,11 @@ class BetterSalesControl extends Component {
                                                         </div>
                                                         <div id={key.replace(/\s/g, '') + 'Container'} className="col-9 ">
                                                             <div className="input-group">
-                                                                <button className="btn btn-dark" style={{ width: '136px' }} disabled="disabled">
+                                                                <button className="btn btn-dark" style={{width: '136px'}} disabled="disabled">
                                                                     Efectivo
                                                                 </button>
                                                                 <input
-                                                                    onFocus={function (event) {
+                                                                    onClick={function (event) {
                                                                         event.target.select();
                                                                     }}
                                                                     onChange={event => this.updatePaymentMethodAmount(key, event)}
@@ -1251,8 +1285,9 @@ class BetterSalesControl extends Component {
                                                                     onChange={event => {
                                                                         this.changeCashCurrencyHandler(event, key);
                                                                     }}
+                                                                    defaultValue="Bs"
                                                                     className="btn btn-dark p-0">
-                                                                    <option selected value="Bs.">
+                                                                    <option value="Bs">
                                                                         Bs.
                                                                     </option>
                                                                     <option value="$">$</option>
@@ -1276,7 +1311,7 @@ class BetterSalesControl extends Component {
                                             }
                                             if (key.startsWith('bank transfer')) {
                                                 return (
-                                                    <div className="paymentDetailsContainer row mb-3">
+                                                    <div key={key} className="paymentDetailsContainer row mb-3">
                                                         <div className="col-1 ">
                                                             <button
                                                                 onClick={() => {
@@ -1288,11 +1323,11 @@ class BetterSalesControl extends Component {
                                                         </div>
                                                         <div className="col-9 ">
                                                             <div className="input-group">
-                                                                <button className="btn btn-dark" style={{ width: '136px' }} disabled="disabled">
+                                                                <button className="btn btn-dark" style={{width: '136px'}} disabled="disabled">
                                                                     Transferencia
                                                                 </button>
                                                                 <input
-                                                                    onFocus={function (event) {
+                                                                    onClick={function (event) {
                                                                         event.target.select();
                                                                     }}
                                                                     onChange={event => this.updatePaymentMethodAmount(key, event)}
@@ -1387,6 +1422,20 @@ class BetterSalesControl extends Component {
                                 <h5 className="modal-title">Payment Methods</h5>
                             </div>
                             <div className="modal-body"></div>
+                        </div>
+                    </div>
+                </div>
+                <div className="modal" id="clientModal" tabindex="-1" aria-labelledby="clientModalLabel" aria-hidden="true">
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title" id="clientModalLabel">Add new client</h5>
+                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <ClientRegistration action="Add" insertHandler={this.insertClientHandler} />
+
                         </div>
                     </div>
                 </div>

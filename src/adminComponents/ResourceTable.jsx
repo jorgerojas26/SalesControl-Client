@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, {Component} from "react";
 import debounce from "lodash.debounce";
 
 
@@ -78,26 +78,25 @@ class ResourceTable extends Component {
                         var column = this;
                         if (column.dataSrc() == "grossTotalDollars") {
                             let totalDollars = api
-                                .column(3)
+                                .column(3, {page: "all"})
                                 .data()
                                 .reduce(function (a, b) {
                                     return a + b
                                 }, 0);
                             let pageTotalDollars = api
-                                .column(3, { page: 'current' })
+                                .column(3, {page: 'current'})
                                 .data()
                                 .reduce(function (a, b) {
                                     return a + b
                                 }, 0);
 
                             if (totalDollars) {
-                                $(column.footer()).html(
-                                    `${Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(pageTotalDollars)} <br>
-                                            <span class="text-danger">(${Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(totalDollars)} Total)</span>`
+                                $(column.header()).html(
+                                    `${Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'}).format(pageTotalDollars)}`
                                 );
                             }
                             else {
-                                $(column.footer()).html("");
+                                $(column.header()).html("");
                             }
 
                         }
@@ -110,18 +109,17 @@ class ResourceTable extends Component {
                                 }, 0);
 
                             let pageTotalBs = api
-                                .column(4, { page: 'current' })
+                                .column(4, {page: 'current'})
                                 .data()
                                 .reduce(function (a, b) {
                                     return a + b
                                 }, 0);
                             if (pageTotalBs) {
-                                $(column.footer()).html(
-                                    `${Intl.NumberFormat('es-VE', { style: 'currency', currency: 'VES' }).format(pageTotalBs)} <br>
-                                        <span class="text-danger">(${Intl.NumberFormat('es-VE', { style: 'currency', currency: 'VES' }).format(totalBs)} Total)</span>`
+                                $(column.header()).html(
+                                    `${Intl.NumberFormat('es-VE', {currency: 'VES'}).format(pageTotalBs)}`
                                 );
                             } else {
-                                $(column.footer()).html("");
+                                $(column.header()).html("");
                             }
                         }
                         if (column.dataSrc() == "netIncomeDollars") {
@@ -133,18 +131,17 @@ class ResourceTable extends Component {
                                 }, 0);
 
                             let pageTotalDollars = api
-                                .column(5, { page: 'current' })
+                                .column(5, {page: 'current'})
                                 .data()
                                 .reduce(function (a, b) {
                                     return a + b
                                 }, 0);
                             if (pageTotalDollars) {
-                                $(column.footer()).html(
-                                    `${Intl.NumberFormat('es-VE', { style: 'currency', currency: 'VES' }).format(pageTotalDollars)} <br>
-                                        <span class="text-danger">(${Intl.NumberFormat('es-VE', { style: 'currency', currency: 'VES' }).format(totalDollars)} Total)</span>`
+                                $(column.header()).html(
+                                    `${Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'}).format(pageTotalDollars)}`
                                 );
                             } else {
-                                $(column.footer()).html("");
+                                $(column.header()).html("");
                             }
                         }
                         if (column.dataSrc() == "netIncomeBs") {
@@ -156,18 +153,15 @@ class ResourceTable extends Component {
                                 }, 0);
 
                             let pageTotalBs = api
-                                .column(6, { page: 'current' })
+                                .column(6, {page: 'current'})
                                 .data()
                                 .reduce(function (a, b) {
                                     return a + b
                                 }, 0);
                             if (pageTotalBs) {
-                                $(column.footer()).html(
-                                    `${Intl.NumberFormat('es-VE', { style: 'currency', currency: 'VES' }).format(pageTotalBs)} <br>
-                                        <span class="text-danger">(${Intl.NumberFormat('es-VE', { style: 'currency', currency: 'VES' }).format(totalBs)} Total)</span>`
-                                );
+                                $(column.header()).html(`<span className="text-danger">${Intl.NumberFormat('es-VE', {currency: 'VES'}).format(pageTotalBs)}</span>`);
                             } else {
-                                $(column.footer()).html("");
+                                $(column.header()).html("");
                             }
                         }
                     })
@@ -221,7 +215,7 @@ class ResourceTable extends Component {
                                 "data-target": "#exampleModal"
                             },
                             action: (e, datatable, node, config) => {
-                                var selectedRowData = datatable.row({ selected: true }).data();
+                                var selectedRowData = datatable.row({selected: true}).data();
                                 _this.props.setSelectedRowData(selectedRowData);
                                 _this.props.setModalAction("edit");
                             }
@@ -234,7 +228,7 @@ class ResourceTable extends Component {
                             className: "btn btn-danger",
                             extend: "selected",
                             action: function (e, datatable, node, config) {
-                                var selectedRowData = datatable.row({ selected: true }).data();
+                                var selectedRowData = datatable.row({selected: true}).data();
                                 var r = window.confirm("¿Está seguro que desea eliminar este registro?");
                                 if (r == true) {
                                     fetch(`${_this.props.sourceURL}/${selectedRowData.id}`, {
@@ -287,7 +281,7 @@ class ResourceTable extends Component {
                                 },
                                 extend: "selected",
                                 action: function (e, datatable, node, config) {
-                                    var selectedRowData = datatable.row({ selected: true }).data();
+                                    var selectedRowData = datatable.row({selected: true}).data();
                                     _this.props.setSelectedRowData(selectedRowData);
                                     _this.props.setModalAction("applyDiscount")
 
@@ -302,7 +296,7 @@ class ResourceTable extends Component {
                                 action: function (e, datatable, node, config) {
                                     let response = window.confirm("¿Seguro que desea eliminar el descuento?");
                                     if (response == true) {
-                                        let selectedRowData = datatable.row({ selected: true }).data();
+                                        let selectedRowData = datatable.row({selected: true}).data();
                                         let discountId = selectedRowData.discount[0].id;
                                         fetch(`/api/discounts/${discountId}`, {
                                             headers: {
@@ -340,7 +334,6 @@ class ResourceTable extends Component {
 
                         if (_this.props.sourceURL.includes("/api/sales") && _this.props.sourceURL.includes("group=true")) {
                             results.data.forEach((row, index) => {
-                                row.product = row.product[0];
                                 //row.transactions = results.count.reverse()[index].count;
                                 row.grossTotalBs = row.grossTotalDollars * row.dolarReference;
 
@@ -356,7 +349,7 @@ class ResourceTable extends Component {
                         }
                         return results.data;
                     },
-                    headers: { 'Authorization': `Bearer ${localStorage.getItem("jwt")}` },
+                    headers: {'Authorization': `Bearer ${localStorage.getItem("jwt")}`},
                     data: function (d) {
                         if (d.length != -1) {
                             d.page = d.start / d.length + 1;
@@ -377,7 +370,7 @@ class ResourceTable extends Component {
                 pageLength: (this.props.sourceURL.includes("group=true")) ? 1000000000000000 : 10,
                 columns: this.props.columns,
                 columnDefs: (this.props.sourceURL.includes("products")) ? [
-                    { width: "30%", "targets": 1 }
+                    {width: "30%", "targets": 1}
                 ] : null,
                 ordering: false,
                 order: _this.props.sorting || [[0, "desc"]]

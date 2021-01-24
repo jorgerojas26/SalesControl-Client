@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, {Component} from "react";
 import Async from 'react-select/async';
 
 class CustomSelect extends Component {
@@ -37,10 +37,10 @@ class CustomSelect extends Component {
                     results.data.forEach(item => {
                         item.value = item.name;
                         if (item.imagePath) {
-                            item.label = [<img className="img img-fluid" style={{ maxWidth: "40px" }} src={item.imagePath} />, `${item.name} (${Intl.NumberFormat("es-VE", { style: "currency", currency: "VES" }).format(this.roundToNiceNumber(item.price * this.props.dolarReference))})`];
+                            item.label = [<img className="img img-fluid" style={{maxWidth: "40px"}} src={item.imagePath} />, `${item.name} (${Intl.NumberFormat("es-VE", {style: "currency", currency: "VES"}).format(this.roundToNiceNumber(item.price * this.props.dolarReference))})`];
                         }
                         else {
-                            item.label = `${item.name} (${Intl.NumberFormat("es-VE", { style: "currency", currency: "VES" }).format(this.roundToNiceNumber(item.price * this.props.dolarReference))})`
+                            item.label = `${item.name} (${Intl.NumberFormat("es-VE", {style: "currency", currency: "VES"}).format(this.roundToNiceNumber(item.price * this.props.dolarReference))})`
                         }
                     });
                     callback(results.data)
@@ -51,9 +51,7 @@ class CustomSelect extends Component {
         return (
             <Async
                 loadOptions={this.searchHandler}
-                defaultOptions
                 placeholder="Buscar"
-                autoFocus
                 inputId="selectedProduct"
                 isMulti={this.props.isMulti}
                 isClearable

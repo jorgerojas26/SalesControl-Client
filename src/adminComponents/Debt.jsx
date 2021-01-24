@@ -1,5 +1,6 @@
-import React, { Component } from "react";
+import React, {Component} from "react";
 import debtsRequests from "../requests/debts";
+import salesRequests from "../requests/sales"
 import CustomSelect from "../globalComponents/CustomSelect";
 import $ from "jquery";
 require("datatables.net")
@@ -53,7 +54,7 @@ class Debt extends Component {
                 "data-target": "#debtModal"
             },
             action: (e, datatable, node, config) => {
-                let selectedRowData = datatable.row({ selected: true }).data();
+                let selectedRowData = datatable.row({selected: true}).data();
                 $(".modal-title").text("Edit debt");
                 $("#debtTotal").val(selectedRowData.total);
 
@@ -72,33 +73,28 @@ class Debt extends Component {
     }
 
     async componentDidMount() {
-        let response = await debtsRequests.fetchAll();
+        let response = await salesRequests.fetchAllDebts();
         if (response.data) {
             $(this.debtTable.current).DataTable({
                 data: response.data,
                 columns: [
-                    { title: "ID", data: "id" },
-                    { title: "Client ID", data: "client.id" },
-                    { title: "Nombre", data: "client.name" },
-                    { title: "Cédula", data: "client.cedula" },
-                    { title: "Teléfono", data: "client.phoneNumber" },
+                    {title: "ID", data: "id"},
+                    {title: "Client ID", data: "client.id"},
+                    {title: "Nombre", data: "client.name"},
+                    {title: "Cédula", data: "client.cedula"},
+                    {title: "Teléfono", data: "client.phoneNumber"},
                     {
-                        render: function (data) {
-                            return (data == 0) ? "Deuda" : "Credito"
-                        }, title: "Tipo", data: "type"
-                    },
-                    {
-                        render: function (data) {
-                            return Intl.NumberFormat("es-VE", { style: "currency", currency: "VES" }).format(data)
-                        }, title: "Total", data: "total"
+                        render: function (data, datatable) {
+                            return Intl.NumberFormat("es-VE", {style: "currency", currency: "VES"}).format(data)
+                        }, title: "Total"
                     },
                     {
                         render: function (data) {
                             return (data == 0) ? `<span class="text-danger">SIN PAGAR</span>` : `<span class="text-success">PAGADO</span>`
                         }, title: "Estado", data: "cancelled"
                     },
-                    { title: "Fecha creación", data: "createdAt" },
-                    { title: "Fecha actualización", data: "updatedAt" }
+                    {title: "Fecha creación", data: "createdAt"},
+                    {title: "Fecha actualización", data: "updatedAt"}
                 ],
                 dom: "Blftip",
                 buttons: [this.addButton, this.editButton],

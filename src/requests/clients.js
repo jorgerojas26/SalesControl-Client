@@ -22,6 +22,17 @@ const functions = {
 
         return response;
     },
+    fetchByIdWithDebts: async function (id) {
+        let client = await fetch(BASE_URL + `?id=${id}&withDebts=true`, {
+            headers: {
+                Authorization: 'Bearer ' + localStorage.getItem('jwt'),
+            },
+        });
+
+        let response = await client.json();
+
+        return response;
+    },
     fetchByNameWithDebts: async function (name) {
         let client = await fetch(BASE_URL + `?name=${name}&withDebts=true`, {
             headers: {
