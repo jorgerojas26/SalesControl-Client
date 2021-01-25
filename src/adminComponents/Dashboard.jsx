@@ -8,7 +8,7 @@ import Suppliers from "./Suppliers";
 import Supplyings from "./Supplyings";
 import Users from "./Users";
 import Navigation from "./Navigation";
-import SalesControl from "./SalesControl/SalesControl";
+import SalesControl from "./SalesControl/screens/SalesControl";
 import BetterSalesControl from "./BetterSalesControl";
 import Inventory from "./Inventory";
 import Reports from "./Reports";

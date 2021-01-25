@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, {Component} from "react";
 
 import CustomSelect from "../globalComponents/CustomSelect";
 import $ from "jquery";
@@ -96,12 +96,12 @@ class SalesControl extends Component {
                         product.totalBs = this.roundToNiceNumber(product.priceBs * product.quantity - (product.priceBs * (discount / 100)));
 
                         if (discount) {
-                            product.totalFormattedDollars = <span className={(discount) ? "text-danger" : ""}>{Intl.NumberFormat('es-VE', { style: 'currency', currency: 'USD' }).format(product.totalDollars) + ` (-${discount}%)`}</span>;
-                            product.totalFormattedBs = <span className={(discount) ? "text-danger" : ""}>{Intl.NumberFormat('es-VE', { style: 'currency', currency: 'VES' }).format(product.totalBs) + ` (-${discount}%)`}</span>;
+                            product.totalFormattedDollars = <span className={(discount) ? "text-danger" : ""}>{Intl.NumberFormat('es-VE', {style: 'currency', currency: 'USD'}).format(product.totalDollars) + ` (-${discount}%)`}</span>;
+                            product.totalFormattedBs = <span className={(discount) ? "text-danger" : ""}>{Intl.NumberFormat('es-VE', {style: 'currency', currency: 'VES'}).format(product.totalBs) + ` (-${discount}%)`}</span>;
                         }
                         else {
-                            product.totalFormattedDollars = Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(product.totalDollars);
-                            product.totalFormattedBs = Intl.NumberFormat('es-VE', { style: 'currency', currency: 'VES' }).format(product.totalBs);
+                            product.totalFormattedDollars = Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'}).format(product.totalDollars);
+                            product.totalFormattedBs = Intl.NumberFormat('es-VE', {style: 'currency', currency: 'VES'}).format(product.totalBs);
                         }
 
                         productFormatted = {
@@ -158,7 +158,7 @@ class SalesControl extends Component {
                             this.setState({
                                 addedProducts: [
                                     ...this.state.addedProducts.slice(0, index),
-                                    Object.assign({}, this.state.addedProducts[index], { ...productFormatted }),
+                                    Object.assign({}, this.state.addedProducts[index], {...productFormatted}),
                                     ...this.state.addedProducts.slice(index + 1)
                                 ],
                                 quantity: 1,
@@ -364,9 +364,9 @@ class SalesControl extends Component {
                                         <th scope="col">Precio $</th>
                                         <th scope="col">Precio Bs</th>
                                         <th scope="col">Cantidad</th>
-                                        <th scope="col">Total<span className="font-weight-bold text-warning">{" " + Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(this.state.totalDollars)}</span>
+                                        <th scope="col">Total<span className="font-weight-bold text-warning">{" " + Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'}).format(this.state.totalDollars)}</span>
                                         </th>
-                                        <th scope="col">Total<span className="font-weight-bold text-warning">{" " + Intl.NumberFormat('es-VE', { style: 'currency', currency: 'VES' }).format(this.state.totalBs)}</span>
+                                        <th scope="col">Total<span className="font-weight-bold text-warning">{" " + Intl.NumberFormat('es-VE', {style: 'currency', currency: 'VES'}).format(this.state.totalBs)}</span>
                                         </th>
                                     </tr>
                                 </thead>
@@ -376,9 +376,9 @@ class SalesControl extends Component {
                                             <tr key={index} productid={product.id}>
                                                 <th>{index + 1}</th>
                                                 <th>{product.id}</th>
-                                                <th><img className="" style={{ maxWidth: "40px" }} src={product.imagePath} />{product.name}</th>
-                                                <th>{Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(product.price)}</th>
-                                                <th>{Intl.NumberFormat('es-VE', { style: 'currency', currency: 'VES' }).format(product.priceBs)}</th>
+                                                <th><img className="" style={{maxWidth: "40px"}} src={product.imagePath} />{product.name}</th>
+                                                <th>{Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'}).format(product.price)}</th>
+                                                <th>{Intl.NumberFormat('es-VE', {style: 'currency', currency: 'VES'}).format(product.priceBs)}</th>
                                                 <th>{product.quantity}</th>
                                                 <th>{product.totalFormattedDollars}</th>
                                                 <th>{product.totalFormattedBs}</th>

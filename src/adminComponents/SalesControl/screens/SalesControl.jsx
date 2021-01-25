@@ -1,6 +1,7 @@
 import React from "react"
 
-import OrderForm from "./OrderForm"
+import OrderForm from "../containers/OrderFormContainer"
+import ProductsTable from "../components/ProductsTable"
 
 const SalesControl = (props) => {
     return (
@@ -16,6 +17,16 @@ const SalesControl = (props) => {
                 </div>
             </div>
             <OrderForm />
+            <div className="row">
+                <div className="col-12 col-lg-2">
+                    <div className="form-group">
+                        <input type="button" className="form-control btn btn-primary" value="Procesar venta" />
+                    </div>
+                </div>
+                <div className="col-12 col-lg-10">
+                    <ProductsTable />
+                </div>
+            </div>
         </div>
     )
 }

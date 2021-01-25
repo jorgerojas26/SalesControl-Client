@@ -1,10 +1,8 @@
 import React from "react"
 
 const ProductsTable = (props) => {
-
-
     return (
-        <table className="table table-dark table-striped table-bordered overflow-auto">
+        <table className="table table-dark table-striped table-bordered table-sm overflow-auto">
             <thead>
                 <tr>
                     <th className="my-auto" scope="col">
@@ -20,13 +18,13 @@ const ProductsTable = (props) => {
                         Cantidad
                                         </th>
                     <th className="my-auto" scope="col">
-                        Total <span className="font-weight-bold text-warning"> {' ' + Intl.NumberFormat('es-VE', {currency: 'VES'}).format(this.state.totalBs)} </span>
+                        Total <span className="font-weight-bold text-warning"> {' ' + Intl.NumberFormat('es-VE', {currency: 'VES'}).format(props.invoiceTotalBs || 0)} </span>
                     </th>
                 </tr>
             </thead>
             <tbody>
-                {props.productsToSell &&
-                    props.productsToSell.map((product, index) => {
+                {props.products &&
+                    props.products.map((product, index) => {
                         return (
                             <tr key={index} productid={product.id}>
                                 <th>{product.id}</th>
@@ -34,12 +32,12 @@ const ProductsTable = (props) => {
                                     <img style={{maxWidth: '40px'}} src={product.imagePath} /> {product.name}
                                 </th>
                                 <th>{Intl.NumberFormat('es-VE', {currency: 'VES'}).format(product.unitPriceBs)}</th>
-                                <th onClick={this.editProductQuantityHandler} className="bg-dark" data-toggle="tooltip" data-placement="bottom" title="Editar Cantidad" role="button">
+                                <th onClick={props.editProductQuantityHandler} className="bg-dark" data-toggle="tooltip" data-placement="bottom" title="Editar Cantidad" role="button">
                                     {product.quantity}
                                 </th>
                                 <th>{Intl.NumberFormat('es-VE', {currency: 'VES'}).format(product.totalBs)}</th>
                                 <th>
-                                    <button onClick={this.deleteFromTable} className="btn btn-danger p-0">
+                                    <button onClick={props.deleteFromTable} className="btn btn-danger p-0">
                                         Delete
                                                         </button>
                                 </th>
