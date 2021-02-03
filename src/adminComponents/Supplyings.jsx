@@ -151,7 +151,7 @@ class Supplyings extends Component {
                                     </div>
                                     <div className="form-group">
                                         <label htmlFor="quantity">Quantity: </label>
-                                        <input onChange={this.inputChangeHandler} className="form-control" type="number" step="0.001" name="quantity" id="quantity" required />
+                                        <input onChange={this.inputChangeHandler} className="form-control" type="number" step="0.00000000000000001" name="quantity" id="quantity" required />
                                     </div>
                                 </div>
                                 <div className="modal-footer">
