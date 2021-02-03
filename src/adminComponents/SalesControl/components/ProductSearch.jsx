@@ -7,6 +7,9 @@ const ProductSearch = (props) => {
         <div>
             <AsyncSelect
                 loadOptions={props.onSearchHandler}
+                value={props.currentSelectedProduct}
+                ref={props.innerRef}
+                autoFocus
                 placeholder="Buscar producto"
                 isClearable
                 onChange={props.onChangeHandler}

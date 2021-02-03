@@ -2,34 +2,38 @@ import React, {Component} from "react"
 
 import ProductSearch from "../components/ProductSearch"
 
-import inventoryRequest from "../../../requests/inventory"
+import inventoryRequests from "../../../requests/inventory"
 
 import {roundUpProductPrice} from "../../../helpers"
 
-class ProductSearch extends Component {
+class ProductSearchContainer extends Component {
 
     constructor() {
         super();
 
         this.state = {
-
+            selectedProduct: null
         }
+
 
         this.onChangeHandler = this.onChangeHandler.bind(this);
         this.onSearchHandler = this.onSearchHandler.bind(this);
     }
 
 
-    onChangeHandler(event) {
-
-
+    onChangeHandler(selectedProduct, action) {
+        if (action.action === "select-option") {
+            this.props.onProductSelect(selectedProduct, action);
+        }
+        this.setState({
+            selectedProduct
+        })
     }
 
     async onSearchHandler(inputValue) {
         let results = await inventoryRequests.fetchByProductName(inputValue);
         if (results.data.length > 0) {
             results.data.forEach(product => {
-                //product.value = product;
                 product.label = (
                     <div className="row">
                         <div className="mx-auto">
@@ -51,9 +55,14 @@ class ProductSearch extends Component {
 
     render() {
         return (
-            <ProductSearch onChangeHandler={this.onChangeHandler} onSearchHandler={this.onSearchHandler} />
+            <ProductSearch
+                innerRef={this.props.productSelectRef}
+                onChangeHandler={this.onChangeHandler}
+                onSearchHandler={this.onSearchHandler}
+                currentSelectedProduct={this.props.currentSelectedProduct}
+            />
         )
     }
 }
 
-export default ProductSearch
+export default ProductSearchContainer;

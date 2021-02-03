@@ -2,6 +2,7 @@ import React from "react"
 
 import OrderForm from "../containers/OrderFormContainer"
 import ProductsTable from "../components/ProductsTable"
+import InvoiceModal from "../screens/InvoiceModalContainer"
 
 const SalesControl = (props) => {
     return (
@@ -16,17 +17,28 @@ const SalesControl = (props) => {
                     <span className={(props.messageInfo && props.messageInfo.type) === "error" ? "text-danger" : "text-success"}>{(props.messageInfo && props.messageInfo.message)}</span>
                 </div>
             </div>
-            <OrderForm />
+            <OrderForm onProductSubmit={props.onProductSubmit}
+                showMessageInfo={props.showMessageInfo}
+                dolarReference={props.dolarReference}
+            />
             <div className="row">
                 <div className="col-12 col-lg-2">
                     <div className="form-group">
-                        <input type="button" className="form-control btn btn-primary" value="Procesar venta" />
+                        <input onClick={props.openInvoiceModal} type="button" className="form-control btn btn-primary" value="Procesar venta" />
                     </div>
                 </div>
                 <div className="col-12 col-lg-10">
-                    <ProductsTable />
+                    <ProductsTable
+                        editProductQuantityHandler={props.editProductQuantityHandler}
+                        invoiceTotalBs={props.invoiceTotalBs}
+                        invoiceTotalDollars={props.invoiceTotalDollars}
+                        onProductDelete={props.onProductDelete}
+                        products={props.products} />
                 </div>
             </div>
+            {props.showInvoiceModal &&
+                <InvoiceModal dolarReference={props.dolarReference} />
+            }
         </div>
     )
 }

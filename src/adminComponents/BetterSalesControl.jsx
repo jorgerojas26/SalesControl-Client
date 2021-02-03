@@ -897,6 +897,7 @@ class BetterSalesControl extends Component {
             this.payDebtButton.current.style.display = 'block';
         }
     }
+
     calculatePaymentTotal(sale) {
         let paymentTotal = 0;
         sale.payment.forEach(pm => {
