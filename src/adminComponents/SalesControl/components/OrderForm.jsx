@@ -27,6 +27,7 @@ const OrderForm = (props) => {
                                     productSelectRef={props.productSelectRef}
                                     dolarReference={props.dolarReference}
                                     currentSelectedProduct={props.currentSelectedProduct}
+                                    onProductSearchFocus={props.onProductSearchFocus}
                                     onProductSelect={props.onProductSelect} />
                             </div>
                             <div className="col-12 col-lg-3 mt-2">

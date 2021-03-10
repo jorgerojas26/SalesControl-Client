@@ -18,6 +18,7 @@ class ProductSearchContainer extends Component {
 
         this.onChangeHandler = this.onChangeHandler.bind(this);
         this.onSearchHandler = this.onSearchHandler.bind(this);
+        this.onFocusHandler = this.onFocusHandler.bind(this);
     }
 
 
@@ -53,6 +54,9 @@ class ProductSearchContainer extends Component {
         return results.data;
     }
 
+    onFocusHandler() {
+        this.props.onProductSearchFocus();
+    }
     render() {
         return (
             <ProductSearch
@@ -60,6 +64,7 @@ class ProductSearchContainer extends Component {
                 onChangeHandler={this.onChangeHandler}
                 onSearchHandler={this.onSearchHandler}
                 currentSelectedProduct={this.props.currentSelectedProduct}
+                onFocus={this.onFocusHandler}
             />
         );
     }
