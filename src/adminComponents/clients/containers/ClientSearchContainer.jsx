@@ -50,6 +50,12 @@ class ClientSearchContainer extends Component {
                     freezePrices = true;
                 }
                 let debtInfo = calculateDebtTotal(sale, this.props.dolarReference, freezePrices);
+                if (debtInfo.debtTotal < 0 && debtInfo.debtTotal.toFixed(2) == 0) {
+                    debtInfo.debtTotal = -0.01;
+                }
+                else if (debtInfo.debtTotal > 0 && debtInfo.debtTotal.toFixed(2) == 0) {
+                    debtInfo.debtTotal = 0.01;
+                }
                 sale.debtTotal = debtInfo.debtTotal;
                 sale.debtCurrency = debtInfo.debtCurrency;
             });
