@@ -14,7 +14,7 @@ import { formatPhoneNumber } from "../../../helpers";
 
 const InvoiceModal = (props) => {
     return (
-        <div id="invoiceModal" className="modal" data-backdrop="static" data-keyboard="false" aria-labelledby="invoiceModalLabel" aria-hidden="true">
+        <div id="invoiceModal" className="modal" data-backdrop="static" data-keyboard="false" aria-labelledby="invoiceModalLabel" aria-hidden="true" tabIndex="-1">
             <div className="modal-dialog modal-md modal-dialog-centered modal-dialog-scrollable">
                 <div className="modal-content">
                     <div className="modal-header">

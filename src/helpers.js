@@ -176,8 +176,12 @@ module.exports = {
             invoiceTotalBs = freezeDebt ? invoiceTotalBs : nonFreezedSaleTotal < freezedSaleTotal ? freezedSaleTotal : nonFreezedSaleTotal;
 
             if (higherPayment.payment) {
+            /*
                 debtTotal = higherPayment.payment.currency === "Bs" ? (invoiceTotalBs - expressedPaymentTotal) : ((invoiceTotalBs - expressedPaymentTotal) / higherPayment.dolarReference);
                 debtCurrency = higherPayment.payment.currency;
+                */
+                debtTotal = invoiceTotalBs - expressedPaymentTotal;
+                debtCurrency = "Bs";
             }
             else {
                 debtTotal = invoiceTotalBs;

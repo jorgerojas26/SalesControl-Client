@@ -2,7 +2,7 @@ import React from "react";
 
 const NewClientForm = (props) => {
     return (
-        <div id="newClientModal" className="modal" >
+        <div id="newClientModal" className="modal" data-backdrop="static" data-keyboard="false" aria-hidden="true">
             <div className="modal-dialog modal-sm modal-dialog-centered">
                 <div className="modal-content">
                     <div className="modal-header">

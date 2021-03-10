@@ -60,7 +60,6 @@ class InvoiceModalContainer extends Component {
         let shortcutListener = (event) => {
             if (event.keyCode == 13 && event.ctrlKey) {
                 if (!this.state.confirmingSale) {
-                    console.log("hola");
                     if (this.props.action == "newSale") {
                         this.onSaleSubmitHandler();
                     }
@@ -70,8 +69,8 @@ class InvoiceModalContainer extends Component {
                 }
             }
         };
+        document.querySelector("#invoiceModal").addEventListener("keyup", shortcutListener);
         window.$("#invoiceModal").on("show.bs.modal", (event) => {
-            document.body.addEventListener("keyup", shortcutListener);
             if (this.props.action == "newSale") {
                 this.setState({ invoiceTotal: this.props.invoiceTotal });
             }
@@ -84,9 +83,9 @@ class InvoiceModalContainer extends Component {
                 });
             }
         });
-        window.$("#invoiceModal").on("hide.bs.modal", (event) => {
+        window.$("#invoiceModal").on("hidden.bs.modal", (event) => {
             if (this.props.action == "newSale") {
-                document.body.removeEventListener("keyup", shortcutListener);
+                //document.body.removeEventListener("keyup", shortcutListener);
             }
         });
     }
@@ -666,9 +665,12 @@ class InvoiceModalContainer extends Component {
         client.label = client.name;
         this.setState({
             currentSelectedClient: client
-        });
+        }, () => {
+        console.log(this.state.currentSelectedClient);
         window.$("#newClientModal").modal("hide");
         window.$("#invoiceModal").find("input").focus();
+        });
+        
     }
 
     render() {

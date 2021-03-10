@@ -82,7 +82,7 @@ class NewClientFormContainer extends Component {
                 submitting: false
             }, () => {
                 showMessageInfo(this, "success", "El client se ha registrado de forma exitosa");
-                if (this.props.onSubmitHandler) this.props.onSubmitHandler(this.state.clientData);
+                if (this.props.onSubmitHandler) this.props.onSubmitHandler(response);
             });
         });
     }
