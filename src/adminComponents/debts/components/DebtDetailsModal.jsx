@@ -22,6 +22,13 @@ const DebtDetailsModal = (props) => {
 
     let debtInfo = calculateDebtTotal(props.sale, props.dolarReference, props.freezePrices || freezePrices);
 
+    if (debtInfo.debtTotal < 0 && debtInfo.debtTotal.toFixed(2) == 0) {
+        debtInfo.debtTotal = -0.01;
+    }
+    else if (debtInfo.debtTotal > 0 && debtInfo.debtTotal.toFixed(2) == 0) {
+        debtInfo.debtTotal = 0.01;
+    }
+
     let debtTotal = debtInfo.debtTotal;
     let debtCurrency = debtInfo.debtCurrency;
 
