@@ -1,7 +1,7 @@
 import React from 'react';
 import './App.css';
 
-import {BrowserRouter as Router, Switch, Route, Redirect} from "react-router-dom";
+import { BrowserRouter as Router, Switch, Route, Redirect } from "react-router-dom";
 
 import Header from "./components/Header";
 import Navigation from "./components/Navigation";
@@ -14,7 +14,7 @@ import Dashboard from "./adminComponents/Dashboard";
 import PrivateRoute from "./components/PrivateRoute";
 
 import configureStore from "./store/configureStore";
-import {Provider} from "react-redux";
+import { Provider } from "react-redux";
 
 const store = configureStore();
 
@@ -57,7 +57,7 @@ function App() {
   */
   return (
     <Provider store={store}>
-      <div className="App">
+      <div id="App" className="App">
         <Router>
           <Switch>
             <Route exact path="/signin" component={Login} />

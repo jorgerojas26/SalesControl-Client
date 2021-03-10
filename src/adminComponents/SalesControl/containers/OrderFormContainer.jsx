@@ -1,18 +1,24 @@
-import React, {Component} from "react"
+import React, { Component } from "react";
 
-import inventoryRequests from "../../../requests/inventory"
+import inventoryRequests from "../../../requests/inventory";
+
+import { showMessageInfo, isProductStockEnough } from "../../../helpers";
 
 
-import OrderForm from "../components/OrderForm"
+import OrderForm from "../components/OrderForm";
 
 class OrderFormContainer extends Component {
     constructor() {
         super();
 
         this.state = {
+            messageInfo: {
+                type: null,
+                message: null
+            },
             quantity: 1,
             selectedProduct: null
-        }
+        };
 
         this.quantityInputRef = React.createRef();
         this.productSelectRef = React.createRef();
@@ -28,14 +34,14 @@ class OrderFormContainer extends Component {
         if (isNaN(value)) {
             this.setState({
                 quantity: 1
-            })
-            this.props.showMessageInfo("error", "La cantidad debe ser un valor numérico")
+            });
+            showMessageInfo(this, "error", "La cantidad debe ser un valor numÃ©rico");
 
         }
         else {
             this.setState({
                 [event.target.name]: parseFloat(value)
-            })
+            });
         }
     }
 
@@ -48,14 +54,14 @@ class OrderFormContainer extends Component {
             selectedProduct: {
                 ...selectedProduct,
             }
-        })
+        });
     }
 
     async onProductSubmit(event) {
         event.preventDefault();
 
         if (isNaN(this.state.quantity) || this.state.quantity < 0) {
-            this.props.showMessageInfo("error", "La cantidad debe ser mayor a 0");
+            showMessageInfo(this, "error", "La cantidad debe ser mayor a 0");
             return;
         }
         if (this.state.selectedProduct != null) {
@@ -64,18 +70,20 @@ class OrderFormContainer extends Component {
                 let stock = parseFloat(productInfo.data[0].stock);
                 let quantityToSell = parseFloat(this.state.quantity);
                 if (stock <= 0 || quantityToSell > stock) {
-                    this.props.showMessageInfo('error', 'No hay suficientes productos en el inventario');
+                    showMessageInfo(this, 'error', 'No hay suficientes productos en el inventario');
                 } else {
 
                     this.props.onProductSubmit(this.state.selectedProduct, this.state.quantity);
                     this.setState({
-                        selectedProduct: null
-                    })
+                        selectedProduct: null,
+                        quantity: 1
+                    });
                     this.productSelectRef.current.focus();
+                    this.quantityInputRef.current.value = "1";
                 }
             }
         } else {
-            this.props.showMessageInfo('error', 'Por favor seleccione un producto');
+            showMessageInfo(this, 'error', 'Por favor seleccione un producto');
         }
 
     }
@@ -83,13 +91,14 @@ class OrderFormContainer extends Component {
     render() {
 
         return <OrderForm onChangeHandler={this.onChangeHandler}
+            messageInfo={this.state.messageInfo}
             productSelectRef={this.productSelectRef}
             onProductSubmit={this.onProductSubmit}
             currentSelectedProduct={this.state.selectedProduct}
             quantityInputRef={this.quantityInputRef}
             onProductSelect={this.onProductSelect}
             dolarReference={this.props.dolarReference}
-        />
+        />;
     }
 
 

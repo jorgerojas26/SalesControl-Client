@@ -1,21 +1,21 @@
-import React, {Component} from "react";
+import React, { Component } from "react";
 
-import Categories from "./Categories";
-import Clients from "./Clients";
-import Products from "./Products";
-import Sales from "./Sales";
-import Suppliers from "./Suppliers";
-import Supplyings from "./Supplyings";
-import Users from "./Users";
+import Categories from "./categories/Categories";
+import Clients from "./clients/Clients";
+import Products from "./products/Products";
+import Sales from "./sales/Sales";
+import Suppliers from "./suppliers/Suppliers";
+import Supplyings from "./supplyings/Supplyings";
+import Users from "./users/Users";
 import Navigation from "./Navigation";
-import SalesControl from "./SalesControl/screens/SalesControlContainer";
-import BetterSalesControl from "./BetterSalesControl";
-import Inventory from "./Inventory";
-import Reports from "./Reports";
-import Debt from "./Debt";
+import SalesControl from "./SalesControl/containers/SalesControlContainer";
+import BetterSalesControl from "./SalesControl/BetterSalesControl";
+import Inventory from "./inventory/Inventory";
+import Reports from "./reports/screens/ReportsContainer";
+import Debt from "./debts/containers/DebtsContainer";
 
 import PrivateRoute from "../components/PrivateRoute";
-import {Route} from "react-router-dom";
+import { Route } from "react-router-dom";
 import $ from "jquery";
 class Dashboard extends Component {
 
@@ -26,7 +26,7 @@ class Dashboard extends Component {
             dolarReference: 0,
             loading: false,
             newDolarReference: null
-        }
+        };
 
         this.fetchDolarReference = this.fetchDolarReference.bind(this);
         this.dolarReferenceSubmitHandler = this.dolarReferenceSubmitHandler.bind(this);
@@ -52,24 +52,24 @@ class Dashboard extends Component {
                 if (res.data) {
                     this.setState({
                         dolarReference: res.data.price,
-                        formattedDolareReference: Intl.NumberFormat('es-VE', {style: 'currency', currency: 'VES'}).format(res.data.price),
+                        formattedDolareReference: Intl.NumberFormat('es-VE', { style: 'currency', currency: 'VES' }).format(res.data.price),
                         loading: false
                     });
                 }
                 else {
                     this.setState({
                         dolarReference: 0,
-                        formattedDolareReference: Intl.NumberFormat('es-VE', {style: 'currency', currency: 'VES'}).format(0),
+                        formattedDolareReference: Intl.NumberFormat('es-VE', { style: 'currency', currency: 'VES' }).format(0),
                         loading: false
-                    })
+                    });
                 }
-            })
+            });
     }
 
     changeHandler(event) {
         this.setState({
             [event.target.name]: event.target.value
-        })
+        });
     }
 
     dolarReferenceSubmitHandler(event) {
@@ -81,15 +81,15 @@ class Dashboard extends Component {
                 "Authorization": "Bearer " + localStorage.getItem("jwt"),
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({price: this.state.newDolarReference})
+            body: JSON.stringify({ price: this.state.newDolarReference })
         })
             .then(res => {
                 if (res.status == 204) {
                     window.location.reload();
                 } else {
-                    alert("Error")
+                    alert("Error");
                 }
-            })
+            });
     }
     render() {
         return (
@@ -142,7 +142,7 @@ class Dashboard extends Component {
                 </div>
             </div>
 
-        )
+        );
     }
 }
 

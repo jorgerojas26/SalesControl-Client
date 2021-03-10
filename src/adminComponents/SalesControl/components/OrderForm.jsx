@@ -1,11 +1,16 @@
-import React from "react"
+import React from "react";
 
-import ProductSearch from "../containers/ProductSearchContainer"
+import ProductSearch from "../../products/containers/ProductSearchContainer";
 
 const OrderForm = (props) => {
     return (
         <div>
             <div className="row">
+                <div className="col-12">
+                    {props.messageInfo.message &&
+                        <div className={props.messageInfo.type == 'error' ? 'alert alert-danger' : 'alert alert-success'}>{props.messageInfo.message}</div>
+                    }
+                </div>
                 <div className="col-12 col-lg-7 mt-2">
                     <label className="font-weight-bold">Productos</label>
                 </div>
@@ -36,7 +41,7 @@ const OrderForm = (props) => {
             </div>
 
         </div>
-    )
-}
+    );
+};
 
 export default OrderForm;

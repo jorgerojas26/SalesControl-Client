@@ -1,4 +1,3 @@
-
 const BASE_URL = "/api/sales";
 
 const functions = {
@@ -7,7 +6,7 @@ const functions = {
             headers: {
                 "Authorization": "Bearer " + localStorage.getItem("jwt")
             }
-        })
+        });
 
         let response = await sales.json();
 
@@ -18,7 +17,7 @@ const functions = {
             headers: {
                 "Authorization": "Bearer " + localStorage.getItem("jwt")
             }
-        })
+        });
 
         let response = await sales.json();
 
@@ -29,7 +28,7 @@ const functions = {
             headers: {
                 "Authorization": "Bearer " + localStorage.getItem("jwt")
             }
-        })
+        });
 
         let response = await sale.json();
 
@@ -43,12 +42,12 @@ const functions = {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify(sale)
-        })
+        });
 
         let response = await newSale.json();
 
         return response;
     },
-}
+};
 
-export default functions
+export default functions;

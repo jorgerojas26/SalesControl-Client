@@ -1,52 +1,24 @@
 import React from "react";
 
+import { formaPhonenumber } from "../../../helpers";
 
-import ClientSearch from "../../clients/containers/ClientSearchContainer";
-import DebtTable from "../../debts/containers/DebtTableContainer";
-import PointOfSalePayment from "../../payments/containers/PointOfSalePaymentContainer";
-import CashPayment from "../../payments/containers/CashPaymentContainer";
-import BankTransferPayment from "../../payments/components/containers/BankTransferPaymentContainer";
-import PaymentMethodsModal from "../../payments/containers/PaymentMethodsModalContainer";
-import DebtDetailsModal from "../../debts/components/DebtDetailsModal";
-import NewClientForm from "../../clients/containers/NewClientFormContainer";
-
-import { formatPhoneNumber } from "../../../helpers";
-
-const InvoiceModal = (props) => {
+const DebtPaymentModal = (props) => {
     return (
-        <div id="invoiceModal" className="modal" data-backdrop="static" data-keyboard="false" aria-labelledby="invoiceModalLabel" aria-hidden="true">
+        <div id="debtPaymentModal" className="modal" data-backdrop="static" data-keyboard="false" aria-labelledby="debtPaymentModalLabel" aria-hidden="true">
             <div className="modal-dialog modal-md modal-dialog-centered modal-dialog-scrollable">
                 <div className="modal-content">
                     <div className="modal-header">
-                        <h5 className="modal-title" id="invoiceModalLabel">
-                            Datos de la factura
+                        <h5 className="modal-title" id="debtPaymentModalLabel">
+                            Datos de pago
                         </h5>
-                        <button onClick={() => { window.$("#invoiceModal").modal("hide"); }} type="button" className="close" aria-label="Close">
+                        <button onClick={() => { window.$("#debtPaymentModal").modal("hide"); }} type="button" className="close" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     <div className="modal-body">
                         <div className="row">
                             <div className="col">
-                                <div className="d-flex justify-content-between mb-3">
-                                    {props.action === "newSale" &&
-                                        <ClientSearch
-                                            onClientSelect={props.onClientSelect}
-                                            value={props.client}
-                                            dolarReference={props.dolarReference}
-                                        />
-                                    }
-                                    {props.action === "payDebt" &&
-                                        <input className="form-control text-center" type="text" value={props.client.name} disabled />
-                                    }
-                                    {props.action === "newSale" &&
-                                        <button onClick={() => { window.$("#newClientModal").modal("show"); }} className="btn btn-secondary" type="button" id="newClientButton">
-                                            <svg width="1em" height="1em" viewBox="0 0 16 16" className="bi bi-person-plus-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                <path fillRule="evenodd" d="M1 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm7.5-3a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5z" />
-                                            </svg>
-                                        </button>
-                                    }
-                                </div>
+                                <input type="text" id="clientName" />
                             </div>
                         </div>
                         <div className="row">
@@ -57,23 +29,9 @@ const InvoiceModal = (props) => {
                                 <input className="form-control" type="tel" name="phone" id="phone" placeholder="Telefono" value={(props.client) ? formatPhoneNumber(props.client.phoneNumber) : ""} disabled />
                             </div>
                         </div>
-                        <div className="row mt-2 border-bottom">
-                            {(props.client && props.client.sales && props.client.sales.length > 0) &&
-                                <DebtTable
-                                    client={props.client}
-                                    calculateSaleTotal={props.calculateSaleTotal}
-                                    calculatePaymentsTotal={props.calculatePaymentsTotal}
-                                    payIndividualDebtHandler={props.payIndividualDebtHandler}
-                                    onDebtIdClick={props.onDebtIdClick}
-                                    dolarReference={props.dolarReference}
-                                    openPaymentMethodsModalHandler={props.openPaymentMethodsModalHandler}
-                                />
-                            }
-                        </div>
                         <div className="row mt-2">
                             <div className="col">
                                 <span role="button" onClick={props.openPaymentMethodsModalHandler} className="btn-link"> Agregar método de pago </span>
-
                                 {props.paymentInfo && props.paymentInfo.map(payment => {
                                     switch (payment.type.toLowerCase()) {
                                         case "pointofsale":
@@ -122,25 +80,15 @@ const InvoiceModal = (props) => {
                                 <span className="font-weight-bold">Subtotal: </span>
                             </div>
                             <div className="col-3 text-center p-0">
-                                <span className="text-danger">{Math.abs(props.invoiceTotal).toLocaleString("es-VE") + (props.invoiceCurrency === "USD" ? ` ${props.invoiceCurrency}` : "")}</span>
+                                <span className="text-danger">{props.invoiceTotalBs.toLocaleString("es-VE")}</span>
                             </div>
                         </div>
-                        {props.debtTotalBs > 0 &&
-                            <div className="row">
-                                <div className="col-9 text-right pr-0">
-                                    <span className="font-weight-bold">Deuda: </span>
-                                </div>
-                                <div className="col-3 text-center p-0">
-                                    <span className="text-danger">{props.debtTotalBs.toLocaleString("es-VE")}</span>
-                                </div>
-                            </div>
-                        }
                         <div className="row">
                             <div className="col-9 text-right pr-0">
                                 <span className="font-weight-bold">Total: </span>
                             </div>
                             <div className="col-3 text-center p-0">
-                                <span className="text-danger">{(Math.abs(props.invoiceTotal) + props.debtTotalBs).toLocaleString("es-VE") + (props.invoiceCurrency === "USD" ? ` ${props.invoiceCurrency}` : "")}</span>
+                                <span className="text-danger">{(props.invoiceTotalBs).toLocaleString("es-VE")}</span>
                             </div>
                         </div>
                         <div className="row">
@@ -161,7 +109,7 @@ const InvoiceModal = (props) => {
                         <button onClick={() => { window.$("#invoiceModal").modal("hide"); }} type="button" className="btn btn-secondary" >
                             Cerrar
                         </button>
-                        <button ref={props.saleSubmitButton} onClick={props.action === "newSale" ? props.onSaleSubmitHandler : props.action === "payDebt" ? props.paymentSubmitHandler : () => { }} type="button" className="btn btn-primary">
+                        <button ref={props.saleSubmitButton} onClick={props.onSaleSubmitHandler} type="button" className="btn btn-primary">
                             Enviar
                         </button>
                     </div>
@@ -189,4 +137,4 @@ const InvoiceModal = (props) => {
     );
 };
 
-export default InvoiceModal;
+export default DebtPaymentModal;

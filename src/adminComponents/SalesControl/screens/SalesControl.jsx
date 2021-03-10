@@ -1,8 +1,8 @@
-import React from "react"
+import React from "react";
 
-import OrderForm from "../containers/OrderFormContainer"
-import ProductsTable from "../components/ProductsTable"
-import InvoiceModal from "../screens/InvoiceModalContainer"
+import OrderForm from "../containers/OrderFormContainer";
+import ProductsTable from "../../products/components/ProductsTable";
+import InvoiceModal from "../containers/InvoiceModalContainer";
 
 const SalesControl = (props) => {
     return (
@@ -13,8 +13,10 @@ const SalesControl = (props) => {
                 </div>
             </div>
             <div className="row mb-2 mt-0">
-                <div className="col">
-                    <span className={(props.messageInfo && props.messageInfo.type) === "error" ? "text-danger" : "text-success"}>{(props.messageInfo && props.messageInfo.message)}</span>
+                <div className="col-12">
+                    {props.messageInfo.message &&
+                        <div className={props.messageInfo.type == 'error' ? 'alert alert-danger' : 'alert alert-success'}>{props.messageInfo.message}</div>
+                    }
                 </div>
             </div>
             <OrderForm onProductSubmit={props.onProductSubmit}
@@ -30,17 +32,23 @@ const SalesControl = (props) => {
                 <div className="col-12 col-lg-10">
                     <ProductsTable
                         editProductQuantityHandler={props.editProductQuantityHandler}
-                        invoiceTotalBs={props.invoiceTotalBs}
                         invoiceTotalDollars={props.invoiceTotalDollars}
                         onProductDelete={props.onProductDelete}
                         products={props.products} />
                 </div>
             </div>
             {props.showInvoiceModal &&
-                <InvoiceModal dolarReference={props.dolarReference} />
+                <InvoiceModal
+                    action="newSale"
+                    dolarReference={props.dolarReference}
+                    invoiceTotal={props.invoiceTotalBs}
+                    products={props.products}
+                    toggleInvoiceModal={props.toggleInvoiceModal}
+                    onSaleSubmit={props.onSaleSubmit}
+                />
             }
         </div>
-    )
-}
+    );
+};
 
-export default SalesControl
+export default SalesControl;

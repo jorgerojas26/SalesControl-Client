@@ -2,10 +2,49 @@ body {
   background-image: url("/pattern/leaves-pattern.png");
 }
 
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.sticky-footer tfoot,
+.sticky-footer tfoot th,
+.sticky-footer tfoot td{
+  position: sticky;
+  bottom: 0;
+  background: lightgray;
+  color: #dc3545;
+}
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
 .App {
   text-align: center;
 }
+.p-floating-container {
+    position: relative;
+}
 
+.p-floating-container label {
+    /* Position the label */
+    left: 8px;
+    position: absolute;
+    top: 0;
+
+    /* Hide it by default */
+    opacity: 0;
+    transition: 'all 200ms',
+}
+
+/* Show the label at desired position when the placeholder of input isn't shown */
+.p-floating-container input:not(:placeholder-shown) + label {
+    background: #FFF;
+    transform: translate(0, -50%);
+    opacity: 1;
+}
 .productImage {
   object-fit: contain;
   width: 100%;
