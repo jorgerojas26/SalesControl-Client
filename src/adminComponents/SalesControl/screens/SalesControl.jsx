@@ -23,7 +23,7 @@ const SalesControl = (props) => {
                 showMessageInfo={props.showMessageInfo}
                 dolarReference={props.dolarReference}
             />
-            <div className="row">
+            <div className="row mt-2">
                 <div className="col-12 col-lg-2">
                     <div className="form-group">
                         <input onClick={props.openInvoiceModal} type="button" className="form-control btn btn-primary" value="Procesar venta" />

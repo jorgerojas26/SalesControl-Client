@@ -23,6 +23,7 @@ class PointOfSalePaymentContainer extends Component {
     async componentDidMount() {
         if (this.props.loadNextTicketId) {
             let ticketId = await this.getLastTicketId() + 1;
+            console.log(ticketId)
             this.setState({
                 ticketId
             });
@@ -33,8 +34,8 @@ class PointOfSalePaymentContainer extends Component {
     getLastTicketId() {
         return new Promise((resolve, reject) => {
             pointOfSalesRequests.fetchLastOne().then(response => {
-                if (response.data.length > 0) {
-                    resolve(response.data[0].ticketId);
+                if (response) {
+                    resolve(response.ticketId);
                 } else {
                     resolve(0);
                 }

@@ -41,7 +41,6 @@ const functions = {
         });
 
         let response = await pointofsales.json();
-
         return response;
     },
     create: async function (pointofsale) {
