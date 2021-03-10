@@ -105,7 +105,7 @@ class Sales extends Component {
                             { title: "Cédula", data: "client.cedula" },
                             { title: "Fecha creación", data: "createdAt" }
 
-                        ]} actions={["edit", "delete", "viewSaleDetails"]} />
+                        ]} actions={["delete", "viewSaleDetails"]} />
                     </div>
                 </div>
                 {this.state.showSaleDetails &&
