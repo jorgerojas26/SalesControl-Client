@@ -26,6 +26,7 @@ class OrderFormContainer extends Component {
         this.onChangeHandler = this.onChangeHandler.bind(this);
         this.onProductSubmit = this.onProductSubmit.bind(this);
         this.onProductSelect = this.onProductSelect.bind(this);
+        this.onProductSearchFocus = this.onProductSearchFocus.bind(this);
     }
 
     onChangeHandler(event) {
@@ -54,6 +55,12 @@ class OrderFormContainer extends Component {
             selectedProduct: {
                 ...selectedProduct,
             }
+        });
+    }
+
+    onProductSearchFocus() {
+        this.setState({
+            selectedProduct: null
         });
     }
 
@@ -89,7 +96,6 @@ class OrderFormContainer extends Component {
     }
 
     render() {
-
         return <OrderForm onChangeHandler={this.onChangeHandler}
             messageInfo={this.state.messageInfo}
             productSelectRef={this.productSelectRef}
@@ -98,6 +104,7 @@ class OrderFormContainer extends Component {
             quantityInputRef={this.quantityInputRef}
             onProductSelect={this.onProductSelect}
             dolarReference={this.props.dolarReference}
+            onProductSearchFocus={this.onProductSearchFocus}
         />;
     }
 

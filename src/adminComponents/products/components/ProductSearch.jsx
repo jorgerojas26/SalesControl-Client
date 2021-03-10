@@ -9,6 +9,8 @@ const ProductSearch = (props) => {
                 loadOptions={props.onSearchHandler}
                 value={props.currentSelectedProduct}
                 ref={props.innerRef}
+                onFocus={props.onFocus}
+                isClearable
                 autoFocus
                 placeholder="Buscar producto"
                 onChange={props.onChangeHandler}
