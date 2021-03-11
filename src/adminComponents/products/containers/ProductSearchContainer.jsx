@@ -21,7 +21,6 @@ class ProductSearchContainer extends Component {
         this.onFocusHandler = this.onFocusHandler.bind(this);
     }
 
-
     onChangeHandler(selectedProduct, action) {
         if (action.action === "select-option") {
             this.props.onProductSelect(selectedProduct, action);

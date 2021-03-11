@@ -35,6 +35,9 @@ class NewClientFormContainer extends Component {
                 this.nameInputRef.current.focus();
             });
         });
+        window.$("#newClientModal").on("hide.bs.modal", () => {
+            this.props.closeNewClientFormModal();
+        });
     }
     onChangeHandler(event) {
         let clientData = this.state.clientData;

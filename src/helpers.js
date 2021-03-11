@@ -176,10 +176,10 @@ module.exports = {
             invoiceTotalBs = freezeDebt ? invoiceTotalBs : nonFreezedSaleTotal < freezedSaleTotal ? freezedSaleTotal : nonFreezedSaleTotal;
 
             if (higherPayment.payment) {
-            /*
-                debtTotal = higherPayment.payment.currency === "Bs" ? (invoiceTotalBs - expressedPaymentTotal) : ((invoiceTotalBs - expressedPaymentTotal) / higherPayment.dolarReference);
-                debtCurrency = higherPayment.payment.currency;
-                */
+                /*
+                    debtTotal = higherPayment.payment.currency === "Bs" ? (invoiceTotalBs - expressedPaymentTotal) : ((invoiceTotalBs - expressedPaymentTotal) / higherPayment.dolarReference);
+                    debtCurrency = higherPayment.payment.currency;
+                    */
                 debtTotal = invoiceTotalBs - expressedPaymentTotal;
                 debtCurrency = "Bs";
             }
@@ -191,7 +191,7 @@ module.exports = {
         return { debtTotal, debtCurrency };
     },
     formatPhoneNumber(number) {
-        if (!number) return;
+        if (!number) return "";
         var cleaned = number.replace(/\D/g, '');
         var match = cleaned.match(/^(\d{4})(\d{3})(\d{4})$/);
         if (match) {

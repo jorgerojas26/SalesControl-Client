@@ -29,6 +29,8 @@ class InvoiceModalContainer extends Component {
             currentSelectedClient: props.client || null,
             showDebtDetails: false,
             showPaymentMethodsModal: false,
+            showNewClientFormModal: false,
+            cedulaToBeCreated: "",
             paymentMethodsModalProps: null,
             debtInfo: [],
             submittingSale: false,
@@ -50,6 +52,8 @@ class InvoiceModalContainer extends Component {
         this.onNewClientSubmitHandler = this.onNewClientSubmitHandler.bind(this);
         this.payCurrentDebt = this.payCurrentDebt.bind(this);
         this.paymentSubmitHandler = this.paymentSubmitHandler.bind(this);
+        this.openNewClientFormModal = this.openNewClientFormModal.bind(this);
+        this.closeNewClientFormModal = this.closeNewClientFormModal.bind(this);
     }
 
     componentDidMount() {
@@ -85,6 +89,7 @@ class InvoiceModalContainer extends Component {
         });
         window.$("#invoiceModal").on("hidden.bs.modal", (event) => {
             if (this.props.action == "newSale") {
+                window.$("#productSearchInput").focus();
                 //document.body.removeEventListener("keyup", shortcutListener);
             }
         });
@@ -107,7 +112,7 @@ class InvoiceModalContainer extends Component {
     onClientSelect(selectedClient, actionType) {
         if (actionType.action == 'select-option') {
             selectedClient.label = selectedClient.name;
-            selectedClient.phoneNumber = formatPhoneNumber(selectedClient.phoneNumber);
+            selectedClient.phoneNumber = selectedClient.phoneNumber || "";
             window.$("#invoiceModal").find("input").focus();
         }
 
@@ -666,11 +671,26 @@ class InvoiceModalContainer extends Component {
         this.setState({
             currentSelectedClient: client
         }, () => {
-        console.log(this.state.currentSelectedClient);
-        window.$("#newClientModal").modal("hide");
-        window.$("#invoiceModal").find("input").focus();
+            console.log(this.state.currentSelectedClient);
+            window.$("#newClientModal").modal("hide");
+            window.$("#invoiceModal").find("input").focus();
         });
-        
+
+    }
+
+    openNewClientFormModal(cedulaToBeCreated) {
+        this.setState({
+            showNewClientFormModal: true,
+            cedulaToBeCreated
+        }, () => {
+            window.$("#newClientModal").modal("show");
+        });
+    }
+
+    closeNewClientFormModal() {
+        this.setState({
+            showNewClientFormModal: false
+        });
     }
 
     render() {
@@ -700,6 +720,10 @@ class InvoiceModalContainer extends Component {
                 onSaleSubmitHandler={this.onSaleSubmitHandler}
                 paymentSubmitHandler={this.paymentSubmitHandler}
                 onNewClientSubmitHandler={this.onNewClientSubmitHandler}
+                openNewClientFormModal={this.openNewClientFormModal}
+                closeNewClientFormModal={this.closeNewClientFormModal}
+                showNewClientFormModal={this.state.showNewClientFormModal}
+                cedulaToBeCreated={this.state.cedulaToBeCreated}
             />
         );
     }

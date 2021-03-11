@@ -1,12 +1,13 @@
-import React from "react"
+import React from "react";
 
-import AsyncSelect from 'react-select/async';
+import AsyncSelect from 'react-select/async-creatable';
 
 const ClientSearch = (props) => {
     return (
         <div className="container-fluid p-0">
             <AsyncSelect
                 loadOptions={props.onSearch}
+                onInputChange={props.onInputChange}
                 autoFocus
                 ref={props.clientSelectRef}
                 className="w-100"
@@ -16,7 +17,7 @@ const ClientSearch = (props) => {
                 value={props.value}
                 onChange={props.onClientSelect}
                 styles={{
-                    singleValue: (styles, {data}) => ({
+                    singleValue: (styles, { data }) => ({
                         ...styles,
                         width: '100%',
                     }),
@@ -24,7 +25,7 @@ const ClientSearch = (props) => {
             />
 
         </div>
-    )
-}
+    );
+};
 
 export default ClientSearch;

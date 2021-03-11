@@ -12,6 +12,7 @@ const ProductSearch = (props) => {
                 onFocus={props.onFocus}
                 isClearable
                 autoFocus
+                inputId="productSearchInput"
                 placeholder="Buscar producto"
                 onChange={props.onChangeHandler}
                 styles={{

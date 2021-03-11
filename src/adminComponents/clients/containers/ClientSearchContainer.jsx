@@ -10,9 +10,14 @@ class ClientSearchContainer extends Component {
     constructor() {
         super();
 
+        this.state = {
+            inputValue: null
+        };
         this.clientSelectRef = React.createRef();
 
         this.onClientSelect = this.onClientSelect.bind(this);
+        this.onInputChange = this.onInputChange.bind(this);
+
     }
 
 
@@ -40,28 +45,39 @@ class ClientSearchContainer extends Component {
     }
 
     onClientSelect(selectedClient, action) {
-        if (selectedClient) {
-            selectedClient.sales.forEach(sale => {
-                let nonFreezedSaleTotal = calculateSaleTotal(sale, false, this.props.dolarReference);
-                let freezedSaleTotal = calculateSaleTotal(sale, true);
-                let expressedPaymentTotal = calculatePaymentsTotal(sale.payment);
-                let freezePrices = false;
-                if (freezedSaleTotal - expressedPaymentTotal <= 0 || nonFreezedSaleTotal < freezedSaleTotal) {
-                    freezePrices = true;
-                }
-                let debtInfo = calculateDebtTotal(sale, this.props.dolarReference, freezePrices);
-                if (debtInfo.debtTotal < 0 && debtInfo.debtTotal.toFixed(2) == 0) {
-                    debtInfo.debtTotal = -0.01;
-                }
-                else if (debtInfo.debtTotal > 0 && debtInfo.debtTotal.toFixed(2) == 0) {
-                    debtInfo.debtTotal = 0.01;
-                }
-                sale.debtTotal = debtInfo.debtTotal;
-                sale.debtCurrency = debtInfo.debtCurrency;
-            });
+        if (action.action == "select-option") {
+            if (selectedClient) {
+                selectedClient.sales.forEach(sale => {
+                    let nonFreezedSaleTotal = calculateSaleTotal(sale, false, this.props.dolarReference);
+                    let freezedSaleTotal = calculateSaleTotal(sale, true);
+                    let expressedPaymentTotal = calculatePaymentsTotal(sale.payment);
+                    let freezePrices = false;
+                    if (freezedSaleTotal - expressedPaymentTotal <= 0 || nonFreezedSaleTotal < freezedSaleTotal) {
+                        freezePrices = true;
+                    }
+                    let debtInfo = calculateDebtTotal(sale, this.props.dolarReference, freezePrices);
+                    if (debtInfo.debtTotal < 0 && debtInfo.debtTotal.toFixed(2) == 0) {
+                        debtInfo.debtTotal = -0.01;
+                    }
+                    else if (debtInfo.debtTotal > 0 && debtInfo.debtTotal.toFixed(2) == 0) {
+                        debtInfo.debtTotal = 0.01;
+                    }
+                    sale.debtTotal = debtInfo.debtTotal;
+                    sale.debtCurrency = debtInfo.debtCurrency;
+                });
 
+            }
+            this.props.onClientSelect(selectedClient, action);
         }
-        this.props.onClientSelect(selectedClient, action);
+        else if (action.action == "create-option") {
+            this.props.openNewClientFormModal(this.state.inputValue);
+        }
+    }
+
+    onInputChange(value) {
+        this.setState({
+            inputValue: value
+        });
     }
 
     render() {
@@ -71,6 +87,7 @@ class ClientSearchContainer extends Component {
                 onSearch={this.onSearchHandler}
                 onClientSelect={this.onClientSelect}
                 clientSelectRef={this.clientSelectRef}
+                onInputChange={this.onInputChange}
             />
         );
     }

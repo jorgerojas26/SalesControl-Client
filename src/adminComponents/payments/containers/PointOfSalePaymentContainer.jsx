@@ -23,7 +23,6 @@ class PointOfSalePaymentContainer extends Component {
     async componentDidMount() {
         if (this.props.loadNextTicketId) {
             let ticketId = await this.getLastTicketId() + 1;
-            console.log(ticketId)
             this.setState({
                 ticketId
             });

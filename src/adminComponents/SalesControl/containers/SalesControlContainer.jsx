@@ -36,6 +36,7 @@ class SalesControlContainer extends Component {
                 this.openInvoiceModal();
             }
         });
+
     }
 
     toggleInvoiceModal() {
