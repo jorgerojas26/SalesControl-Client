@@ -64,7 +64,27 @@ const Reports = (props) => {
                         </div>
                     </div>
                 </div>
-                <div className="col-12 col-xl-9 mt-3 mt-xl-0 border-left border-top">
+                <div className="col-12 col-xl-9 mt-3 mt-xl-0 p-0 border-left border-top">
+                    <input onChange={(event) => {
+                        var input, filter, table, tr, td, i, txtValue;
+                        input = event.target;
+                        filter = input.value.toUpperCase();
+                        table = document.getElementById("salesReportTable");
+                        tr = table.getElementsByTagName("tr");
+
+                        // Loop through all table rows, and hide those who don't match the search query
+                        for (i = 0; i < tr.length; i++) {
+                            td = tr[i].getElementsByTagName("td")[1];
+                            if (td) {
+                                txtValue = td.textContent || td.innerText;
+                                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                                    tr[i].style.display = "";
+                                } else {
+                                    tr[i].style.display = "none";
+                                }
+                            }
+                        }
+                    }} type="search" className="form-control bg-transparent font-weight-bold" placeholder="Buscar" />
                     <div className="overflow-auto sticky-footer" style={{ maxHeight: "45vh" }}>
                         <table id="salesReportTable" className="table table-borderless table-striped">
                             <thead>
@@ -81,17 +101,17 @@ const Reports = (props) => {
 
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="h6">
                                 {props.salesInfo && props.salesInfo.map(row => {
                                     return (
                                         <tr>
-                                            <th>{row.productId}</th>
-                                            <th>{row.productName}</th>
-                                            <th>{row.soldQuantity}</th>
-                                            <th>{row.grossIncome.toFixed(2).toLocaleString("es-VE")}</th>
-                                            <th>{row.netIncome.toFixed(2).toLocaleString("es-VE")}</th>
-                                            <th>{row.grossIncomeBs.toLocaleString("es-VE")}</th>
-                                            <th>{row.netIncomeBs.toLocaleString("es-VE")}</th>
+                                            <td>{row.productId}</td>
+                                            <td>{row.productName}</td>
+                                            <td>{row.soldQuantity}</td>
+                                            <td>{row.grossIncome.toFixed(2).toLocaleString("es-VE")}</td>
+                                            <td>{row.netIncome.toFixed(2).toLocaleString("es-VE")}</td>
+                                            <td>{row.grossIncomeBs.toLocaleString("es-VE")}</td>
+                                            <td>{row.netIncomeBs.toLocaleString("es-VE")}</td>
                                         </tr>
                                     );
                                 })}
