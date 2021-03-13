@@ -54,15 +54,11 @@ class BankTransferPaymentContainer extends Component {
     }
 
     onReferenceCodeChange(event) {
-        let input = event.target.value;
-        input = input.replace(/[\D\s\._\-]+/g, "");
-        input = input ? parseInt(input, 10) : 0;
-
         this.setState({
-            referenceCode: input
+            referenceCode: event.target.value
         });
 
-        this.props.onPropertyChange(this.props.id, "referenceCode", input);
+        this.props.onPropertyChange(this.props.id, "referenceCode", event.target.value);
     }
 
     onBankChange(event) {

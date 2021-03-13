@@ -200,13 +200,13 @@ module.exports = {
         return number;
     },
     parsePaymentMethodName(name) {
-        if (name.toLowerCase().startsWith("bank transfer")) {
+        if (name.toLowerCase().includes("bank transfer")) {
             return "Transferencia Bancaria";
         }
-        else if (name.toLowerCase().startsWith("cash")) {
+        else if (name.toLowerCase().includes("cash")) {
             return "Efectivo";
         }
-        else if (name.toLowerCase().startsWith("point of sale")) {
+        else if (name.toLowerCase().includes("point of sale")) {
             return "Punto de Venta";
         }
 

@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { parsePaymentMethodName } from "../../../helpers";
+
 const PaymentMethodsModal = (props) => {
     return (
         <div ref={props.innerRef} id="paymentMethodsModal" className="modal" data-backdrop="static" data-keyboard="false" aria-hidden="true">
@@ -19,7 +21,7 @@ const PaymentMethodsModal = (props) => {
                                 data-id={paymentMethod.id}
                                 data-type={paymentMethod.type}
                                 onClick={props.onClick}
-                            >{paymentMethod.name}</button>;
+                            >{parsePaymentMethodName(paymentMethod.name)}</button>;
                         })}
                     </div>
                 </div>
