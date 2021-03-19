@@ -60,7 +60,7 @@ const Reports = (props) => {
                         <div className="w-25">
                             <button onClick={props.submitQuery} type="submit" className="btn btn-primary">
                                 {props.submitLoading && <span className="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true" />}
-                                        Enviar</button>
+                                        Consultar</button>
                         </div>
                     </div>
                 </div>
@@ -104,10 +104,10 @@ const Reports = (props) => {
                             <tbody className="h6">
                                 {props.salesInfo && props.salesInfo.map(row => {
                                     return (
-                                        <tr>
+                                        <tr key={row.productId}>
                                             <td>{row.productId}</td>
                                             <td>{row.productName}</td>
-                                            <td>{row.soldQuantity}</td>
+                                            <td>{row.soldQuantity % 1 != 0 ? row.soldQuantity.toFixed(3) : row.soldQuantity}</td>
                                             <td>{row.grossIncome.toFixed(2).toLocaleString("es-VE")}</td>
                                             <td>{row.netIncome.toFixed(2).toLocaleString("es-VE")}</td>
                                             <td>{row.grossIncomeBs.toLocaleString("es-VE")}</td>
@@ -148,32 +148,32 @@ const Reports = (props) => {
                                                 <th>Cantidad</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody className="h6" >
                                             {props.paymentInfo.map(payment => {
                                                 if (payment.paymentMethodName.toLowerCase().includes("cash")) {
                                                     return (
-                                                        <tr>
-                                                            <th>EFECTIVO</th>
-                                                            <th>{payment.currency}</th>
-                                                            <th>{payment.amount.toLocaleString("es-VE")}</th>
+                                                        <tr key={new Date().getTime() + Math.random()}>
+                                                            <td>EFECTIVO</td>
+                                                            <td>{payment.currency}</td>
+                                                            <td>{payment.amount.toLocaleString("es-VE")}</td>
                                                         </tr>
                                                     );
                                                 }
                                                 else if (payment.paymentMethodName.toLowerCase().includes("point of sale")) {
                                                     return (
-                                                        <tr>
-                                                            <th>PUNTO DE VENTA</th>
-                                                            <th>{payment.currency}</th>
-                                                            <th>{payment.amount.toLocaleString("es-VE")}</th>
+                                                        <tr key={new Date().getTime() + Math.random()}>
+                                                            <td>PUNTO DE VENTA</td>
+                                                            <td>{payment.currency}</td>
+                                                            <td>{payment.amount.toLocaleString("es-VE")}</td>
                                                         </tr>
                                                     );
                                                 }
                                                 else if (payment.paymentMethodName.toLowerCase().includes("bank transfer")) {
                                                     return (
-                                                        <tr>
-                                                            <th>TRANSFERENCIA BANCARIA</th>
-                                                            <th>{payment.currency}</th>
-                                                            <th>{payment.amount.toLocaleString("es-VE")}</th>
+                                                        <tr key={new Date().getTime() + Math.random()}>
+                                                            <td>TRANSFERENCIA BANCARIA</td>
+                                                            <td>{payment.currency}</td>
+                                                            <td>{payment.amount.toLocaleString("es-VE")}</td>
                                                         </tr>
                                                     );
 
@@ -198,15 +198,15 @@ const Reports = (props) => {
                                                 <th>Fecha Pago</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody className="h6">
                                             {props.debtInfo.map(debt => {
                                                 return (
-                                                    <tr>
-                                                        <th onClick={props.onDebtIdClick} role="button" className="btn-link" data-debtid={debt.id}>{debt.id}</th>
-                                                        <th>{debt.client.name}</th>
-                                                        <th>{debt.client.cedula}</th>
-                                                        <th>{debt.createdAt}</th>
-                                                        <th>{debt.fullyPaidDate ? debt.fullyPaidDate : "NO PAGADO"}</th>
+                                                    <tr key={debt.id}>
+                                                        <td onClick={props.onDebtIdClick} role="button" className="btn-link" data-debtid={debt.id}>{debt.id}</td>
+                                                        <td>{debt.client.name}</td>
+                                                        <td>{debt.client.cedula}</td>
+                                                        <td>{debt.createdAt}</td>
+                                                        <td>{debt.fullyPaidDate ? debt.fullyPaidDate : "NO PAGADO"}</td>
                                                     </tr>
                                                 );
                                             })}

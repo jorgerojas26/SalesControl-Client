@@ -93,8 +93,6 @@ class ReportsContainer extends Component {
 
                     let grossIncomeTotal = 0, netIncomeTotal = 0, grossIncomeTotalBs = 0, netIncomeTotalBs = 0;
                     salesReport.map(product => {
-                        product.grossIncomeBs = roundUpProductPrice(product.grossIncomeBs);
-                        product.netIncomeBs = roundUpProductPrice(product.netIncomeBs);
                         grossIncomeTotal += product.grossIncome;
                         netIncomeTotal += product.netIncome;
                         grossIncomeTotalBs += product.grossIncomeBs;
