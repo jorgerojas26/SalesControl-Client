@@ -4,6 +4,22 @@ import DebtDetailsModal from '../../debts/components/DebtDetailsModal';
 
 
 const Reports = (props) => {
+    let totalBs = 0;
+    let totalDollars = 0;
+    let totalDollarsToBs = 0;
+    if (props.debtInfo) {
+        props.debtInfo.map(debt => {
+            debt.payment.map(payment => {
+                if (payment.currency == "Bs") {
+                    totalBs += payment.amount;
+                }
+                else if (payment.currency == "USD") {
+                    totalDollars += payment.amount;
+                    totalDollarsToBs += Math.round(payment.amount * payment.cash[0].dolarReference);
+                }
+            });
+        });
+    }
     return (
         <div id="reportContainer" className="container-fluid">
             <div className="row">
@@ -155,7 +171,14 @@ const Reports = (props) => {
                                                         <tr key={new Date().getTime() + Math.random()}>
                                                             <td>EFECTIVO</td>
                                                             <td>{payment.currency}</td>
-                                                            <td>{payment.amount.toLocaleString("es-VE")}</td>
+                                                            <td className="text-center">{payment.cashToBs == null ?
+                                                                payment.amount.toLocaleString("es-VE")
+                                                                : <div className="text-center">
+                                                                    <span>{payment.amount.toLocaleString("es-VE")}</span>
+                                                                    < br />
+                                                                    <span className="blockquote-footer">{payment.cashToBs.toLocaleString("es-VE")}</span>
+                                                                </div>
+                                                            }</td>
                                                         </tr>
                                                     );
                                                 }
@@ -164,7 +187,7 @@ const Reports = (props) => {
                                                         <tr key={new Date().getTime() + Math.random()}>
                                                             <td>PUNTO DE VENTA</td>
                                                             <td>{payment.currency}</td>
-                                                            <td>{payment.amount.toLocaleString("es-VE")}</td>
+                                                            <td className="text-center">{payment.amount.toLocaleString("es-VE")}</td>
                                                         </tr>
                                                     );
                                                 }
@@ -173,10 +196,9 @@ const Reports = (props) => {
                                                         <tr key={new Date().getTime() + Math.random()}>
                                                             <td>TRANSFERENCIA BANCARIA</td>
                                                             <td>{payment.currency}</td>
-                                                            <td>{payment.amount.toLocaleString("es-VE")}</td>
+                                                            <td className="text-center">{payment.amount.toLocaleString("es-VE")}</td>
                                                         </tr>
                                                     );
-
                                                 }
                                             })}
                                         </tbody>
@@ -188,30 +210,50 @@ const Reports = (props) => {
                             {props.debtInfo &&
                                 <div className="mt-2">
                                     <h4 className="text-danger">Reporte de deudas</h4>
-                                    <table id="debtsReportTable" className="table table-bordered table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>ID Venta</th>
-                                                <th>Nombre</th>
-                                                <th>Cédula</th>
-                                                <th>Fecha Venta</th>
-                                                <th>Fecha Pago</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="h6">
-                                            {props.debtInfo.map(debt => {
-                                                return (
-                                                    <tr key={debt.id}>
-                                                        <td onClick={props.onDebtIdClick} role="button" className="btn-link" data-debtid={debt.id}>{debt.id}</td>
-                                                        <td>{debt.client.name}</td>
-                                                        <td>{debt.client.cedula}</td>
-                                                        <td>{debt.createdAt}</td>
-                                                        <td>{debt.fullyPaidDate ? debt.fullyPaidDate : "NO PAGADO"}</td>
-                                                    </tr>
-                                                );
-                                            })}
-                                        </tbody>
-                                    </table>
+                                    <div className="overflow-auto sticky-footer" style={{ maxHeight: "35vh" }}>
+                                        <table id="debtsReportTable" className="table table-bordered table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID Venta</th>
+                                                    <th>Nombre</th>
+                                                    <th>Cédula</th>
+                                                    <th>Monto pagado</th>
+                                                    <th>Fecha Venta</th>
+                                                    <th>Fecha Pago</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="h6">
+                                                {props.debtInfo.map(debt => {
+                                                    return (
+                                                        <tr key={debt.id}>
+                                                            <td onClick={props.onDebtIdClick} role="button" className="btn-link" data-debtid={debt.id}>{debt.id}</td>
+                                                            <td>{debt.client.name}</td>
+                                                            <td scope="col">{debt.client.cedula}</td>
+                                                            <td>{debt.payment.map((payment, index) => {
+                                                                return <div><span className={payment.amount < 0 ? "text-danger" : "text-success"}>{`${payment.amount.toLocaleString("es-VE")} ${payment.currency}`}</span><br /></div>;
+                                                            })}</td>
+                                                            <td>{debt.createdAt}</td>
+                                                            <td>{debt.fullyPaidDate ? debt.fullyPaidDate : "NO PAGADO"}</td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                            <tfoot>
+                                                <tr className="font-weight-bold">
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td className="w-100">Total Ingresado</td>
+                                                    <td className="text-center">{totalBs.toLocaleString("es-VE")}</td>
+                                                    <td className="text-center">
+                                                        <span>{"$" + totalDollars.toLocaleString("es-VE")}</span>
+                                                        <span className="blockquote-footer">{totalDollarsToBs.toLocaleString("es-VE")}</span>
+                                                    </td>
+                                                    <td>
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
                                 </div>
                             }
                         </div>

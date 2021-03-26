@@ -33,6 +33,7 @@ class InvoiceModalContainer extends Component {
             cedulaToBeCreated: "",
             paymentMethodsModalProps: null,
             debtInfo: [],
+            isMoneyBack: false,
             submittingSale: false,
             confirmingSale: false
         };
@@ -149,11 +150,13 @@ class InvoiceModalContainer extends Component {
     addPaymentMethod(paymentType, defaultInfo) {
         let paymentInfo = this.state.paymentInfo;
         let debtInfo = this.state.paymentMethodsModalProps;
+        let isMoneyBack = this.state.isMoneyBack;
         paymentInfo.push({
             ...defaultInfo,
             id: Date.now(),
             type: paymentType,
-            debtInfo
+            debtInfo,
+            isMoneyBack
         });
 
         this.setState({ paymentInfo }, () => {
@@ -207,10 +210,11 @@ class InvoiceModalContainer extends Component {
         });
     }
 
-    openPaymentMethodsModalHandler(event, props) {
+    openPaymentMethodsModalHandler(event, props, isMoneyBack) {
         this.setState({
             showPaymentMethodsModal: true,
-            paymentMethodsModalProps: props
+            paymentMethodsModalProps: props,
+            isMoneyBack
         }, () => {
             window.$("#paymentMethodsModal").modal("show");
         });
@@ -659,10 +663,9 @@ class InvoiceModalContainer extends Component {
             backdrop: true,
             buttons
         });
-        dialog.on("hidden.bs.modal", () => {
-            this.setState({
-                confirmingSale: false
-            });
+        dialog.on('show.bs.modal', function () {
+            console.log("asdqwdqwd");
+            window.$(dialog).find(".btn-default:first").focus();
         });
     }
 

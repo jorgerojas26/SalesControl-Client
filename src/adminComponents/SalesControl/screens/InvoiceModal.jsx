@@ -119,6 +119,7 @@ const InvoiceModal = (props) => {
                                 })}
                             </div>
                         </div>
+                        <span role="button" onClick={props.openPaymentMethodsModalHandler} className="btn-link"> Agregar devolución </span>
                     </div>
                     <hr className="col mt-0 mb-1" />
                     <div className="container-fluid">
