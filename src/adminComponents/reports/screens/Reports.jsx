@@ -2,24 +2,44 @@ import React from 'react';
 
 import DebtDetailsModal from '../../debts/components/DebtDetailsModal';
 
+import { calculateSaleTotal, calculatePaymentsTotal } from "../../../helpers";
 
 const Reports = (props) => {
-    let totalBs = 0;
-    let totalDollars = 0;
-    let totalDollarsToBs = 0;
+
+    let debtTotalIncomeBs = 0;
+    let debtTotalIncomeDollars = 0;
+    let debtTotalIncomeDollarsToBs = 0;
+    let nonPaidDebtTotalBs = 0;
+
     if (props.debtInfo) {
         props.debtInfo.map(debt => {
-            debt.payment.map(payment => {
-                if (payment.currency == "Bs") {
-                    totalBs += payment.amount;
+            let debtTotal = calculateSaleTotal(debt, true);
+            let paymentTotal = calculatePaymentsTotal(debt.payment);
+            if (!debt.isPaid) {
+                if (debt.payment.length == 0) {
+                    nonPaidDebtTotalBs += debtTotal;
                 }
-                else if (payment.currency == "USD") {
-                    totalDollars += payment.amount;
-                    totalDollarsToBs += Math.round(payment.amount * payment.cash[0].dolarReference);
+                else {
+                    let totalRemaining = debtTotal - paymentTotal;
+                    if (paymentTotal < debtTotal) {
+                        nonPaidDebtTotalBs += totalRemaining;
+                    }
                 }
-            });
+            }
+            else {
+                debt.payment.map(payment => {
+                    if (payment.currency == "Bs") {
+                        debtTotalIncomeBs += payment.amount;
+                    }
+                    else if (payment.currency == "USD") {
+                        debtTotalIncomeDollars += payment.amount;
+                        debtTotalIncomeDollarsToBs += Math.round(payment.amount * payment.cash[0].dolarReference);
+                    }
+                });
+            }
         });
     }
+
     return (
         <div id="reportContainer" className="container-fluid">
             <div className="row">
@@ -38,7 +58,7 @@ const Reports = (props) => {
                 </div>
             </div>
             <div className="row h-lg-75">
-                <div className="col-12 col-xl-3 text-center border-right border-top">
+                <div className="col-12 col-xl-3 text-center border-right border-top border-left">
                     <fieldset className="d-flex justify-content-center">
                         <legend className="w-auto">Período a consultar</legend>
 
@@ -150,9 +170,9 @@ const Reports = (props) => {
                 </div>
             </div>
             <div className="row">
-                <div className="col-12 col-xl-9 offset-xl-3 mt-3 border">
+                <div className="col-12 mt-3 border">
                     <div className="row">
-                        <div className="col-6">
+                        <div className="col-3">
                             {props.paymentInfo &&
                                 <div className="mt-2">
                                     <h4 className="text-danger">Reporte de pagos</h4>
@@ -206,7 +226,7 @@ const Reports = (props) => {
                                 </div>
                             }
                         </div>
-                        <div className="col-6">
+                        <div className="col-5">
                             {props.debtInfo &&
                                 <div className="mt-2">
                                     <h4 className="text-danger">Reporte de deudas</h4>
@@ -238,20 +258,32 @@ const Reports = (props) => {
                                                     );
                                                 })}
                                             </tbody>
-                                            <tfoot>
-                                                <tr className="font-weight-bold">
-                                                    <td></td>
-                                                    <td></td>
-                                                    <td className="w-100">Total Ingresado</td>
-                                                    <td className="text-center">{totalBs.toLocaleString("es-VE")}</td>
-                                                    <td className="text-center">
-                                                        <span>{"$" + totalDollars.toLocaleString("es-VE")}</span>
-                                                        <span className="blockquote-footer">{totalDollarsToBs.toLocaleString("es-VE")}</span>
-                                                    </td>
-                                                    <td>
-                                                    </td>
+                                        </table>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div className="col-4">
+                            {props.debtInfo &&
+                                <div>
+                                    <h4 className="text-danger">Resumen Deudas</h4>
+                                    <div className="mt-3">
+                                        <table id="debtSummaryReport" className="table table-bordered table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Total ingresado por pago de deudas</th>
+                                                    <th>Monto total de deudas adquiridas</th>
                                                 </tr>
-                                            </tfoot>
+                                            </thead>
+                                            <tbody className="h6 text-center">
+                                                <tr>
+                                                    <td>{debtTotalIncomeBs.toLocaleString("es-VE") + " Bs"}</td>
+                                                    <td>{nonPaidDebtTotalBs.toLocaleString("es-VE") + " Bs"}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>{"$" + debtTotalIncomeDollars.toLocaleString("en-US")}</td>
+                                                </tr>
+                                            </tbody>
                                         </table>
                                     </div>
                                 </div>

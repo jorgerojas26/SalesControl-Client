@@ -90,7 +90,6 @@ class ReportsContainer extends Component {
                     let salesReport = await reportsRequests.salesReport(this.state.startDate, this.state.endDate);
                     let paymentsReport = await reportsRequests.paymentsReport(this.state.startDate, this.state.endDate);
                     let debtsReport = await reportsRequests.debtsReport(this.state.startDate, this.state.endDate);
-                    console.log(paymentsReport);
                     let grossIncomeTotal = 0, netIncomeTotal = 0, grossIncomeTotalBs = 0, netIncomeTotalBs = 0;
                     salesReport.map(product => {
                         grossIncomeTotal += product.grossIncome;
