@@ -172,7 +172,7 @@ const Reports = (props) => {
             <div className="row">
                 <div className="col-12 mt-3 border">
                     <div className="row">
-                        <div className="col-3">
+                        <div className="col-12 col-xl-4">
                             {props.paymentInfo &&
                                 <div className="mt-2">
                                     <h4 className="text-danger">Reporte de pagos</h4>
@@ -230,7 +230,7 @@ const Reports = (props) => {
                                 </div>
                             }
                         </div>
-                        <div className="col-5">
+                        <div className="col-12 col-xl-5">
                             {props.debtInfo &&
                                 <div className="mt-2">
                                     <h4 className="text-danger">Reporte de deudas</h4>
@@ -267,7 +267,7 @@ const Reports = (props) => {
                                 </div>
                             }
                         </div>
-                        <div className="col-4">
+                        <div className="col-12 col-xl-3">
                             {props.debtInfo &&
                                 <div>
                                     <h4 className="text-danger">Resumen Deudas</h4>
