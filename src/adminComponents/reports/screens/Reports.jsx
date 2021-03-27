@@ -182,7 +182,6 @@ const Reports = (props) => {
                                                 <th>Método de pago</th>
                                                 <th>Moneda</th>
                                                 <th>Cantidad</th>
-                                                <th>Diferencia respecto a ventas</th>
                                             </tr>
                                         </thead>
                                         <tbody className="h6" >
@@ -200,7 +199,6 @@ const Reports = (props) => {
                                                                     <span className="blockquote-footer">{payment.cashToBs.toLocaleString("es-VE")}</span>
                                                                 </div>
                                                             }</td>
-                                                            <td>{payment.remaining && payment.remaining.toLocaleString("es-VE")}</td>
                                                         </tr>
                                                     );
                                                 }
@@ -210,7 +208,6 @@ const Reports = (props) => {
                                                             <td>PUNTO DE VENTA</td>
                                                             <td>{payment.currency}</td>
                                                             <td className="text-center">{payment.amount.toLocaleString("es-VE")}</td>
-                                                            <td>{payment.remaining && payment.remaining.toLocaleString("es-VE")}</td>
                                                         </tr>
                                                     );
                                                 }
@@ -220,7 +217,6 @@ const Reports = (props) => {
                                                             <td>TRANSFERENCIA BANCARIA</td>
                                                             <td>{payment.currency}</td>
                                                             <td className="text-center">{payment.amount.toLocaleString("es-VE")}</td>
-                                                            <td>{payment.remaining && payment.remaining.toLocaleString("es-VE")}</td>
                                                         </tr>
                                                     );
                                                 }
@@ -230,7 +226,7 @@ const Reports = (props) => {
                                 </div>
                             }
                         </div>
-                        <div className="col-12 col-xl-5">
+                        <div className="col-12 col-xl-6">
                             {props.debtInfo &&
                                 <div className="mt-2">
                                     <h4 className="text-danger">Reporte de deudas</h4>
@@ -267,10 +263,10 @@ const Reports = (props) => {
                                 </div>
                             }
                         </div>
-                        <div className="col-12 col-xl-3">
+                        <div className="col-12 col-xl-2">
                             {props.debtInfo &&
                                 <div>
-                                    <h4 className="text-danger">Resumen Deudas</h4>
+                                    <h4 className="text-danger mt-2">Resumen Deudas</h4>
                                     <div className="mt-3">
                                         <table id="debtSummaryReport" className="table table-bordered table-striped">
                                             <thead>

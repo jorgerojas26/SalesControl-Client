@@ -2,10 +2,8 @@ import React, { Component } from 'react';
 import ResourceTable from '../ResourceTable';
 import CustomSelect from '../../globalComponents/CustomSelect';
 
-import moment from 'moment';
 import $ from 'jquery';
-const DataTable = require('datatables.net');
-
+import { roundUpProductPrice } from "../../helpers";
 class Products extends Component {
   constructor() {
     super();
@@ -160,16 +158,6 @@ class Products extends Component {
     }
   }
 
-  roundToNiceNumber(value) {
-    var val = 0;
-    if (value.toString().length == 4) {
-      val = Math.ceil(value / 100) * 100;
-    } else if (value.toString().length > 4) {
-      val = Math.ceil(value / 1000) * 1000;
-    }
-
-    return val;
-  }
   render() {
     return (
       <div className="">
@@ -201,7 +189,7 @@ class Products extends Component {
                 { title: 'Precio $', data: 'price' },
                 {
                   render: data => {
-                    return Intl.NumberFormat('es-Ve', { style: 'currency', currency: 'VES' }).format(this.roundToNiceNumber(data * this.props.dolarReference));
+                    return Intl.NumberFormat('es-Ve', { style: 'currency', currency: 'VES' }).format(roundUpProductPrice(data * this.props.dolarReference));
                   },
                   title: 'Precio Bs',
                   data: 'price',
