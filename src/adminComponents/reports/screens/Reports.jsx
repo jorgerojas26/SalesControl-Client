@@ -281,7 +281,13 @@ const Reports = (props) => {
                                                     <td>{nonPaidDebtTotalBs.toLocaleString("es-VE") + " Bs"}</td>
                                                 </tr>
                                                 <tr>
-                                                    <td>{"$" + debtTotalIncomeDollars.toLocaleString("en-US")}</td>
+                                                    <td>{
+                                                        <div>
+                                                            <span>{"$" + debtTotalIncomeDollars.toLocaleString("en-US")}</span>
+                                                            <br />
+                                                            <span className="blockquote-footer">{debtTotalIncomeDollarsToBs.toLocaleString("es-VE")}</span>
+                                                        </div>
+                                                    }</td>
                                                 </tr>
                                             </tbody>
                                         </table>
