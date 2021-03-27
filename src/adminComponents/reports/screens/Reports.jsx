@@ -182,6 +182,7 @@ const Reports = (props) => {
                                                 <th>Método de pago</th>
                                                 <th>Moneda</th>
                                                 <th>Cantidad</th>
+                                                <th>Diferencia respecto a ventas</th>
                                             </tr>
                                         </thead>
                                         <tbody className="h6" >
@@ -199,6 +200,7 @@ const Reports = (props) => {
                                                                     <span className="blockquote-footer">{payment.cashToBs.toLocaleString("es-VE")}</span>
                                                                 </div>
                                                             }</td>
+                                                            <td>{payment.remaining && payment.remaining.toLocaleString("es-VE")}</td>
                                                         </tr>
                                                     );
                                                 }
@@ -208,6 +210,7 @@ const Reports = (props) => {
                                                             <td>PUNTO DE VENTA</td>
                                                             <td>{payment.currency}</td>
                                                             <td className="text-center">{payment.amount.toLocaleString("es-VE")}</td>
+                                                            <td>{payment.remaining && payment.remaining.toLocaleString("es-VE")}</td>
                                                         </tr>
                                                     );
                                                 }
@@ -217,6 +220,7 @@ const Reports = (props) => {
                                                             <td>TRANSFERENCIA BANCARIA</td>
                                                             <td>{payment.currency}</td>
                                                             <td className="text-center">{payment.amount.toLocaleString("es-VE")}</td>
+                                                            <td>{payment.remaining && payment.remaining.toLocaleString("es-VE")}</td>
                                                         </tr>
                                                     );
                                                 }
