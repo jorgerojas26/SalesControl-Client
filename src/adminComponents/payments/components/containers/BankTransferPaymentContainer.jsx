@@ -13,8 +13,8 @@ class BankTransferPaymentContainer extends Component {
 
         this.state = {
             currency: props.currency,
-            amount: 0,
-            formattedAmount: "0",
+            amount: props.defaultAmount || 0,
+            formattedAmount: props.defaultAmount.toLocaleString("es-VE") || "0",
             bankList: [],
             currentSelectedBankId: props.defaultBankId || null,
             referenceCode: props.defaultReferenceCode || ""
