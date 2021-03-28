@@ -11,6 +11,7 @@ const DebtDetailsModal = (props) => {
 
     let nonFreezedSaleTotal = calculateSaleTotal(props.sale, false, props.dolarReference);
     let freezedSaleTotal = calculateSaleTotal(props.sale, true);
+    console.log(nonFreezedSaleTotal, freezedSaleTotal);
     let payments = props.sale.payment;
     let expressedPaymentTotal = calculatePaymentsTotal(payments);
     let freezePrices = false;

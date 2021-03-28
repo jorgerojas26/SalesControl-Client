@@ -6,11 +6,11 @@ const BankTransferPayment = (props) => {
             {props.debtInfo &&
                 <span className="text-success col-12">DEUDA (FACTURA {props.debtInfo.saleId})</span>
             }
-            <div className="col-1">
-                {!props.disabled &&
+            {!props.disabled &&
+                <div className="col-1">
                     <button onClick={props.onRemove} className="btn btn-danger rounded-0"> - </button>
-                }
-            </div>
+                </div>
+            }
             <div className="col-9">
                 <div className="input-group">
                     <button className="btn btn-dark rounded-0" disabled="disabled">
@@ -32,7 +32,7 @@ const BankTransferPayment = (props) => {
                     </button>
                 </div>
             </div>
-            <div className="col-2 pl-0 mb-2">
+            <div className={props.disabled ? "col-3 pl-0 mb-2" : "col-2 pl-0 mb-2"}>
                 <input
                     onChange={props.onReferenceCodeChange}
                     className="form-control"

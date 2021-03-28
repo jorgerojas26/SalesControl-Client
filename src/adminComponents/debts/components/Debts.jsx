@@ -48,6 +48,7 @@ const Debts = (props) => {
             {props.showDebtDetails &&
                 <DebtDetailsModal
                     sale={props.debtDetails}
+                    dolarReference={props.dolarReference}
                 />
             }
             {props.showInvoiceModal &&

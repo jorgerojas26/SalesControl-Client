@@ -52,7 +52,6 @@ class DebtsContainer extends Component {
                 }
                 sale.debtTotal = debtInfo.debtTotal;
                 sale.debtCurrency = debtInfo.debtCurrency;
-                console.log(sale);
             });
         this.setState({
             salesArray: sales.data
@@ -107,6 +106,7 @@ class DebtsContainer extends Component {
                 invoiceInfo={this.state.invoiceInfo}
                 messageInfo={this.state.messageInfo}
                 onPaymentSubmit={this.onPaymentSubmit}
+                dolarReference={this.props.dolarReference}
             />
         );
     }

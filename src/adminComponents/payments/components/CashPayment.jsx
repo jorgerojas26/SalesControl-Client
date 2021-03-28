@@ -6,15 +6,15 @@ const CashPayment = (props) => {
             {props.debtInfo &&
                 <span className="text-success col-12">DEUDA (FACTURA {props.debtInfo.saleId})</span>
             }
-            <div className="col-1">
-                {!props.disabled &&
+            {!props.disabled &&
+                <div className="col-1">
                     <button
                         onClick={props.disabled ? null : props.onRemove}
                         className="btn btn-danger rounded-0"
                         disabled={props.disabled}
                     > - </button>
-                }
-            </div>
+                </div>
+            }
             <div className={props.currency === "Bs" ? "col-9" : "col-7 pr-0"}>
                 <div className="input-group">
                     <button className="btn btn-dark rounded-0" disabled="disabled">
@@ -43,7 +43,7 @@ const CashPayment = (props) => {
                     </select>
                 </div>
             </div>
-            <div className={props.currency === "Bs" ? "d-none" : "col-4 p-floating-container"}>
+            <div className={props.currency === "Bs" ? "d-none" : props.disabled ? "col-5 p-floating-container" : "col-4 p-floating-container"}>
                 <input
                     onChange={props.disabled ? null : props.onDolarReferenceChange}
                     className="form-control"
