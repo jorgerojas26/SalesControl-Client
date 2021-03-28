@@ -15,7 +15,8 @@ const CashPayment = (props) => {
                     > - </button>
                 </div>
             }
-            <div className={props.currency === "Bs" ? "col-9" : "col-7 pr-0"}>
+            <div className={props.currency === "Bs" && props.disabled ? "col-12"
+                : props.currency === "Bs" && !props.disabled ? "col-9" : props.currency === "USD" && props.disabled ? "col-7" : "col-7 pr-0"}>
                 <div className="input-group">
                     <button className="btn btn-dark rounded-0" disabled="disabled">
                         Efectivo
