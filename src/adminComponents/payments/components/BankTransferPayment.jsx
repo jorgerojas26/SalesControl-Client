@@ -47,6 +47,7 @@ const BankTransferPayment = (props) => {
                     onChange={props.onBankChange}
                     className="form-control btn btn-secondary rounded-0"
                     disabled={props.disabled}
+                    value={props.currentSelectedBankId}
                 >
                     {props.bankList &&
                         props.bankList.map(bankInfo => {

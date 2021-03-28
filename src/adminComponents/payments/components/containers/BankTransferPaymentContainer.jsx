@@ -83,6 +83,7 @@ class BankTransferPaymentContainer extends Component {
             currency={this.props.currency || "Bs"}
             amountValue={this.state.formattedAmount}
             referenceCodeValue={this.state.referenceCode}
+            currentSelectedBankId={this.state.currentSelectedBankId}
             debtInfo={this.props.debtInfo}
             disabled={this.props.disabled}
         />;
