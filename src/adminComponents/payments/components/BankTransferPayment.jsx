@@ -25,6 +25,7 @@ const BankTransferPayment = (props) => {
                         value={props.amountValue}
                         placeholder="Ingrese el valor"
                         className="form-control text-right text-danger"
+                        disabled={props.disabled}
                     />
                     <button className="btn btn-dark rounded-0" disabled="disabled">
                         {props.currency}
@@ -38,12 +39,14 @@ const BankTransferPayment = (props) => {
                     type="text"
                     value={props.referenceCodeValue}
                     placeholder="COD"
+                    disabled={props.disabled}
                 />
             </div>
             <div className="col-12">
                 <select
                     onChange={props.onBankChange}
                     className="form-control btn btn-secondary rounded-0"
+                    disabled={props.disabled}
                 >
                     {props.bankList &&
                         props.bankList.map(bankInfo => {

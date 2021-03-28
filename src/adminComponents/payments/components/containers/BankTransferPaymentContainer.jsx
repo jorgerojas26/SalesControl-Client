@@ -84,6 +84,7 @@ class BankTransferPaymentContainer extends Component {
             amountValue={this.state.formattedAmount}
             referenceCodeValue={this.state.referenceCode}
             debtInfo={this.props.debtInfo}
+            disabled={this.props.disabled}
         />;
     }
 }
