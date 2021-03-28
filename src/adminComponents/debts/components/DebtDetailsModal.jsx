@@ -67,7 +67,7 @@ const DebtDetailsModal = (props) => {
                     </div>
                     <div className="modal-body">
                         <div className="row mb-3 border-bottom">
-                            <div className="col-6 border-right">
+                            <div className="col-7 border-right">
                                 <h4 className="col-12 mb-2">Información de pago</h4>
                                 {payments && payments.map(payment => {
                                     if (payment.cash.length) {
@@ -125,7 +125,7 @@ const DebtDetailsModal = (props) => {
                                     }
                                 })}
                             </div>
-                            <div className="col-6 my-auto border-left">
+                            <div className="col-5 my-auto border-left">
                                 <h4 className="col-12 mb-2">Resumen de totales</h4>
                                 <div className="row">
                                     <div className="col-6 text-right">
