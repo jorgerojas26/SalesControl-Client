@@ -23,6 +23,7 @@ class ReportsContainer extends Component {
             salesInfo: null,
             paymentInfo: null,
             debtInfo: null,
+            remainingInfo: null,
             debtDetailsInfo: null,
             startDate: moment(new Date()).format("YYYY-MM-DD"),
             endDate: moment(new Date()).format("YYYY-MM-DD"),
@@ -100,8 +101,9 @@ class ReportsContainer extends Component {
                     });
                     this.setState({
                         salesInfo: salesReport,
-                        paymentInfo: paymentsReport,
+                        paymentInfo: paymentsReport.paymentReport,
                         debtInfo: debtsReport,
+                        remainingInfo: paymentsReport.remainingReport.remainingTotal || 0,
                         grossIncomeTotal,
                         netIncomeTotal,
                         grossIncomeTotalBs,
@@ -276,6 +278,7 @@ class ReportsContainer extends Component {
                 salesInfo={this.state.salesInfo}
                 paymentInfo={this.state.paymentInfo}
                 debtInfo={this.state.debtInfo}
+                remainingInfo={this.state.remainingInfo}
                 debtDetailsInfo={this.state.debtDetailsInfo}
                 dolarReference={this.props.dolarReference}
                 onDebtIdClick={this.onDebtIdClick}

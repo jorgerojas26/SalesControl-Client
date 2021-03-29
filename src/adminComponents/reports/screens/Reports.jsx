@@ -221,6 +221,11 @@ const Reports = (props) => {
                                                     );
                                                 }
                                             })}
+                                            <tr>
+                                                <td></td>
+                                                <td>Diferencia en cuanto a ventas concretadas</td>
+                                                <td className={props.remainingInfo < 0 ? "text-danger" : "text-success"}>{props.remainingInfo.toLocaleString("es-VE")}</td>
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>
