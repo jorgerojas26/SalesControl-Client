@@ -17,7 +17,18 @@ const InvoiceModal = (props) => {
     let clientCedula = props.client ? props.client.cedula : "";
     let clientPhoneNumber = props.client ? props.client.phoneNumber : "";
     return (
-        <div id="invoiceModal" className="modal" data-backdrop="static" data-keyboard="false" aria-labelledby="invoiceModalLabel" aria-hidden="true" tabIndex="-1">
+        <div
+            onKeyUp={(event) => {
+                if (event.keyCode == 13 && event.ctrlKey) {
+                    if (props.action == "newSale") {
+                        props.onSaleSubmitHandler();
+                    }
+                    else if (props.action == "payDebt") {
+                        props.paymentSubmitHandler();
+                    }
+                }
+            }}
+            id="invoiceModal" className="modal" data-backdrop="static" data-keyboard="false" aria-labelledby="invoiceModalLabel" aria-hidden="true">
             <div className="modal-dialog modal-md modal-dialog-centered modal-dialog-scrollable">
                 <div className="modal-content">
                     <div className="modal-header">

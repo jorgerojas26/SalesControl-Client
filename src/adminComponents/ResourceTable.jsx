@@ -379,11 +379,9 @@ class ResourceTable extends Component {
                 lengthMenu: [[10, 25, 50, 100, 1000000000000000], [10, 25, 50, 100, "All"]],
                 pageLength: (this.props.sourceURL.includes("group=true")) ? 1000000000000000 : 10,
                 columns: this.props.columns,
-                columnDefs: (this.props.sourceURL.includes("products")) ? [
-                    { width: "30%", "targets": 1 }
-                ] : null,
                 ordering: false,
-                order: _this.props.sorting || [[0, "desc"]]
+                order: _this.props.sorting || [[0, "desc"]],
+                autoWidth: true
             });
 
             if (this.props.actions.includes("date-range")) {
@@ -420,9 +418,10 @@ class ResourceTable extends Component {
                 dom: "",
                 data: this.props.data,
                 columns: this.props.columns,
-
+                autoWidth: true
             });
         }
+        $recordsTable.columns.adjust().draw();
 
 
 
@@ -433,8 +432,8 @@ class ResourceTable extends Component {
 
     render() {
         return (
-            <div className="bg-light table-responsive">
-                <table id="resourceTable" className="table table-bordered" ref={this.recordsTable} >
+            <div className="bg-light table-responsive w-100">
+                <table id="resourceTable" className="table table-bordered w-100" ref={this.recordsTable} >
                     <thead></thead>
                     <tbody></tbody>
                     <tfoot>

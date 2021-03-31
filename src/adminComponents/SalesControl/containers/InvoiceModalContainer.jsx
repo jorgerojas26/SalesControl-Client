@@ -61,20 +61,21 @@ class InvoiceModalContainer extends Component {
         if (this.props.action === "newSale") {
             this.loadPoinfOfSalesPayment();
         }
-
-        let shortcutListener = (event) => {
-            if (event.keyCode == 13 && event.ctrlKey) {
-                if (!this.state.confirmingSale) {
-                    if (this.props.action == "newSale") {
-                        this.onSaleSubmitHandler();
-                    }
-                    else if (this.props.action == "payDebt") {
-                        this.paymentSubmitHandler();
+        /*
+            let shortcutListener = (event) => {
+                if (event.keyCode == 13 && event.ctrlKey) {
+                    if (!this.state.confirmingSale) {
+                        if (this.props.action == "newSale") {
+                            this.onSaleSubmitHandler();
+                        }
+                        else if (this.props.action == "payDebt") {
+                            this.paymentSubmitHandler();
+                        }
                     }
                 }
-            }
-        };
-        document.querySelector("#invoiceModal").addEventListener("keyup", shortcutListener);
+            };
+            document.body.addEventListener("keyup", shortcutListener);
+            */
         window.$("#invoiceModal").on("show.bs.modal", (event) => {
             if (this.props.action == "newSale") {
                 this.setState({ invoiceTotal: this.props.invoiceTotal });
@@ -629,7 +630,7 @@ class InvoiceModalContainer extends Component {
                 },
                 storeWithoutDebt: {
                     label: "Continuar sin guardar deuda",
-                    className: "btn-success",
+                    className: "btn btn-success btn-primary",
                     callback: function () {
                         cb(true);
                     }
@@ -646,7 +647,8 @@ class InvoiceModalContainer extends Component {
                 },
                 confirm: {
                     label: "Confirmar",
-                    className: "btn-success",
+                    className: "btn btn-primary btn-success",
+                    autoFocus: true,
                     callback: function () {
                         cb(true);
                     }
@@ -661,11 +663,10 @@ class InvoiceModalContainer extends Component {
             centerVertical: true,
             animate: false,
             backdrop: true,
+            onHidden: () => {
+                window.$("#invoiceModal").find("input").focus();
+            },
             buttons
-        });
-        dialog.on('show.bs.modal', function () {
-            console.log("asdqwdqwd");
-            window.$(dialog).find(".btn-default:first").focus();
         });
     }
 
