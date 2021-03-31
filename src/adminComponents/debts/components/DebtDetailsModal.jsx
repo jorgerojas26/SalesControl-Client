@@ -11,49 +11,61 @@ const DebtDetailsModal = (props) => {
 
     let nonFreezedSaleTotal = calculateSaleTotal(props.sale, false, props.dolarReference);
     let freezedSaleTotal = calculateSaleTotal(props.sale, true);
-    console.log(nonFreezedSaleTotal, freezedSaleTotal);
     let payments = props.sale.payment;
     let expressedPaymentTotal = calculatePaymentsTotal(payments);
-    let freezePrices = false;
+    let invoiceTotalBs = 0;
+    let debtInfo, debtTotal, debtCurrency;
+    let products = [];
+    let businessDebt = freezedSaleTotal - expressedPaymentTotal <= 0;
 
     // freeze prices if business owes money or if client is the debtor but current prices are lower so i keep the old prices
-    if (freezedSaleTotal - expressedPaymentTotal <= 0 || nonFreezedSaleTotal < freezedSaleTotal) {
-        freezePrices = true;
+    if (businessDebt || props.historyView) {
+        invoiceTotalBs = calculateSaleTotal(props.sale, true, props.dolarReference, false);
+        props.sale.saleProducts.forEach(saleProduct => {
+            let productUnitPrice = roundUpProductPrice(saleProduct.price * props.sale.dolarReference);
+            products.push({
+                id: saleProduct.product.id,
+                name: saleProduct.product.name,
+                imagePath: saleProduct.product.imagePath,
+                unitPriceBs: productUnitPrice,
+                quantity: saleProduct.quantity,
+                totalBs: productUnitPrice * saleProduct.quantity
+            });
+        });
+        debtInfo = calculateDebtTotal(props.sale, props.dolarReference, true);
     }
+    else {
+        invoiceTotalBs = calculateSaleTotal(props.sale, true, props.dolarReference, true);
+        props.sale.saleProducts.forEach(saleProduct => {
+            let oldUnitProductPrice = roundUpProductPrice(saleProduct.price * props.sale.dolarReference);
+            let actualUnitProductPrice = roundUpProductPrice(saleProduct.product.price * props.dolarReference);
+            let productUnitPrice = oldUnitProductPrice > actualUnitProductPrice ? oldUnitProductPrice : actualUnitProductPrice;
 
-    let debtInfo = calculateDebtTotal(props.sale, props.dolarReference, props.freezePrices || freezePrices);
+            products.push({
+                id: saleProduct.product.id,
+                name: saleProduct.product.name,
+                imagePath: saleProduct.product.imagePath,
+                unitPriceBs: productUnitPrice,
+                quantity: saleProduct.quantity,
+                totalBs: productUnitPrice * saleProduct.quantity
+            });
+        });
+        debtInfo = calculateDebtTotal(props.sale, props.dolarReference, false);
+    }
+    debtTotal = debtInfo.debtTotal;
+    debtCurrency = debtInfo.debtCurrency;
 
+
+    /*
     if (debtInfo.debtTotal < 0 && debtInfo.debtTotal.toFixed(2) == 0) {
         debtInfo.debtTotal = -0.01;
     }
     else if (debtInfo.debtTotal > 0 && debtInfo.debtTotal.toFixed(2) == 0) {
         debtInfo.debtTotal = 0.01;
     }
+    */
 
-    let debtTotal = debtInfo.debtTotal;
-    let debtCurrency = debtInfo.debtCurrency;
 
-    let products = [];
-    let invoiceTotalBs = 0;
-
-    props.sale.saleProducts.forEach(saleProduct => {
-        products.push({
-            id: saleProduct.product.id,
-            name: saleProduct.product.name,
-            imagePath: saleProduct.product.imagePath,
-            unitPriceBs: props.freezePrices || freezePrices
-                ? roundUpProductPrice(saleProduct.price * props.sale.dolarReference)
-                : roundUpProductPrice(saleProduct.product.price * props.dolarReference),
-            quantity: saleProduct.quantity,
-            totalBs: props.freezePrices || freezePrices
-                ? roundUpProductPrice((saleProduct.price * props.sale.dolarReference) * saleProduct.quantity)
-                : roundUpProductPrice((saleProduct.product.price * props.dolarReference) * saleProduct.quantity)
-        });
-    });
-
-    products.map(product => {
-        return invoiceTotalBs += product.totalBs;
-    });
 
     return (
         <div id="debtDetailsModal" className="modal" tabIndex="-1" aria-labelledby="debtDetailsModalLabel" aria-hidden="true" >

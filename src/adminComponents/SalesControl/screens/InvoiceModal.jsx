@@ -194,7 +194,6 @@ const InvoiceModal = (props) => {
                 <DebtDetailsModal
                     sale={props.debtInfo}
                     dolarReference={props.dolarReference}
-                    freezePrices={false}
                 />
             }
         </div >

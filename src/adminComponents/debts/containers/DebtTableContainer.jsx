@@ -36,6 +36,7 @@ class DebtTableContainer extends Component {
         });
 
         if (match) {
+            console.log(saleObject);
             this.props.onDebtIdClick(saleObject, () => {
                 window.$("#debtDetailsModal").modal("show");
             });

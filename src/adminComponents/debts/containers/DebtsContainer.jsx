@@ -34,25 +34,23 @@ class DebtsContainer extends Component {
     }
     async fetchAllDebts() {
         let sales = await salesRequests.fetchAllDebts();
-        if (sales.data)
+        if (sales.data) {
             sales.data.map(sale => {
                 let nonFreezedSaleTotal = calculateSaleTotal(sale, false, this.props.dolarReference);
                 let freezedSaleTotal = calculateSaleTotal(sale, true);
                 let expressedPaymentTotal = calculatePaymentsTotal(sale.payment);
-                let freezePrices = false;
-                if (freezedSaleTotal - expressedPaymentTotal <= 0 || nonFreezedSaleTotal < freezedSaleTotal) {
-                    freezePrices = true;
+                let businessDebt = freezedSaleTotal - expressedPaymentTotal <= 0;
+                let debtInfo;
+                if (businessDebt) {
+                    debtInfo = calculateDebtTotal(sale, this.props.dolarReference, true);
                 }
-                let debtInfo = calculateDebtTotal(sale, this.props.dolarReference, freezePrices);
-                if (debtInfo.debtTotal < 0 && debtInfo.debtTotal.toFixed(2) == 0) {
-                    debtInfo.debtTotal = -0.01;
-                }
-                else if (debtInfo.debtTotal > 0 && debtInfo.debtTotal.toFixed(2) == 0) {
-                    debtInfo.debtTotal = 0.01;
+                else {
+                    debtInfo = calculateDebtTotal(sale, this.props.dolarReference, false);
                 }
                 sale.debtTotal = debtInfo.debtTotal;
                 sale.debtCurrency = debtInfo.debtCurrency;
             });
+        }
         this.setState({
             salesArray: sales.data
         });

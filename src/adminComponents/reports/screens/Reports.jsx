@@ -308,7 +308,7 @@ const Reports = (props) => {
                 <DebtDetailsModal
                     sale={props.debtDetailsInfo}
                     dolarReference={props.dolarReference}
-                    freezePrices={true}
+                    historyView={true}
                 />
             }
         </div >

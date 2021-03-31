@@ -2,7 +2,7 @@ import React, { Component } from "react";
 
 import SalesControl from "../screens/SalesControl";
 
-import inventoryRequests from "../../../requests/inventory";
+import productsRequests from "../../../requests/products";
 
 import { roundUpProductPrice, showMessageInfo, isProductStockEnough } from "../../../helpers";
 
@@ -53,7 +53,7 @@ class SalesControlContainer extends Component {
         productsToSell = productsToSell.map(productToSell => {
             if (productToSell.id === product.id) {
                 productExists = true;
-                productToSell.quantity += quantity;
+                productToSell.quantity = quantity;
             }
             return productToSell;
         });
@@ -73,7 +73,7 @@ class SalesControlContainer extends Component {
         let quantity = window.prompt('Ingrese la cantidad: ');
         if (quantity != null && quantity != '') {
             let productId = event.target.parentElement.getAttribute('productId');
-            if (await isProductStockEnough(this, inventoryRequests, productId, quantity)) {
+            if (await isProductStockEnough(this, productsRequests, productId, quantity)) {
                 let productsToSell = this.state.productsToSell;
                 productsToSell.forEach(product => {
                     if (product.id == productId) {
@@ -115,7 +115,7 @@ class SalesControlContainer extends Component {
                 product.quantity = parseFloat(quantity);
             }
             product.unitPriceBs = roundUpProductPrice(product.price * this.props.dolarReference);
-            product.totalBs = roundUpProductPrice(product.unitPriceBs * product.quantity);
+            product.totalBs = roundUpProductPrice(product.unitPriceBs) * product.quantity;
             product.totalDollars = product.unitPriceDollars * product.quantity;
         }
         return product;

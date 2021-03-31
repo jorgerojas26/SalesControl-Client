@@ -1,9 +1,24 @@
 
-const calculateSaleTotal = (sale, frozenPrice, currentDolarReference) => {
+const calculateSaleTotal = (sale, frozenPrice, currentDolarReference, checkIndividualProduct) => {
     let saleTotal = 0;
     sale.saleProducts.forEach(saleProduct => {
-        let productPrice = (frozenPrice) ? saleProduct.price : saleProduct.product.price;
-        saleTotal += roundUpProductPrice((productPrice * (frozenPrice ? sale.dolarReference : currentDolarReference)) * saleProduct.quantity);
+        let productPrice = 0;
+        if (checkIndividualProduct) {
+            let oldProductPrice = roundUpProductPrice(saleProduct.price * sale.dolarReference);
+            let actualProductPrice = roundUpProductPrice(saleProduct.product.price * currentDolarReference);
+            if (oldProductPrice < actualProductPrice) {
+                productPrice = actualProductPrice;
+            }
+            else {
+                productPrice = oldProductPrice;
+            }
+        }
+        else {
+            productPrice = (frozenPrice)
+                ? roundUpProductPrice(saleProduct.price * sale.dolarReference)
+                : roundUpProductPrice(saleProduct.product.price * currentDolarReference);
+        }
+        saleTotal += productPrice * saleProduct.quantity;
     });
     return Math.round(saleTotal);
 };
@@ -96,10 +111,10 @@ const showMessageInfo = (innerThis, type, message) => {
 function roundUpProductPrice(price) {
     var val = 0;
     if (price < 10000) {
-        val = Math.round(price / 100) * 100;
+        val = Math.ceil(price / 100) * 100;
     }
     else {
-        val = Math.round(price / 1000) * 1000;
+        val = Math.ceil(price / 1000) * 1000;
     }
     return val;
 }
@@ -122,8 +137,8 @@ module.exports = {
     },
     //This method receives an array of payments from a sale that comes directly from the DB and returns the higher payment object along with
     // the currency and the dollar reference used in the payment method to calculate the higher payment amount in case of a USD currency payment.
-    isProductStockEnough: async (innerThis, inventoryRequests, id, quantity) => {
-        let productInfo = await inventoryRequests.fetchByProductId(id);
+    isProductStockEnough: async (innerThis, productRequests, id, quantity) => {
+        let productInfo = await productRequests.fetchById(id);
         if (productInfo.data) {
             let stock = parseFloat(productInfo.data[0].stock);
             if (stock <= 0 || quantity > stock) {
@@ -156,7 +171,7 @@ module.exports = {
 
         return higherPayment;
     },
-    calculateDebtTotal(sale, currentDolarReference, freezeDebt) {
+    calculateDebtTotal(sale, currentDolarReference, historyView) {
         let invoiceTotalBs = calculateSaleTotal(sale, true);
         let expressedPaymentTotal = calculatePaymentsTotal(sale.payment);
         let debtTotal = 0;
@@ -171,15 +186,10 @@ module.exports = {
 
         }
         else if ((invoiceTotalBs - expressedPaymentTotal) > 0) { // client owes money
-            let nonFreezedSaleTotal = calculateSaleTotal(sale, false, currentDolarReference);
-            let freezedSaleTotal = calculateSaleTotal(sale, true);
-            invoiceTotalBs = freezeDebt ? invoiceTotalBs : nonFreezedSaleTotal < freezedSaleTotal ? freezedSaleTotal : nonFreezedSaleTotal;
-
+            if (!historyView) {
+                invoiceTotalBs = calculateSaleTotal(sale, true, currentDolarReference, true);
+            }
             if (higherPayment.payment) {
-                /*
-                    debtTotal = higherPayment.payment.currency === "Bs" ? (invoiceTotalBs - expressedPaymentTotal) : ((invoiceTotalBs - expressedPaymentTotal) / higherPayment.dolarReference);
-                    debtCurrency = higherPayment.payment.currency;
-                    */
                 debtTotal = invoiceTotalBs - expressedPaymentTotal;
                 debtCurrency = "Bs";
             }
@@ -188,8 +198,9 @@ module.exports = {
                 debtCurrency = "Bs";
             }
         }
-        return { debtTotal, debtCurrency };
+        return { debtTotal, debtCurrency, dolarReference: higherPayment.dolarReference };
     },
+
     formatPhoneNumber(number) {
         if (!number) return "";
         var cleaned = number.replace(/\D/g, '');
@@ -199,6 +210,7 @@ module.exports = {
         }
         return number;
     },
+
     parsePaymentMethodName(name) {
         if (name.toLowerCase().includes("bank transfer")) {
             return "Transferencia Bancaria";
@@ -209,6 +221,5 @@ module.exports = {
         else if (name.toLowerCase().includes("point of sale")) {
             return "Punto de Venta";
         }
-
     }
 };

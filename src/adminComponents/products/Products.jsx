@@ -202,6 +202,17 @@ class Products extends Component {
                   data: 'profitPercent',
                 },
                 {
+                  render: function (data) {
+                    if (data == 0) {
+                      return `<span class="text-danger">${data}</span>`;
+                    }
+                    else if (data > 10) {
+                      return `<span class="text-success">${data}</span>`;
+                    }
+                    return data;
+                  }, title: "Inventario", data: "stock"
+                },
+                {
                   render: function (data, type, row, meta) {
                     let disc = data.map(discount => {
                       return discount.percent;

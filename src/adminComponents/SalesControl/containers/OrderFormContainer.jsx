@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-import inventoryRequests from "../../../requests/inventory";
+import productsRequests from "../../../requests/products";
 
 import { showMessageInfo, isProductStockEnough } from "../../../helpers";
 
@@ -72,22 +72,14 @@ class OrderFormContainer extends Component {
             return;
         }
         if (this.state.selectedProduct != null) {
-            let productInfo = await inventoryRequests.fetchByProductId(this.state.selectedProduct.id);
-            if (productInfo.data) {
-                let stock = parseFloat(productInfo.data[0].stock);
-                let quantityToSell = parseFloat(this.state.quantity);
-                if (stock <= 0 || quantityToSell > stock) {
-                    showMessageInfo(this, 'error', 'No hay suficientes productos en el inventario');
-                } else {
-
-                    this.props.onProductSubmit(this.state.selectedProduct, this.state.quantity);
-                    this.setState({
-                        selectedProduct: null,
-                        quantity: 1
-                    });
-                    this.productSelectRef.current.focus();
-                    this.quantityInputRef.current.value = "1";
-                }
+            if (await isProductStockEnough(this, productsRequests, this.state.selectedProduct.id, this.state.quantity)) {
+                this.props.onProductSubmit(this.state.selectedProduct, this.state.quantity);
+                this.setState({
+                    selectedProduct: null,
+                    quantity: 1
+                });
+                this.productSelectRef.current.focus();
+                this.quantityInputRef.current.value = "1";
             }
         } else {
             showMessageInfo(this, 'error', 'Por favor seleccione un producto');

@@ -17,7 +17,7 @@ class Navigation extends Component {
     clickHandler(event) {
         this.setState({
             activeNavLink: event.target.innerText
-        })
+        });
     }
     render() {
         return (
@@ -32,9 +32,13 @@ class Navigation extends Component {
                         <li className="nav-item" data-toggle="collapse" data-target="#navbarSupportedContent">
                             <NavLink className="nav-link" onClick={this.clickHandler} to="/control-de-ventas"><span className="d-md-inline">Control de Ventas</span></NavLink>
                         </li>
+                        {
+                            /*
                         <li className="nav-item" data-toggle="collapse" data-target="#navbarSupportedContent">
                             <NavLink className="nav-link" onClick={this.clickHandler} to="/inventario"><span className="d-md-inline">Inventario</span></NavLink>
                         </li>
+                            */
+                        }
                         <li className="nav-item" data-toggle="collapse" data-target="#navbarSupportedContent">
                             <NavLink className="nav-link" onClick={this.clickHandler} to="/reportes"><span className="d-md-inline">Reportes</span></NavLink>
                         </li>
@@ -68,7 +72,7 @@ class Navigation extends Component {
                     </ul>
                 </div>
             </nav>
-        )
+        );
     }
 }
 
