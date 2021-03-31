@@ -113,7 +113,7 @@ class Sales extends Component {
                         fontSize="small"
                         dolarReference={this.props.dolarReference}
                         sale={this.state.saleDetails}
-                        freezePrices={true}
+                        historyView={true}
                     />
                 }
             </div >
