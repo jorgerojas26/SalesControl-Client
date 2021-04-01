@@ -628,9 +628,9 @@ class InvoiceModalContainer extends Component {
                         cb(false);
                     }
                 },
-                storeWithoutDebt: {
+                confirm: {
                     label: "Continuar sin guardar deuda",
-                    className: "btn btn-success btn-primary",
+                    className: "btn btn-primary btn-success",
                     callback: function () {
                         cb(true);
                     }
