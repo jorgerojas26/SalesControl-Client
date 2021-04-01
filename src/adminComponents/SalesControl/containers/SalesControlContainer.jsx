@@ -115,7 +115,7 @@ class SalesControlContainer extends Component {
                 product.quantity = parseFloat(quantity);
             }
             product.unitPriceBs = roundUpProductPrice(product.price * this.props.dolarReference);
-            product.totalBs = roundUpProductPrice(product.unitPriceBs) * product.quantity;
+            product.totalBs = product.unitPriceBs * product.quantity;
             product.totalDollars = product.unitPriceDollars * product.quantity;
         }
         return product;
