@@ -76,9 +76,9 @@ class Clients extends Component {
 
     async componentDidMount() {
         let response = await clientRequests.fetchAll();
-        if (response.data) {
+        if (response) {
             $(this.clientTable.current).DataTable({
-                data: response.data,
+                data: response,
                 columns: [
                     { title: "ID", data: "id" },
                     { title: "Nombre", data: "name" },
