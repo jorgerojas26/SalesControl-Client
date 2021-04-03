@@ -7,8 +7,6 @@ const ClientSearch = (props) => {
         <div className="container-fluid p-0">
             <AsyncSelect
                 loadOptions={props.onSearch}
-                onInputChange={props.onInputChange}
-                autoFocus
                 ref={props.clientSelectRef}
                 className="w-100"
                 placeholder="Buscar cliente"

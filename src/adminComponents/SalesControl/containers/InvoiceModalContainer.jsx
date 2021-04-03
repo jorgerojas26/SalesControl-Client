@@ -3,12 +3,12 @@ import React, { Component } from "react";
 import bootbox from "bootbox";
 
 import InvoiceModal from "../screens/InvoiceModal";
-import { formatPhoneNumber, showMessageInfo, getHigherAmountClientPayment } from "../../../helpers";
+
+import { showMessageInfo, getHigherAmountClientPayment } from "../../../helpers";
 
 import salesRequests from "../../../requests/sales";
 import paymentsRequests from "../../../requests/payments";
 import paymentMethodsRequests from "../../../requests/paymentMethods";
-
 
 require("bootstrap");
 
@@ -35,7 +35,8 @@ class InvoiceModalContainer extends Component {
             debtInfo: [],
             isMoneyBack: false,
             submittingSale: false,
-            confirmingSale: false
+            confirmingSale: false,
+            clientIsEmployee: false
         };
 
         this.onClientSelect = this.onClientSelect.bind(this);
@@ -58,24 +59,26 @@ class InvoiceModalContainer extends Component {
     }
 
     componentDidMount() {
+        window.$(".modal-header").on("mousedown", function (mousedownEvt) {
+            var $draggable = window.$(this);
+            var x = mousedownEvt.pageX - $draggable.offset().left,
+                y = mousedownEvt.pageY - $draggable.offset().top;
+            window.$("body").on("mousemove.draggable", function (mousemoveEvt) {
+                $draggable.closest(".modal-content").offset({
+                    "left": mousemoveEvt.pageX - x,
+                    "top": mousemoveEvt.pageY - y
+                });
+            });
+            window.$("body").on("mouseup", function () {
+                window.$("body").off("mousemove.draggable");
+            });
+            $draggable.closest(".modal").on("bs.modal.hide", function () {
+                window.$("body").off("mousemove.draggable");
+            });
+        });
         if (this.props.action === "newSale") {
             this.loadPoinfOfSalesPayment();
         }
-        /*
-            let shortcutListener = (event) => {
-                if (event.keyCode == 13 && event.ctrlKey) {
-                    if (!this.state.confirmingSale) {
-                        if (this.props.action == "newSale") {
-                            this.onSaleSubmitHandler();
-                        }
-                        else if (this.props.action == "payDebt") {
-                            this.paymentSubmitHandler();
-                        }
-                    }
-                }
-            };
-            document.body.addEventListener("keyup", shortcutListener);
-            */
         window.$("#invoiceModal").on("show.bs.modal", (event) => {
             if (this.props.action == "newSale") {
                 this.setState({ invoiceTotal: this.props.invoiceTotal });
@@ -90,13 +93,30 @@ class InvoiceModalContainer extends Component {
             }
         });
         window.$("#invoiceModal").on("hidden.bs.modal", (event) => {
-            if (this.props.action == "newSale") {
+            if (this.props.action == "newSale" && event.target.id == "invoiceModal") {
                 window.$("#productSearchInput").focus();
-                //document.body.removeEventListener("keyup", shortcutListener);
             }
         });
     }
 
+    componentDidUpdate(prevProps) {
+        if (prevProps.invoiceTotal != this.props.invoiceTotal) {
+            this.state.paymentInfo.map(payment => {
+                if (this.state.paymentInfo.length == 1 && payment.type === "PointOfSale") {
+                    this.setState({ paymentInfo: [] }, () => {
+                        this.addPaymentMethod("PointOfSale", {
+                            paymentMethodId: payment.paymentMethodId,
+                            amount: Math.abs(this.props.invoiceTotal),
+                            currency: "Bs",
+                        });
+                        setTimeout(() => {
+                            window.$("#invoiceModal").find("input").focus();
+                        });
+                    });
+                }
+            });
+        }
+    }
     async loadPoinfOfSalesPayment() {
         let paymentMethods = await paymentMethodsRequests.fetchAll();
         if (paymentMethods.data) {
@@ -116,10 +136,16 @@ class InvoiceModalContainer extends Component {
             selectedClient.label = selectedClient.name;
             selectedClient.phoneNumber = selectedClient.phoneNumber || "";
             window.$("#invoiceModal").find("input").focus();
+            this.setState({ clientIsEmployee: selectedClient.employee });
         }
-
+        else {
+            this.setState({ clientIsEmployee: false });
+        }
         this.setState({
-            currentSelectedClient: selectedClient,
+            currentSelectedClient: selectedClient
+        });
+        this.props.onClientSelect(selectedClient ? selectedClient.id : null, (invoiceTotal) => {
+            this.setState({ invoiceTotal });
         });
     }
 
@@ -160,9 +186,7 @@ class InvoiceModalContainer extends Component {
             isMoneyBack
         });
 
-        this.setState({ paymentInfo }, () => {
-            console.log(this.state.paymentInfo);
-        });
+        this.setState({ paymentInfo });
     }
 
     onPaymentPropertyChange(id, property, value) {
@@ -364,6 +388,7 @@ class InvoiceModalContainer extends Component {
             });
         }
     }
+
     submitCurrentSale(fullyPaid) {
         this.setState({
             submittingSale: true
@@ -663,9 +688,6 @@ class InvoiceModalContainer extends Component {
             centerVertical: true,
             animate: false,
             backdrop: true,
-            onHidden: () => {
-                window.$("#invoiceModal").find("input").focus();
-            },
             buttons
         });
     }
@@ -728,6 +750,7 @@ class InvoiceModalContainer extends Component {
                 closeNewClientFormModal={this.closeNewClientFormModal}
                 showNewClientFormModal={this.state.showNewClientFormModal}
                 cedulaToBeCreated={this.state.cedulaToBeCreated}
+                clientIsEmployee={this.state.clientIsEmployee}
             />
         );
     }

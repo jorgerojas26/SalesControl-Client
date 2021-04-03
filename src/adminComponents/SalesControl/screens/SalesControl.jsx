@@ -45,6 +45,7 @@ const SalesControl = (props) => {
                     products={props.products}
                     toggleInvoiceModal={props.toggleInvoiceModal}
                     onSaleSubmit={props.onSaleSubmit}
+                    onClientSelect={props.onClientSelect}
                 />
             }
         </div>

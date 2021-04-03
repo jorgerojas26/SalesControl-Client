@@ -4,7 +4,7 @@ import ProductSearch from "../../products/containers/ProductSearchContainer";
 
 const OrderForm = (props) => {
     return (
-        <div>
+        <div className="">
             <div className="row">
                 <div className="col-12">
                     {props.messageInfo.message &&

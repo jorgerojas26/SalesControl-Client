@@ -3,6 +3,7 @@ import React, { Component } from "react";
 import SalesControl from "../screens/SalesControl";
 
 import productsRequests from "../../../requests/products";
+import clientsRequests from "../../../requests/clients";
 
 import { roundUpProductPrice, showMessageInfo, isProductStockEnough } from "../../../helpers";
 
@@ -19,7 +20,8 @@ class SalesControlContainer extends Component {
             },
             productsToSell: [],
             totalBs: 0,
-            totalDollars: 0
+            totalDollars: 0,
+            currentSelectedClientIsEmployee: false
         };
 
         this.onProductSubmit = this.onProductSubmit.bind(this);
@@ -28,6 +30,7 @@ class SalesControlContainer extends Component {
         this.openInvoiceModal = this.openInvoiceModal.bind(this);
         this.toggleInvoiceModal = this.toggleInvoiceModal.bind(this);
         this.onSaleSubmit = this.onSaleSubmit.bind(this);
+        this.onClientSelect = this.onClientSelect.bind(this);
     }
 
     componentDidMount() {
@@ -63,9 +66,9 @@ class SalesControlContainer extends Component {
         }
 
         this.setState({
-            productsToSell
+            productsToSell,
         }, () => {
-            this.calculateSalesTotal();
+            this.calculateSalesTotal(this.state.currentSelectedClientIsEmployee);
         });
     }
 
@@ -83,7 +86,7 @@ class SalesControlContainer extends Component {
                                 productsToSell,
                             },
                             () => {
-                                this.calculateSalesTotal();
+                                this.calculateSalesTotal(this.state.currentSelectedClientIsEmployee);
                             },
                         );
                     }
@@ -102,18 +105,13 @@ class SalesControlContainer extends Component {
             {
                 productsToSell,
             },
-            () => this.calculateSalesTotal(),
+            () => this.calculateSalesTotal(this.state.currentSelectedClientIsEmployee),
         );
     }
 
-    calculateProductTotal(product, quantity, quantityOperation) {
+    calculateProductTotal(product, quantity) {
         if (product != null && quantity != null) {
-            if (quantityOperation === "sum") {
-                product.quantity = (product.quantity) ? parseFloat(product.quantity + quantity) : parseFloat(quantity);
-            }
-            else if (quantityOperation === "equal") {
-                product.quantity = parseFloat(quantity);
-            }
+            product.quantity = parseFloat(quantity);
             product.unitPriceBs = roundUpProductPrice(product.price * this.props.dolarReference);
             product.totalBs = product.unitPriceBs * product.quantity;
             product.totalDollars = product.unitPriceDollars * product.quantity;
@@ -121,10 +119,22 @@ class SalesControlContainer extends Component {
         return product;
     }
 
-    calculateSalesTotal() {
+    calculateSalesTotal(employee) {
         let totalBs = 0;
         let totalDollars = 0;
-        this.state.productsToSell.forEach(product => {
+        let productsToSell = this.state.productsToSell;
+        productsToSell.forEach(product => {
+            product.unitPriceBs = roundUpProductPrice(product.price * this.props.dolarReference);
+            product.totalBs = product.unitPriceBs * product.quantity;
+            product.totalDollars = product.unitPriceDollars * product.quantity;
+
+            if (employee) {
+                product.discount = Math.round((product.unitPriceBs - Math.round(product.unitPriceBs / ((100 + product.profitPercent) / 100))) / 1000) * 1000;
+                product.totalBs = roundUpProductPrice((product.unitPriceBs - product.discount) * product.quantity);
+            }
+            else {
+                product.discount = 0;
+            }
             totalBs += product.totalBs;
             totalDollars += product.totalDollars;
         });
@@ -132,7 +142,22 @@ class SalesControlContainer extends Component {
         this.setState({
             totalBs,
             totalDollars,
+            productsToSell
         });
+        return totalBs;
+    }
+
+    async onClientSelect(clientId, callback) {
+        let client = await clientsRequests.fetchById(clientId);
+        if (client != null && client.length && client[0].employee) {
+            callback(this.calculateSalesTotal(true));
+            this.setState({
+                currentSelectedClientIsEmployee: true
+            });
+        }
+        else {
+            callback(this.calculateSalesTotal(false));
+        }
     }
 
     openInvoiceModal() {
@@ -144,7 +169,7 @@ class SalesControlContainer extends Component {
         this.setState({
             showInvoiceModal: true
         }, () => {
-            window.$("#invoiceModal").modal();
+            window.$("#invoiceModal").modal("show");
         });
     }
 
@@ -172,6 +197,7 @@ class SalesControlContainer extends Component {
                 toggleInvoiceModal={this.toggleInvoiceModal}
                 showInvoiceModal={this.state.showInvoiceModal}
                 onSaleSubmit={this.onSaleSubmit}
+                onClientSelect={this.onClientSelect}
             />
         );
     }

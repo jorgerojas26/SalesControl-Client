@@ -41,16 +41,22 @@ const InvoiceModal = (props) => {
                     </div>
                     <div className="modal-body">
                         <div className="row">
+                            {props.clientIsEmployee &&
+                                <div className="col-12">
+                                    <label className="text-success font-weight-bold text-start h6">BUSINESS EMPLOYEE</label>
+                                </div>
+                            }
                             <div className="col">
                                 <div className="d-flex justify-content-between mb-3">
                                     {props.action === "newSale" &&
-                                        <ClientSearch
-                                            onClientSelect={props.onClientSelect}
-                                            value={props.client}
-                                            dolarReference={props.dolarReference}
-                                            openNewClientFormModal={props.openNewClientFormModal}
-                                            onClientSearchInputChange={props.onClientSearchInputChange}
-                                        />
+                                        <div className="col p-0">
+                                            <ClientSearch
+                                                onClientSelect={props.onClientSelect}
+                                                value={props.client}
+                                                dolarReference={props.dolarReference}
+                                                openNewClientFormModal={props.openNewClientFormModal}
+                                            />
+                                        </div>
                                     }
                                     {props.action === "payDebt" &&
                                         <input className="form-control text-center" type="text" value={props.client.name} disabled />

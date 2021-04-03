@@ -11,26 +11,28 @@ class ClientSearchContainer extends Component {
         super();
 
         this.state = {
-            inputValue: null
+            inputValue: null,
+            employee: false
         };
         this.clientSelectRef = React.createRef();
 
         this.onClientSelect = this.onClientSelect.bind(this);
-        this.onInputChange = this.onInputChange.bind(this);
 
     }
 
 
     componentDidMount() {
-        window.$("#invoiceModal").on("shown.bs.modal", () => {
-            this.clientSelectRef.current.focus();
+        let _this = this;
+        window.$("#invoiceModal").on("shown.bs.modal", (event) => {
+            if (event.target.id == "invoiceModal")
+                _this.clientSelectRef.current.focus();
         });
     }
 
     async onSearchHandler(name) {
         let results = await clientRequests.fetchByNameOrCedulaWithDebts(name);
-        if (results.data.length > 0) {
-            results.data.forEach(client => {
+        if (results.length) {
+            results.forEach(client => {
                 client.label = (
                     <div className="row mx-auto">
                         <span className="mx-auto">
@@ -41,7 +43,7 @@ class ClientSearchContainer extends Component {
                 );
             });
         }
-        return results.data;
+        return results;
     }
 
     onClientSelect(selectedClient, action) {
@@ -67,17 +69,14 @@ class ClientSearchContainer extends Component {
                 });
 
             }
-            this.props.onClientSelect(selectedClient, action);
+            this.setState({
+                employee: selectedClient.employee
+            });
         }
         else if (action.action == "create-option") {
             this.props.openNewClientFormModal(this.state.inputValue);
         }
-    }
-
-    onInputChange(value) {
-        this.setState({
-            inputValue: value
-        });
+        this.props.onClientSelect(selectedClient, action);
     }
 
     render() {
@@ -88,6 +87,8 @@ class ClientSearchContainer extends Component {
                 onClientSelect={this.onClientSelect}
                 clientSelectRef={this.clientSelectRef}
                 onInputChange={this.onInputChange}
+                inputValue={this.state.inputValue}
+                employee={this.state.employee}
             />
         );
     }

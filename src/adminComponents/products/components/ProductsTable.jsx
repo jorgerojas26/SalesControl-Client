@@ -32,16 +32,19 @@ const ProductsTable = (props) => {
                 {props.products.length > 0 &&
                     props.products.map((product, index) => {
                         return (
-                            <tr key={index} productid={product.id}>
+                            <tr key={product.id} productid={product.id}>
                                 <th>{product.id}</th>
                                 <th>
                                     <img style={{ maxWidth: '40px' }} src={product.imagePath} /> {product.name}
                                 </th>
-                                <th>{Intl.NumberFormat('es-VE', { currency: 'VES' }).format(product.unitPriceBs)}</th>
+                                <th>{product.discount
+                                    ? <span>{product.unitPriceBs.toLocaleString("es-VE")} <span className="text-danger">{product.discount && product.discount > 0 ? `(-${product.discount.toLocaleString("es-VE")})` : null}</span></span>
+                                    : product.unitPriceBs.toLocaleString("es-VE")
+                                }</th>
                                 <th onClick={props.editProductQuantityHandler} className="bg-dark" data-toggle="tooltip" data-placement="bottom" title="Editar Cantidad" role="button">
                                     {product.quantity}
                                 </th>
-                                <th>{Intl.NumberFormat('es-VE', { currency: 'VES' }).format(product.totalBs)}</th>
+                                <th>{product.totalBs.toLocaleString("es-VE")}</th>
                                 <th>
                                     <button onClick={props.onProductDelete} className="btn btn-danger p-0"> Delete </button>
                                 </th>

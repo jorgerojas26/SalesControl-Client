@@ -179,9 +179,9 @@ const Reports = (props) => {
                                     <table id="paymentsReportTable" className="table table-bordered table-striped">
                                         <thead>
                                             <tr>
-                                                <th>Método de pago</th>
-                                                <th>Moneda</th>
-                                                <th>Cantidad</th>
+                                                <th className="w-50">Método de pago</th>
+                                                <th className="w-25">Moneda</th>
+                                                <th className="w-50">Cantidad</th>
                                             </tr>
                                         </thead>
                                         <tbody className="h6" >
@@ -223,8 +223,8 @@ const Reports = (props) => {
                                             })}
                                             <tr>
                                                 <td></td>
-                                                <td>Diferencia en cuanto a ventas concretadas</td>
-                                                <td className={props.remainingInfo < 0 ? "text-danger" : "text-success"}>{props.remainingInfo.toLocaleString("es-VE")}</td>
+                                                <td role="button" className="bg-light btn-link">Ventas con diferencia</td>
+                                                <td className={props.remainingInfo < 0 ? "text-danger bg-light" : "text-success bg-light"}>{props.remainingInfo.toLocaleString("es-VE")}</td>
                                             </tr>
                                         </tbody>
                                     </table>
