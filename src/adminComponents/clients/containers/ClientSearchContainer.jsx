@@ -11,8 +11,7 @@ class ClientSearchContainer extends Component {
         super();
 
         this.state = {
-            inputValue: null,
-            employee: false
+            inputValue: null
         };
         this.clientSelectRef = React.createRef();
 
@@ -69,9 +68,6 @@ class ClientSearchContainer extends Component {
                 });
 
             }
-            this.setState({
-                employee: selectedClient.employee
-            });
         }
         else if (action.action == "create-option") {
             this.props.openNewClientFormModal(this.state.inputValue);
@@ -88,7 +84,6 @@ class ClientSearchContainer extends Component {
                 clientSelectRef={this.clientSelectRef}
                 onInputChange={this.onInputChange}
                 inputValue={this.state.inputValue}
-                employee={this.state.employee}
             />
         );
     }
