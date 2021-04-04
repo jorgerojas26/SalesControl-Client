@@ -14,8 +14,9 @@ import { formatPhoneNumber } from "../../../helpers";
 
 const InvoiceModal = (props) => {
 
-    let clientCedula = props.client ? props.client.cedula : "";
-    let clientPhoneNumber = props.client ? props.client.phoneNumber : "";
+    console.log(props.client);
+    let clientCedula = props.client && props.client.cedula ? props.client.cedula : "";
+    let clientPhoneNumber = props.client && props.client.phoneNumber ? props.client.phoneNumber : "";
     return (
         <div
             onKeyUp={(event) => {

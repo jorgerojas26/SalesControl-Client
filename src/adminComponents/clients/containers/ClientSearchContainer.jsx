@@ -82,8 +82,6 @@ class ClientSearchContainer extends Component {
                 onSearch={this.onSearchHandler}
                 onClientSelect={this.onClientSelect}
                 clientSelectRef={this.clientSelectRef}
-                onInputChange={this.onInputChange}
-                inputValue={this.state.inputValue}
             />
         );
     }
