@@ -8,6 +8,7 @@ const ClientSearch = (props) => {
             <AsyncSelect
                 loadOptions={props.onSearch}
                 ref={props.clientSelectRef}
+                onInputChange={props.onInputChange}
                 className="w-100"
                 placeholder="Buscar cliente"
                 isClearable

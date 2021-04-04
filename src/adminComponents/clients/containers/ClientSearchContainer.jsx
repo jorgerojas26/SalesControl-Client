@@ -16,7 +16,7 @@ class ClientSearchContainer extends Component {
         this.clientSelectRef = React.createRef();
 
         this.onClientSelect = this.onClientSelect.bind(this);
-
+        this.onInputChange = this.onInputChange.bind(this);
     }
 
 
@@ -75,6 +75,12 @@ class ClientSearchContainer extends Component {
         this.props.onClientSelect(selectedClient, action);
     }
 
+    onInputChange(value) {
+        this.setState({
+            inputValue: value
+        });
+    }
+
     render() {
         return (
             <ClientSearch
@@ -82,6 +88,7 @@ class ClientSearchContainer extends Component {
                 onSearch={this.onSearchHandler}
                 onClientSelect={this.onClientSelect}
                 clientSelectRef={this.clientSelectRef}
+                onInputChange={this.onInputChange}
             />
         );
     }

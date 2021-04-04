@@ -693,7 +693,8 @@ class InvoiceModalContainer extends Component {
     }
 
     onNewClientSubmitHandler(client) {
-        client.label = client.name;
+        client.label = client.name ? client.name : "";
+        client.cedula = client.cedula ? parseInt(client.cedula) : "";
         this.setState({
             currentSelectedClient: client
         }, () => {
