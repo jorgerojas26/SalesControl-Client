@@ -76,7 +76,7 @@ class SalesControlContainer extends Component {
         let quantity = window.prompt('Ingrese la cantidad: ');
         if (quantity != null && quantity != '') {
             let productId = event.target.parentElement.getAttribute('productId');
-            if (await isProductStockEnough(this, productsRequests, productId, quantity)) {
+            if (await isProductStockEnough(this, productId, quantity)) {
                 let productsToSell = this.state.productsToSell;
                 productsToSell.forEach(product => {
                     if (product.id == productId) {

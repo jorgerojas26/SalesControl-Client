@@ -22,7 +22,7 @@ class Inventory extends Component {
                             { title: "Product ID", data: "id" },
                             { title: "Nombre Producto", data: "name" },
                             {
-                                title: "Inventario", data: "stock", render: function (data, type, row) {
+                                title: "Inventario", data: "inventario", render: function (data, type, row) {
                                     if (data <= 0) {
                                         return `<span class="text-danger">${data}</span>`;
                                     }

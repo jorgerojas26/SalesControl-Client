@@ -109,9 +109,7 @@ class Dashboard extends Component {
                 </div>
                 <main className="mt-5">
                     <Route path="/control-de-ventas" render={(props) => (<SalesControl {...props} dolarReference={this.state.dolarReference} />)} />
-                    {/*
                     <Route path="/inventario" component={Inventory} />
-                    */}
                     <Route path="/reportes" render={(props) => (<Reports {...props} dolarReference={this.state.dolarReference} />)} />
                     <Route path="/deuda" render={(props) => (<Debt {...props} dolarReference={this.state.dolarReference} />)} />
                     <Route path="/categorias" component={Categories} />

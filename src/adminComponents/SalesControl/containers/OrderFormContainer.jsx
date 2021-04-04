@@ -72,7 +72,7 @@ class OrderFormContainer extends Component {
             return;
         }
         if (this.state.selectedProduct != null) {
-            if (await isProductStockEnough(this, productsRequests, this.state.selectedProduct.id, this.state.quantity)) {
+            if (await isProductStockEnough(this, this.state.selectedProduct.id, this.state.quantity)) {
                 this.props.onProductSubmit(this.state.selectedProduct, this.state.quantity);
                 this.setState({
                     selectedProduct: null,

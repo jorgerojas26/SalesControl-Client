@@ -1,4 +1,3 @@
-
 const calculateSaleTotal = (sale, frozenPrice, currentDolarReference, checkIndividualProduct) => {
     let saleTotal = 0;
     sale.saleProducts.forEach(saleProduct => {
@@ -137,10 +136,12 @@ module.exports = {
     },
     //This method receives an array of payments from a sale that comes directly from the DB and returns the higher payment object along with
     // the currency and the dollar reference used in the payment method to calculate the higher payment amount in case of a USD currency payment.
-    isProductStockEnough: async (innerThis, productRequests, id, quantity) => {
-        let productInfo = await productRequests.fetchById(id);
+    isProductStockEnough: async (innerThis, id, quantity) => {
+        let inventoryRequests = require("./requests/inventory");
+        let productInfo = await inventoryRequests.default.fetchByProductId(id);
+        console.log(productInfo);
         if (productInfo.data) {
-            let stock = parseFloat(productInfo.data[0].stock);
+            let stock = parseFloat(productInfo.data[0].inventario);
             if (stock <= 0 || quantity > stock) {
                 showMessageInfo(innerThis, 'error', 'No hay suficientes productos en el inventario');
             } else {
