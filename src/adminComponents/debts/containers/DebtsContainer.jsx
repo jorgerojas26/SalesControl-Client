@@ -19,7 +19,8 @@ class DebtsContainer extends Component {
             showDebtDetails: false,
             debtDetails: null,
             showInvoiceModal: false,
-            invoiceInfo: null
+            invoiceInfo: null,
+            debtClient: null
         };
 
         this.fetchAllDebts = this.fetchAllDebts.bind(this);
@@ -105,6 +106,7 @@ class DebtsContainer extends Component {
                 messageInfo={this.state.messageInfo}
                 onPaymentSubmit={this.onPaymentSubmit}
                 dolarReference={this.props.dolarReference}
+                client={this.state.debtClient}
             />
         );
     }

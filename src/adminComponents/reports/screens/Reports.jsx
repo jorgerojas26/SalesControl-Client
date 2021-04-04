@@ -13,7 +13,7 @@ const Reports = (props) => {
 
     if (props.debtInfo) {
         props.debtInfo.map(debt => {
-            let debtTotal = calculateSaleTotal(debt, true);
+            let debtTotal = calculateSaleTotal(debt, true).invoiceTotal;
             let paymentTotal = calculatePaymentsTotal(debt.payment);
             if (!debt.isPaid) {
                 if (debt.payment.length == 0) {

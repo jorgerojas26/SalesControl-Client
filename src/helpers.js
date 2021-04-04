@@ -1,7 +1,9 @@
 const calculateSaleTotal = (sale, frozenPrice, currentDolarReference, checkIndividualProduct) => {
     let saleTotal = 0;
+    let products = [];
     sale.saleProducts.forEach(saleProduct => {
         let productPrice = 0;
+        let productDiscount = 0;
         if (checkIndividualProduct) {
             let oldProductPrice = roundUpProductPrice(saleProduct.price * sale.dolarReference);
             let actualProductPrice = roundUpProductPrice(saleProduct.product.price * currentDolarReference);
@@ -17,9 +19,24 @@ const calculateSaleTotal = (sale, frozenPrice, currentDolarReference, checkIndiv
                 ? roundUpProductPrice(saleProduct.price * sale.dolarReference)
                 : roundUpProductPrice(saleProduct.product.price * currentDolarReference);
         }
-        saleTotal += productPrice * saleProduct.quantity;
+        if (sale.client.employee) {
+            productDiscount = Math.round((productPrice - Math.round(productPrice / ((100 + saleProduct.profitPercent) / 100))) / 1000) * 1000;
+        }
+        saleTotal += (productPrice - productDiscount) * saleProduct.quantity;
+        products.push({
+            id: saleProduct.productId,
+            name: saleProduct.product.name,
+            imagePath: saleProduct.product.imagePath,
+            unitPriceBs: productPrice,
+            discount: productDiscount,
+            quantity: saleProduct.quantity,
+            totalBs: (productPrice - productDiscount) * saleProduct.quantity
+        });
     });
-    return Math.round(saleTotal);
+    return {
+        invoiceTotal: Math.round(saleTotal),
+        productList: products
+    };
 };
 const calculatePaymentsTotal = (payments) => {
     let paymentTotal = 0;
@@ -173,7 +190,7 @@ module.exports = {
         return higherPayment;
     },
     calculateDebtTotal(sale, currentDolarReference, historyView) {
-        let invoiceTotalBs = calculateSaleTotal(sale, true);
+        let invoiceTotalBs = calculateSaleTotal(sale, true).invoiceTotal;
         let expressedPaymentTotal = calculatePaymentsTotal(sale.payment);
         let debtTotal = 0;
         let debtCurrency = "";
@@ -188,7 +205,7 @@ module.exports = {
         }
         else if ((invoiceTotalBs - expressedPaymentTotal) > 0) { // client owes money
             if (!historyView) {
-                invoiceTotalBs = calculateSaleTotal(sale, true, currentDolarReference, true);
+                invoiceTotalBs = calculateSaleTotal(sale, true, currentDolarReference, true).invoiceTotal;
             }
             if (higherPayment.payment) {
                 debtTotal = invoiceTotalBs - expressedPaymentTotal;

@@ -9,8 +9,8 @@ import { calculatePaymentsTotal, calculateSaleTotal, roundUpProductPrice, calcul
 
 const DebtDetailsModal = (props) => {
 
-    let nonFreezedSaleTotal = calculateSaleTotal(props.sale, false, props.dolarReference);
-    let freezedSaleTotal = calculateSaleTotal(props.sale, true);
+    // let nonFreezedSaleTotal = calculateSaleTotal(props.sale, false, props.dolarReference);
+    let freezedSaleTotal = calculateSaleTotal(props.sale, true).invoiceTotal;
     let payments = props.sale.payment;
     let expressedPaymentTotal = calculatePaymentsTotal(payments);
     let invoiceTotalBs = 0;
@@ -18,38 +18,16 @@ const DebtDetailsModal = (props) => {
     let products = [];
     let businessDebt = freezedSaleTotal - expressedPaymentTotal <= 0;
 
-    // freeze prices if business owes money or if client is the debtor but current prices are lower so i keep the old prices
     if (businessDebt || props.historyView) {
-        invoiceTotalBs = calculateSaleTotal(props.sale, true, props.dolarReference, false);
-        props.sale.saleProducts.forEach(saleProduct => {
-            let productUnitPrice = roundUpProductPrice(saleProduct.price * props.sale.dolarReference);
-            products.push({
-                id: saleProduct.product.id,
-                name: saleProduct.product.name,
-                imagePath: saleProduct.product.imagePath,
-                unitPriceBs: productUnitPrice,
-                quantity: saleProduct.quantity,
-                totalBs: productUnitPrice * saleProduct.quantity
-            });
-        });
+        let saleTotalInfo = calculateSaleTotal(props.sale, true, props.dolarReference, false, props.sale.client.employee);
+        invoiceTotalBs = saleTotalInfo.invoiceTotal;
+        products = saleTotalInfo.productList;
         debtInfo = calculateDebtTotal(props.sale, props.dolarReference, true);
     }
     else {
-        invoiceTotalBs = calculateSaleTotal(props.sale, true, props.dolarReference, true);
-        props.sale.saleProducts.forEach(saleProduct => {
-            let oldUnitProductPrice = roundUpProductPrice(saleProduct.price * props.sale.dolarReference);
-            let actualUnitProductPrice = roundUpProductPrice(saleProduct.product.price * props.dolarReference);
-            let productUnitPrice = oldUnitProductPrice > actualUnitProductPrice ? oldUnitProductPrice : actualUnitProductPrice;
-
-            products.push({
-                id: saleProduct.product.id,
-                name: saleProduct.product.name,
-                imagePath: saleProduct.product.imagePath,
-                unitPriceBs: productUnitPrice,
-                quantity: saleProduct.quantity,
-                totalBs: productUnitPrice * saleProduct.quantity
-            });
-        });
+        let saleTotalInfo = calculateSaleTotal(props.sale, true, props.dolarReference, true, props.sale.client.employee);
+        invoiceTotalBs = saleTotalInfo.invoiceTotal;
+        products = saleTotalInfo.productList;
         debtInfo = calculateDebtTotal(props.sale, props.dolarReference, false);
     }
     debtTotal = debtInfo.debtTotal;

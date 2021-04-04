@@ -37,8 +37,8 @@ const ProductsTable = (props) => {
                                 <th>
                                     <img style={{ maxWidth: '40px' }} src={product.imagePath} /> {product.name}
                                 </th>
-                                <th>{product.discount
-                                    ? <span>{product.unitPriceBs.toLocaleString("es-VE")} <span className="text-danger">{product.discount && product.discount > 0 ? `(-${product.discount.toLocaleString("es-VE")})` : null}</span></span>
+                                <th>{product.discount && product.discount > 0
+                                    ? <span>{product.unitPriceBs.toLocaleString("es-VE")} <br /><span className="text-danger">{product.discount && product.discount > 0 ? `(-${product.discount.toLocaleString("es-VE")})` : null}</span></span>
                                     : product.unitPriceBs.toLocaleString("es-VE")
                                 }</th>
                                 <th onClick={props.editProductQuantityHandler} className="bg-dark" data-toggle="tooltip" data-placement="bottom" title="Editar Cantidad" role="button">
