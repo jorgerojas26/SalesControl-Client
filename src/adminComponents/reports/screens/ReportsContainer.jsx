@@ -256,9 +256,6 @@ class ReportsContainer extends Component {
         let sale = await salesRequests.fetchById(debtId);
         if (sale.data[0]) {
             sale = sale.data[0];
-            let debtInfo = calculateDebtTotal(sale, this.props.dolarReference, true);
-            sale.debtTotal = debtInfo.debtTotal;
-            sale.debtCurrency = debtInfo.debtCurrency;
             this.setState({
                 debtDetailsInfo: sale
             }, () => {

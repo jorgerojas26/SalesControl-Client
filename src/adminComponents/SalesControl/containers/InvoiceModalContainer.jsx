@@ -504,6 +504,7 @@ class InvoiceModalContainer extends Component {
                     payments: salePayments
                 });
                 if (sale.error) {
+                    console.log(sale.error);
                     showMessageInfo(this, "error", sale.error.toString());
                 }
                 else {
@@ -631,7 +632,7 @@ class InvoiceModalContainer extends Component {
 
             }
         } catch (error) {
-
+            showMessageInfo(this, "error", error.toString());
         }
     }
 

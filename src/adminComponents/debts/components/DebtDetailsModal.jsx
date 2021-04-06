@@ -9,7 +9,9 @@ import { calculatePaymentsTotal, calculateSaleTotal, roundUpProductPrice, calcul
 
 const DebtDetailsModal = (props) => {
 
+    console.log(props.sale);
     // let nonFreezedSaleTotal = calculateSaleTotal(props.sale, false, props.dolarReference);
+    /*
     let freezedSaleTotal = calculateSaleTotal(props.sale, true).invoiceTotal;
     let payments = props.sale.payment;
     let expressedPaymentTotal = calculatePaymentsTotal(payments);
@@ -32,7 +34,7 @@ const DebtDetailsModal = (props) => {
     }
     debtTotal = debtInfo.debtTotal;
     debtCurrency = debtInfo.debtCurrency;
-
+*/
 
     /*
     if (debtInfo.debtTotal < 0 && debtInfo.debtTotal.toFixed(2) == 0) {
@@ -60,7 +62,7 @@ const DebtDetailsModal = (props) => {
                         <div className="row mb-3 border-bottom">
                             <div className="col-7 border-right">
                                 <h4 className="col-12 mb-2">Información de pago</h4>
-                                {payments && payments.map(payment => {
+                                {props.sale.payment && props.sale.payment.map(payment => {
                                     if (payment.cash.length) {
                                         return payment.cash.map(pm => {
                                             return <CashPayment
@@ -123,7 +125,7 @@ const DebtDetailsModal = (props) => {
                                         <span className="font-weight-bold">Subtotal: </span>
                                     </div>
                                     <div className="col-6 text-left">
-                                        <span className="text-danger">{invoiceTotalBs.toLocaleString("es-VE")}</span>
+                                        <span className="text-danger">{props.sale.invoiceTotalBs.toLocaleString("es-VE")}</span>
                                     </div>
                                 </div>
                                 <div className="row">
@@ -131,7 +133,7 @@ const DebtDetailsModal = (props) => {
                                         <span className="font-weight-bold">Total: </span>
                                     </div>
                                     <div className="col-6 text-left">
-                                        <span className="text-danger">{invoiceTotalBs.toLocaleString("es-VE")}</span>
+                                        <span className="text-danger">{props.sale.invoiceTotalBs.toLocaleString("es-VE")}</span>
                                     </div>
                                 </div>
                                 <div className="row">
@@ -139,7 +141,7 @@ const DebtDetailsModal = (props) => {
                                         <span className="font-weight-bold">Pago total expresado: </span>
                                     </div>
                                     <div className="col-6 text-left">
-                                        <span className="text-danger">{expressedPaymentTotal.toLocaleString("es-VE")}</span>
+                                        <span className="text-danger">{props.sale.paymentTotalBs.toLocaleString("es-VE")}</span>
                                     </div>
                                 </div>
                                 <div className="row">
@@ -147,8 +149,8 @@ const DebtDetailsModal = (props) => {
                                         <span className="font-weight-bold">Diferencia: </span>
                                     </div>
                                     <div className="col-6 text-left">
-                                        <span className={debtTotal < 0 ? "text-success" : "text-danger"}>
-                                            {debtCurrency ? debtCurrency === "USD" ? "$" : "Bs" : "Bs "}{" " + Math.abs(debtTotal.toFixed(2)).toLocaleString("es-VE")}
+                                        <span className={props.sale.debtTotal < 0 ? "text-success" : "text-danger"}>
+                                            {props.sale.debtCurrency ? props.sale.debtCurrency === "USD" ? "$" : "Bs" : "Bs "}{" " + Math.abs(props.sale.debtTotal.toFixed(2)).toLocaleString("es-VE")}
                                         </span>
                                     </div>
                                 </div>
@@ -157,7 +159,7 @@ const DebtDetailsModal = (props) => {
                         <h4 className="col-12 mb-2">Productos</h4>
                         <ProductsTable
                             fontSize="small"
-                            products={products}
+                            products={props.sale.products}
                         />
                     </div>
                 </div>

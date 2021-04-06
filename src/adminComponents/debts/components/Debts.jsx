@@ -32,7 +32,7 @@ const Debts = (props) => {
                     <tbody>
                         {props.salesArray && props.salesArray.map(sale => {
                             return (
-                                <tr>
+                                <tr key={sale.id}>
                                     <th onClick={() => props.openDebtDetails(sale.id)} role="button" className="btn-link">{sale.id}</th>
                                     <th>{sale.client.name}</th>
                                     <th>{sale.client.cedula}</th>
@@ -55,7 +55,7 @@ const Debts = (props) => {
                 <InvoiceModal
                     action="payDebt"
                     dolarReference={props.dolarReference}
-                    saleId={props.invoiceInfo.saleId}
+                    saleId={props.invoiceInfo.saleId} typeoetypeof
                     invoiceTotal={props.invoiceInfo.debtTotal}
                     invoiceCurrency={props.invoiceInfo.debtCurrency}
                     client={props.invoiceInfo.client}

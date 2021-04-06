@@ -20,7 +20,6 @@ class Sales extends Component {
 
     submitHandler(event) {
         event.preventDefault();
-        console.log("hola");
     }
 
     roundToNiceNumber(value) {
@@ -80,6 +79,7 @@ class Sales extends Component {
             window.$("#debtDetailsModal").modal("show");
         });
     }
+
     render() {
         return (
             <div className="">

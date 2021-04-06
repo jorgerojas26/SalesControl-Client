@@ -37,6 +37,7 @@ class DebtsContainer extends Component {
         let sales = await salesRequests.fetchAllDebts();
         if (sales.data) {
             sales.data.map(sale => {
+                /*
                 let nonFreezedSaleTotal = calculateSaleTotal(sale, false, this.props.dolarReference);
                 let freezedSaleTotal = calculateSaleTotal(sale, true);
                 let expressedPaymentTotal = calculatePaymentsTotal(sale.payment);
@@ -50,6 +51,7 @@ class DebtsContainer extends Component {
                 }
                 sale.debtTotal = debtInfo.debtTotal;
                 sale.debtCurrency = debtInfo.debtCurrency;
+                */
             });
         }
         this.setState({

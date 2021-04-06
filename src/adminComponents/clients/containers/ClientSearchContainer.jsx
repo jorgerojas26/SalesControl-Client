@@ -48,6 +48,8 @@ class ClientSearchContainer extends Component {
     onClientSelect(selectedClient, action) {
         if (action.action == "select-option") {
             if (selectedClient) {
+                console.log(selectedClient);
+                /*
                 selectedClient.sales.forEach(sale => {
                     let nonFreezedSaleTotal = calculateSaleTotal(sale, false, this.props.dolarReference).invoiceTotal;
                     let freezedSaleTotal = calculateSaleTotal(sale, true).invoiceTotal;
@@ -66,7 +68,7 @@ class ClientSearchContainer extends Component {
                     sale.debtTotal = debtInfo.debtTotal;
                     sale.debtCurrency = debtInfo.debtCurrency;
                 });
-
+                */
             }
         }
         else if (action.action == "create-option") {

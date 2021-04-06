@@ -127,10 +127,10 @@ const showMessageInfo = (innerThis, type, message) => {
 function roundUpProductPrice(price) {
     var val = 0;
     if (price < 10000) {
-        val = Math.ceil(price / 100) * 100;
+        val = Math.ceil(Math.round(price) / 100) * 100;
     }
     else {
-        val = Math.ceil(price / 1000) * 1000;
+        val = Math.ceil(Math.round(price) / 1000) * 1000;
     }
     return val;
 }
@@ -156,7 +156,6 @@ module.exports = {
     isProductStockEnough: async (innerThis, id, quantity) => {
         let inventoryRequests = require("./requests/inventory");
         let productInfo = await inventoryRequests.default.fetchByProductId(id);
-        console.log(productInfo);
         if (productInfo.data) {
             let stock = parseFloat(productInfo.data[0].inventario);
             if (stock <= 0 || quantity > stock) {

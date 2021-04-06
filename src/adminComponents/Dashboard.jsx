@@ -15,7 +15,7 @@ import Reports from "./reports/screens/ReportsContainer";
 import Debt from "./debts/containers/DebtsContainer";
 
 import PrivateRoute from "../components/PrivateRoute";
-import { Route } from "react-router-dom";
+import { Router, Route, Switch } from "react-router-dom";
 import $ from "jquery";
 class Dashboard extends Component {
 
@@ -108,17 +108,19 @@ class Dashboard extends Component {
 
                 </div>
                 <main className="mt-5">
-                    <Route path="/control-de-ventas" render={(props) => (<SalesControl {...props} dolarReference={this.state.dolarReference} />)} />
-                    <Route path="/inventario" component={Inventory} />
-                    <Route path="/reportes" render={(props) => (<Reports {...props} dolarReference={this.state.dolarReference} />)} />
-                    <Route path="/deuda" render={(props) => (<Debt {...props} dolarReference={this.state.dolarReference} />)} />
-                    <Route path="/categorias" component={Categories} />
-                    <Route path="/clientes" component={Clients} />
-                    <Route path="/productos" render={(props) => (<Products {...props} dolarReference={this.state.dolarReference} />)} />
-                    <Route path="/ventas" component={Sales} />
-                    <Route path="/abastecimiento" render={(props) => (<Supplyings {...props} dolarReference={this.state.dolarReference} />)} />
-                    <Route path="/proveedores" component={Suppliers} />
-                    <Route path="/usuarios" component={Users} />
+                    <Switch>
+                        <PrivateRoute path="/inventario" component={Inventory} />
+                        <PrivateRoute path="/control-de-ventas" component={SalesControl} dolarReference={this.state.dolarReference} />
+                        <PrivateRoute path="/reportes" component={Reports} dolarReference={this.state.dolarReference} />
+                        <PrivateRoute path="/deuda" component={Debt} dolarReference={this.state.dolarReference} />
+                        <PrivateRoute path="/categorias" component={Categories} />
+                        <PrivateRoute path="/clientes" component={Clients} />
+                        <PrivateRoute path="/productos" component={Products} dolarReference={this.state.dolarReference} />
+                        <PrivateRoute path="/ventas" component={Sales} />
+                        <PrivateRoute path="/abastecimiento" component={Supplyings} dolarReference={this.state.dolarReference} />
+                        <PrivateRoute path="/proveedores" component={Suppliers} />
+                        <PrivateRoute path="/usuarios" component={Users} />
+                    </Switch>
                 </main>
                 <div className="modal fade" id="dolarEditModal" tabIndex="-1" aria-labelledby="dolarEditModalLabel" aria-hidden="true">
                     <div className="modal-dialog">

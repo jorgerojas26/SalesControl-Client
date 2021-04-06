@@ -3,6 +3,7 @@ import React from 'react';
 import DebtDetailsModal from '../../debts/components/DebtDetailsModal';
 
 import { calculateSaleTotal, calculatePaymentsTotal } from "../../../helpers";
+import moment from 'moment';
 
 const Reports = (props) => {
 
@@ -13,29 +14,27 @@ const Reports = (props) => {
 
     if (props.debtInfo) {
         props.debtInfo.map(debt => {
-            let debtTotal = calculateSaleTotal(debt, true).invoiceTotal;
-            let paymentTotal = calculatePaymentsTotal(debt.payment);
             if (!debt.isPaid) {
                 if (debt.payment.length == 0) {
-                    nonPaidDebtTotalBs += debtTotal;
+                    nonPaidDebtTotalBs += debt.debtTotal;
                 }
                 else {
-                    let totalRemaining = debtTotal - paymentTotal;
-                    if (paymentTotal < debtTotal) {
-                        nonPaidDebtTotalBs += totalRemaining;
-                    }
+                    let totalRemaining = debt.invoiceTotalBs - debt.paymentTotalBs;
+                    nonPaidDebtTotalBs += totalRemaining;
                 }
             }
             else {
-                debt.payment.map(payment => {
-                    if (payment.currency == "Bs") {
-                        debtTotalIncomeBs += payment.amount;
-                    }
-                    else if (payment.currency == "USD") {
-                        debtTotalIncomeDollars += payment.amount;
-                        debtTotalIncomeDollarsToBs += Math.round(payment.amount * payment.cash[0].dolarReference);
-                    }
-                });
+                if (moment(debt.fullyPaidDate).format("YYYY-MM-DD") != moment(debt.createdAt).format("YYYY-MM-DD")) {
+                    debt.payment.map(payment => {
+                        if (payment.currency == "Bs") {
+                            debtTotalIncomeBs += payment.amount;
+                        }
+                        else if (payment.currency == "USD") {
+                            debtTotalIncomeDollars += payment.amount;
+                            debtTotalIncomeDollarsToBs += Math.round(payment.amount * payment.cash[0].dolarReference);
+                        }
+                    });
+                }
             }
         });
     }

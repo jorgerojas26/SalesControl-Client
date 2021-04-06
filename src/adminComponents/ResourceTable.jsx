@@ -376,7 +376,7 @@ class ResourceTable extends Component {
                     }
                 },
                 paging: true,
-                lengthMenu: [[10, 25, 50, 100, 1000000000000000], [10, 25, 50, 100, "All"]],
+                lengthMenu: [[1, 10, 25, 50, 100, 1000000000000000], [1, 10, 25, 50, 100, "All"]],
                 pageLength: (this.props.sourceURL.includes("group=true")) ? 1000000000000000 : 10,
                 columns: this.props.columns,
                 ordering: false,
