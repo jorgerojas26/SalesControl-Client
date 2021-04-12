@@ -47,7 +47,7 @@ class ProductSearchContainer extends Component {
                         </span>
                     </div>
                 );
-                if (product.stock == 0) product.isDisabled = true;
+                if (product.inventario == 0) product.isDisabled = true;
             });
         }
         return results.data;

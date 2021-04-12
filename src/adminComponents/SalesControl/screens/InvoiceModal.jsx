@@ -83,8 +83,6 @@ const InvoiceModal = (props) => {
                             {(props.client && props.client.sales && props.client.sales.length > 0) &&
                                 <DebtTable
                                     client={props.client}
-                                    calculateSaleTotal={props.calculateSaleTotal}
-                                    calculatePaymentsTotal={props.calculatePaymentsTotal}
                                     payIndividualDebtHandler={props.payIndividualDebtHandler}
                                     onDebtIdClick={props.onDebtIdClick}
                                     dolarReference={props.dolarReference}

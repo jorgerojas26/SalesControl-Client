@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 
 import DebtTable from "../components/DebtTable";
 
-import { roundUpProductPrice, calculateSaleTotal, calculatePaymentsTotal } from "../../../helpers";
-
 class DebtTableContainer extends Component {
 
     constructor() {
@@ -31,12 +29,12 @@ class DebtTableContainer extends Component {
         this.props.client.sales.forEach(sale => {
             if (sale.id == event.target.innerText) {
                 match = true;
+                sale.client = this.props.client;
                 saleObject = sale;
             }
         });
 
         if (match) {
-            console.log(saleObject);
             this.props.onDebtIdClick(saleObject, () => {
                 window.$("#debtDetailsModal").modal("show");
             });
@@ -78,9 +76,6 @@ class DebtTableContainer extends Component {
                 client={this.props.client}
                 onDebtIdClickHandler={this.onDebtIdClickHandler}
                 payIndividualDebt={this.payIndividualDebt}
-                calculatePaymentsTotal={this.props.calculatePaymentsTotal}
-                calculateSaleTotal={this.props.calculateSaleTotal}
-                calculateClientDebtTotal={this.calculateClientDebtTotal}
                 openPaymentMethodsModalHandler={this.props.openPaymentMethodsModalHandler}
             />
         );

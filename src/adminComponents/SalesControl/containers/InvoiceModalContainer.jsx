@@ -227,6 +227,7 @@ class InvoiceModalContainer extends Component {
     }
 
     onDebtIdClick(debtDetails, callback) {
+        console.log(debtDetails);
         this.setState({
             showDebtDetails: true,
             debtInfo: debtDetails

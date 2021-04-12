@@ -18,8 +18,8 @@ const ProductSearch = (props) => {
                 styles={{
                     option: (styles, { data }) => ({
                         ...styles,
-                        color: data.stock > 0 && data.stock <= 10 ? 'orange' : data.stock > 0 ? 'green' : 'red',
-                        cursor: data.stock <= 0 ? 'not-allowed' : 'pointer',
+                        color: data.inventario > 0 && data.inventario <= 10 ? 'orange' : data.inventario > 0 ? 'green' : 'red',
+                        cursor: data.inventario <= 0 ? 'not-allowed' : 'pointer',
                     }),
                     singleValue: (styles) => ({
                         ...styles,
