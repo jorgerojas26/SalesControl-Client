@@ -13,6 +13,7 @@ const Reports = (props) => {
     let nonPaidDebtTotalBs = 0;
 
     if (props.debtInfo) {
+        console.log(props.debtInfo);
         props.debtInfo.map(debt => {
             if (!debt.isPaid) {
                 if (debt.payment.length == 0) {
@@ -24,7 +25,7 @@ const Reports = (props) => {
                 }
             }
             else {
-                if (moment(debt.fullyPaidDate).format("YYYY-MM-DD") != moment(debt.createdAt).format("YYYY-MM-DD")) {
+                if (moment(debt.fullyPaidDate, "DD/MM/YYYY HH:mm:ss").format("YYYY-MM-DD") != moment(debt.createdAt, "DD/MM/YYYY HH:mm:ss").format("YYYY-MM-DD")) {
                     debt.payment.map(payment => {
                         if (payment.currency == "Bs") {
                             debtTotalIncomeBs += payment.amount;

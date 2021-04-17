@@ -1,42 +1,41 @@
-import React, { Component } from "react";
+import React, { Component } from 'react';
 
-import bootbox from "bootbox";
+import bootbox from 'bootbox';
 
-import InvoiceModal from "../screens/InvoiceModal";
+import InvoiceModal from '../screens/InvoiceModal';
 
-import { showMessageInfo, getHigherAmountClientPayment } from "../../../helpers";
+import { showMessageInfo, getHigherAmountClientPayment } from '../../../helpers';
 
-import salesRequests from "../../../requests/sales";
-import paymentsRequests from "../../../requests/payments";
-import paymentMethodsRequests from "../../../requests/paymentMethods";
+import salesRequests from '../../../requests/sales';
+import paymentsRequests from '../../../requests/payments';
+import paymentMethodsRequests from '../../../requests/paymentMethods';
 
-require("bootstrap");
+require('bootstrap');
 
 class InvoiceModalContainer extends Component {
-
     constructor(props) {
         super(props);
 
         this.state = {
             messageInfo: {
                 type: null,
-                message: null
+                message: null,
             },
             invoiceTotal: props.invoiceTotal || 0,
-            invoiceCurrency: props.invoiceCurrency || "",
+            invoiceCurrency: props.invoiceCurrency || '',
             debtTotalBs: 0,
             paymentInfo: [],
             currentSelectedClient: props.client || null,
             showDebtDetails: false,
             showPaymentMethodsModal: false,
             showNewClientFormModal: false,
-            cedulaToBeCreated: "",
+            cedulaToBeCreated: '',
             paymentMethodsModalProps: null,
             debtInfo: [],
             isMoneyBack: false,
             submittingSale: false,
             confirmingSale: false,
-            clientIsEmployee: false
+            clientIsEmployee: false,
         };
 
         this.onClientSelect = this.onClientSelect.bind(this);
@@ -59,58 +58,57 @@ class InvoiceModalContainer extends Component {
     }
 
     componentDidMount() {
-        window.$(".modal-header").on("mousedown", function (mousedownEvt) {
+        window.$('.modal-header').on('mousedown', function (mousedownEvt) {
             var $draggable = window.$(this);
             var x = mousedownEvt.pageX - $draggable.offset().left,
                 y = mousedownEvt.pageY - $draggable.offset().top;
-            window.$("body").on("mousemove.draggable", function (mousemoveEvt) {
-                $draggable.closest(".modal-content").offset({
-                    "left": mousemoveEvt.pageX - x,
-                    "top": mousemoveEvt.pageY - y
+            window.$('body').on('mousemove.draggable', function (mousemoveEvt) {
+                $draggable.closest('.modal-content').offset({
+                    left: mousemoveEvt.pageX - x,
+                    top: mousemoveEvt.pageY - y,
                 });
             });
-            window.$("body").on("mouseup", function () {
-                window.$("body").off("mousemove.draggable");
+            window.$('body').on('mouseup', function () {
+                window.$('body').off('mousemove.draggable');
             });
-            $draggable.closest(".modal").on("bs.modal.hide", function () {
-                window.$("body").off("mousemove.draggable");
+            $draggable.closest('.modal').on('bs.modal.hide', function () {
+                window.$('body').off('mousemove.draggable');
             });
         });
-        if (this.props.action === "newSale") {
+        if (this.props.action === 'newSale') {
             this.loadPoinfOfSalesPayment();
         }
-        window.$("#invoiceModal").on("show.bs.modal", (event) => {
-            if (this.props.action == "newSale") {
+        window.$('#invoiceModal').on('show.bs.modal', (event) => {
+            if (this.props.action == 'newSale') {
                 this.setState({ invoiceTotal: this.props.invoiceTotal });
-            }
-            else if (this.props.action == "payDebt") {
+            } else if (this.props.action == 'payDebt') {
                 this.setState({
                     invoiceTotal: this.props.invoiceTotal,
                     invoiceCurrency: this.props.invoiceCurrency,
                     paymentInfo: [],
-                    currentSelectedClient: this.props.client
+                    currentSelectedClient: this.props.client,
                 });
             }
         });
-        window.$("#invoiceModal").on("hidden.bs.modal", (event) => {
-            if (this.props.action == "newSale" && event.target.id == "invoiceModal") {
-                window.$("#productSearchInput").focus();
+        window.$('#invoiceModal').on('hidden.bs.modal', (event) => {
+            if (this.props.action == 'newSale' && event.target.id == 'invoiceModal') {
+                window.$('#productSearchInput').focus();
             }
         });
     }
 
     componentDidUpdate(prevProps) {
         if (prevProps.invoiceTotal != this.props.invoiceTotal) {
-            this.state.paymentInfo.map(payment => {
-                if (this.state.paymentInfo.length == 1 && payment.type === "PointOfSale") {
+            this.state.paymentInfo.map((payment) => {
+                if (this.state.paymentInfo.length == 1 && payment.type === 'PointOfSale') {
                     this.setState({ paymentInfo: [] }, () => {
-                        this.addPaymentMethod("PointOfSale", {
+                        this.addPaymentMethod('PointOfSale', {
                             paymentMethodId: payment.paymentMethodId,
                             amount: Math.abs(this.props.invoiceTotal),
-                            currency: "Bs",
+                            currency: 'Bs',
                         });
                         setTimeout(() => {
-                            window.$("#invoiceModal").find("input").focus();
+                            window.$('#invoiceModal').find('input').focus();
                         });
                     });
                 }
@@ -120,12 +118,12 @@ class InvoiceModalContainer extends Component {
     async loadPoinfOfSalesPayment() {
         let paymentMethods = await paymentMethodsRequests.fetchAll();
         if (paymentMethods.data) {
-            paymentMethods.data.map(pm => {
-                if (pm.name.toLowerCase().includes("point of sale")) {
-                    this.addPaymentMethod("PointOfSale", {
+            paymentMethods.data.map((pm) => {
+                if (pm.name.toLowerCase().includes('point of sale')) {
+                    this.addPaymentMethod('PointOfSale', {
                         paymentMethodId: pm.id,
                         amount: Math.abs(this.props.invoiceTotal),
-                        currency: "Bs",
+                        currency: 'Bs',
                     });
                 }
             });
@@ -134,15 +132,14 @@ class InvoiceModalContainer extends Component {
     onClientSelect(selectedClient, actionType) {
         if (actionType.action == 'select-option') {
             selectedClient.label = selectedClient.name;
-            selectedClient.phoneNumber = selectedClient.phoneNumber || "";
-            window.$("#invoiceModal").find("input").focus();
+            selectedClient.phoneNumber = selectedClient.phoneNumber || '';
+            window.$('#invoiceModal').find('input').focus();
             this.setState({ clientIsEmployee: selectedClient.employee });
-        }
-        else {
+        } else {
             this.setState({ clientIsEmployee: false });
         }
         this.setState({
-            currentSelectedClient: selectedClient
+            currentSelectedClient: selectedClient,
         });
         this.props.onClientSelect(selectedClient ? selectedClient.id : null, (invoiceTotal) => {
             this.setState({ invoiceTotal });
@@ -152,11 +149,10 @@ class InvoiceModalContainer extends Component {
     calculateExpressedPaymentTotal() {
         let paymentInfo = this.state.paymentInfo;
         let paymentTotal = 0;
-        paymentInfo.forEach(paymentType => {
-            if (paymentType.currency === "Bs") {
+        paymentInfo.forEach((paymentType) => {
+            if (paymentType.currency === 'Bs') {
                 paymentTotal += paymentType.amount;
-            }
-            else if (paymentType.currency === "USD") {
+            } else if (paymentType.currency === 'USD') {
                 paymentTotal += paymentType.amount * paymentType.dolarReference;
             }
         });
@@ -166,7 +162,7 @@ class InvoiceModalContainer extends Component {
     calculateClientTotalDebt() {
         let client = this.state.currentSelectedClient;
         let debtTotal = 0;
-        client.sales.forEach(sale => {
+        client.sales.forEach((sale) => {
             if (sale.markedToBePaid && sale.debtTotal > 0) {
                 debtTotal += sale.debtTotal;
             }
@@ -183,7 +179,7 @@ class InvoiceModalContainer extends Component {
             id: Date.now(),
             type: paymentType,
             debtInfo,
-            isMoneyBack
+            isMoneyBack,
         });
 
         this.setState({ paymentInfo });
@@ -192,7 +188,7 @@ class InvoiceModalContainer extends Component {
     onPaymentPropertyChange(id, property, value) {
         let paymentInfo = this.state.paymentInfo;
 
-        paymentInfo.map(payment => {
+        paymentInfo.map((payment) => {
             if (payment.id == id) {
                 payment[property] = value;
             }
@@ -201,124 +197,135 @@ class InvoiceModalContainer extends Component {
         this.setState({ paymentInfo });
     }
 
-
     removePaymentMethod(id) {
         let paymentInfo = this.state.paymentInfo;
 
-        this.setState({
-            paymentInfo: paymentInfo.filter(payment => payment.id != id)
-        }, () => {
-            console.log(this.state.paymentInfo);
-        });
+        this.setState(
+            {
+                paymentInfo: paymentInfo.filter((payment) => payment.id != id),
+            },
+            () => {
+                console.log(this.state.paymentInfo);
+            }
+        );
     }
 
     payIndividualDebtHandler(saleId) {
         let client = this.state.currentSelectedClient;
-        client.sales && client.sales.map(sale => {
-            if (sale.id == saleId) {
-                sale.markedToBePaid = !sale.markedToBePaid;
-            }
-        });
+        client.sales &&
+            client.sales.map((sale) => {
+                if (sale.id == saleId) {
+                    sale.markedToBePaid = !sale.markedToBePaid;
+                }
+            });
 
         this.setState({
             currentSelectedClient: client,
-            debtTotalBs: this.calculateClientTotalDebt()
+            debtTotalBs: this.calculateClientTotalDebt(),
         });
     }
 
     onDebtIdClick(debtDetails, callback) {
         console.log(debtDetails);
-        this.setState({
-            showDebtDetails: true,
-            debtInfo: debtDetails
-        }, () => {
-            callback();
-        });
+        this.setState(
+            {
+                showDebtDetails: true,
+                debtInfo: debtDetails,
+            },
+            () => {
+                callback();
+            }
+        );
     }
 
     openPaymentMethodsModalHandler(event, props, isMoneyBack) {
-        this.setState({
-            showPaymentMethodsModal: true,
-            paymentMethodsModalProps: props,
-            isMoneyBack
-        }, () => {
-            window.$("#paymentMethodsModal").modal("show");
-        });
-
+        this.setState(
+            {
+                showPaymentMethodsModal: true,
+                paymentMethodsModalProps: props,
+                isMoneyBack,
+            },
+            () => {
+                window.$('#paymentMethodsModal').modal('show');
+            }
+        );
     }
 
     closePaymentMethodsModal() {
         this.setState({
-            showPaymentMethodsModal: false
+            showPaymentMethodsModal: false,
         });
     }
 
     saleSubmitValidationsPassed() {
         if (!this.state.currentSelectedClient) {
-            showMessageInfo(this, "error", "Por favor seleccione un cliente");
+            showMessageInfo(this, 'error', 'Por favor seleccione un cliente');
             return false;
         }
         if (this.props.products == null || !this.props.products.length) {
-            showMessageInfo(this, "error", "Por favor seleccione un producto");
+            showMessageInfo(this, 'error', 'Por favor seleccione un producto');
             return false;
         }
 
         if (!this.state.paymentInfo.length) {
-            showMessageInfo(this, "error", "Por favor seleccione un método de pago");
+            showMessageInfo(this, 'error', 'Por favor seleccione un método de pago');
             return false;
         }
         for (let payment of this.state.paymentInfo) {
-            if (payment.amount == null || payment.amount === "" || isNaN(payment.amount)) {
-                showMessageInfo(this, "error", "El monto debe contener un valor numérico");
+            if (payment.amount == null || payment.amount === '' || isNaN(payment.amount)) {
+                showMessageInfo(this, 'error', 'El monto debe contener un valor numérico');
                 return false;
             }
-            if (payment.type === "PointOfSale") {
-                if (payment.ticketId == null || payment.ticketId === "" || isNaN(payment.ticketId)) {
-                    showMessageInfo(this, "error", "El número de ticket debe contener un valor numérico");
+            if (payment.type === 'PointOfSale') {
+                if (payment.ticketId == null || payment.ticketId === '' || isNaN(payment.ticketId)) {
+                    showMessageInfo(this, 'error', 'El número de ticket debe contener un valor numérico');
                     return false;
                 }
-            }
-            else if (payment.type === "Cash") {
-                if (payment.currency === "USD" && (payment.dolarReference == null || payment.dolarReference === "" || isNaN(payment.dolarReference))) {
-                    showMessageInfo(this, "error", "El valor del dólar no puede estar vacío");
+            } else if (payment.type === 'Cash') {
+                if (
+                    payment.currency === 'USD' &&
+                    (payment.dolarReference == null || payment.dolarReference === '' || isNaN(payment.dolarReference))
+                ) {
+                    showMessageInfo(this, 'error', 'El valor del dólar no puede estar vacío');
                     return false;
                 }
-            }
-            else if (payment.type === "BankTransfer") {
-                if (payment.referenceCode == null || payment.referenceCode === "" || isNaN(payment.referenceCode)) {
-                    showMessageInfo(this, "error", "El número de referencia debe contener un valor numérico");
+            } else if (payment.type === 'BankTransfer') {
+                if (payment.referenceCode == null || payment.referenceCode === '' || isNaN(payment.referenceCode)) {
+                    showMessageInfo(this, 'error', 'El número de referencia debe contener un valor numérico');
                     return false;
                 }
-                if (payment.bankId == null || payment.bankId === "" || isNaN(payment.bankId)) {
-                    showMessageInfo(this, "error", "Debe seleccionar el banco receptor de la transferencia");
+                if (payment.bankId == null || payment.bankId === '' || isNaN(payment.bankId)) {
+                    showMessageInfo(this, 'error', 'Debe seleccionar el banco receptor de la transferencia');
                     return false;
                 }
             }
 
             if (payment.debtInfo) {
                 if (payment.debtInfo.saleId == null || payment.debtInfo.debtTotal == null) {
-                    showMessageInfo(this, "error", "El pago de la deuda no está asociado a ninguna factura");
+                    showMessageInfo(this, 'error', 'El pago de la deuda no está asociado a ninguna factura');
                     return false;
                 }
                 if (payment.currency === payment.debtInfo.debtCurrency && payment.amount > Math.abs(payment.debtInfo.debtTotal.toFixed(2))) {
-                    showMessageInfo(this, "error", "El monto deudor a pagar es mayor al de la deuda");
+                    showMessageInfo(this, 'error', 'El monto deudor a pagar es mayor al de la deuda');
                     return;
-
                 }
-                if (payment.currency === "USD" && payment.debtInfo.debtCurrency === "Bs" && (payment.amount * payment.dolarReference) > Math.abs(payment.debtInfo.debtTotal.toFixed(2))) {
-                    showMessageInfo(this, "error", "El monto deudor a pagar es mayor al de la deuda");
+                if (
+                    payment.currency === 'USD' &&
+                    payment.debtInfo.debtCurrency === 'Bs' &&
+                    payment.amount * payment.dolarReference > Math.abs(payment.debtInfo.debtTotal.toFixed(2))
+                ) {
+                    showMessageInfo(this, 'error', 'El monto deudor a pagar es mayor al de la deuda');
                     return;
                 }
                 if (payment.amount == 0) {
-                    showMessageInfo(this, "error", "El monto deudor a pagar no puede ser igual a 0");
+                    showMessageInfo(this, 'error', 'El monto deudor a pagar no puede ser igual a 0');
                     return false;
                 }
             }
-
         }
         let expressedPaymentTotal = this.calculateExpressedPaymentTotal();
         if (expressedPaymentTotal < this.state.debtTotalBs) {
-            showMessageInfo(this, "error", "El pago total expresado es inferior al total de la deuda a pagar");
+            showMessageInfo(this, 'error', 'El pago total expresado es inferior al total de la deuda a pagar');
             return false;
         }
         return true;
@@ -326,37 +333,38 @@ class InvoiceModalContainer extends Component {
 
     paymentSubmitValidationsPassed() {
         if (!this.state.currentSelectedClient) {
-            showMessageInfo(this, "error", "Por favor seleccione un cliente");
+            showMessageInfo(this, 'error', 'Por favor seleccione un cliente');
             return false;
         }
         if (!this.state.paymentInfo.length) {
-            showMessageInfo(this, "error", "Por favor seleccione un método de pago");
+            showMessageInfo(this, 'error', 'Por favor seleccione un método de pago');
             return false;
         }
         for (let payment of this.state.paymentInfo) {
-            if (payment.amount == null || payment.amount === "" || isNaN(payment.amount)) {
-                showMessageInfo(this, "error", "El monto debe contener un valor numérico");
+            if (payment.amount == null || payment.amount === '' || isNaN(payment.amount)) {
+                showMessageInfo(this, 'error', 'El monto debe contener un valor numérico');
                 return false;
             }
-            if (payment.type === "PointOfSale") {
-                if (payment.ticketId == null || payment.ticketId === "" || isNaN(payment.ticketId)) {
-                    showMessageInfo(this, "error", "El número de ticket debe contener un valor numérico");
+            if (payment.type === 'PointOfSale') {
+                if (payment.ticketId == null || payment.ticketId === '' || isNaN(payment.ticketId)) {
+                    showMessageInfo(this, 'error', 'El número de ticket debe contener un valor numérico');
                     return false;
                 }
-            }
-            else if (payment.type === "Cash") {
-                if (payment.currency === "USD" && (payment.dolarReference == null || payment.dolarReference === "" || isNaN(payment.dolarReference))) {
-                    showMessageInfo(this, "error", "El valor del dólar no puede estar vacío");
+            } else if (payment.type === 'Cash') {
+                if (
+                    payment.currency === 'USD' &&
+                    (payment.dolarReference == null || payment.dolarReference === '' || isNaN(payment.dolarReference))
+                ) {
+                    showMessageInfo(this, 'error', 'El valor del dólar no puede estar vacío');
                     return false;
                 }
-            }
-            else if (payment.type === "BankTransfer") {
-                if (payment.referenceCode == null || payment.referenceCode === "" || isNaN(payment.referenceCode)) {
-                    showMessageInfo(this, "error", "El número de referencia debe contener un valor numérico");
+            } else if (payment.type === 'BankTransfer') {
+                if (payment.referenceCode == null || payment.referenceCode === '' || isNaN(payment.referenceCode)) {
+                    showMessageInfo(this, 'error', 'El número de referencia debe contener un valor numérico');
                     return false;
                 }
-                if (payment.bankId == null || payment.bankId === "" || isNaN(payment.bankId)) {
-                    showMessageInfo(this, "error", "Debe seleccionar el banco receptor de la transferencia");
+                if (payment.bankId == null || payment.bankId === '' || isNaN(payment.bankId)) {
+                    showMessageInfo(this, 'error', 'Debe seleccionar el banco receptor de la transferencia');
                     return false;
                 }
             }
@@ -368,159 +376,160 @@ class InvoiceModalContainer extends Component {
         if (this.saleSubmitValidationsPassed()) {
             let expressedPaymentTotal = this.calculateExpressedPaymentTotal();
             let totalToBePaid = this.props.invoiceTotal + this.state.debtTotalBs;
-            let message = "";
+            let message = '';
             let canAcquireDebt = true;
             if (expressedPaymentTotal == totalToBePaid) {
-                message = "¿Está seguro que desea continuar?";
+                message = '¿Está seguro que desea continuar?';
                 canAcquireDebt = false;
+            } else if (expressedPaymentTotal < totalToBePaid) {
+                message =
+                    "<span class='font-weight-bold'>El pago total expresado es <span class='text-danger h5'>INFERIOR </span> al monto total a pagar. El cliente podría adquirir una <span class='text-danger'>DEUDA</span> con la empresa. ¿Cómo desea continuar?</span>";
+            } else if (expressedPaymentTotal > totalToBePaid) {
+                message =
+                    "<span class='font-weight-bold'>El pago total expresado es <span class='text-success h5'>SUPERIOR </span> al monto total a pagar. La empresa podría adquirir una <span class='text-success'>DEUDA</span> con el cliente. ¿Cómo desea continuar?</span>";
             }
-            else if (expressedPaymentTotal < totalToBePaid) {
-                message = "<span class='font-weight-bold'>El pago total expresado es <span class='text-danger h5'>INFERIOR </span> al monto total a pagar. El cliente podría adquirir una <span class='text-danger'>DEUDA</span> con la empresa. ¿Cómo desea continuar?</span>";
-            }
-            else if (expressedPaymentTotal > totalToBePaid) {
-                message = "<span class='font-weight-bold'>El pago total expresado es <span class='text-success h5'>SUPERIOR </span> al monto total a pagar. La empresa podría adquirir una <span class='text-success'>DEUDA</span> con el cliente. ¿Cómo desea continuar?</span>";
-            }
-            this.setState({
-                confirmingSale: true
-            }, () => {
-                this.showSaleConfirmDialog(message, canAcquireDebt, (fullyPaid) => {
-                    this.submitCurrentSale(fullyPaid);
-                });
-            });
+            this.setState(
+                {
+                    confirmingSale: true,
+                },
+                () => {
+                    this.showSaleConfirmDialog(message, canAcquireDebt, (fullyPaid) => {
+                        this.submitCurrentSale(fullyPaid);
+                    });
+                }
+            );
         }
     }
 
     submitCurrentSale(fullyPaid) {
-        this.setState({
-            submittingSale: true
-        }, async () => {
-            let products = [];
-            let paymentInfo = this.state.paymentInfo;
-            let salePayments = [];
-            this.props.products.forEach(product => {
-                products.push({
-                    id: product.id,
-                    quantity: product.quantity,
-                    price: product.price,
-                    profitPercent: product.profitPercent,
-                    discount: product.discount.length ? product.discount[0].percent : 0
-                });
-            });
-            paymentInfo.forEach(payment => {
-                let pm = {
-                    id: payment.id,
-                    paymentMethodId: payment.paymentMethodId,
-                    amount: payment.amount,
-                    currency: payment.currency,
-                };
-                if (payment.type.includes("PointOfSale")) {
-                    pm.paymentDetails = {
-                        ticketId: payment.ticketId
-                    };
-                }
-                else if (payment.type.includes("Cash") && payment.currency === "USD") {
-                    pm.paymentDetails = {
-                        dolarReference: payment.dolarReference
-                    };
-
-                }
-                else if (payment.type.includes("Cash") && payment.currency === "Bs") {
-                    pm.paymentDetails = {};
-                }
-                else if (payment.type.includes("BankTransfer")) {
-                    pm.paymentDetails = {
-                        referenceCode: payment.referenceCode,
-                        bankId: payment.bankId
-                    };
-
-                }
-                if (payment.debtInfo) {
-                    salePayments.push({
-                        ...pm,
-                        payingDebtInfo: [{
-                            saleId: payment.debtInfo.saleId,
-                            amount: -pm.amount,
-                            fullyPaid: payment.amount == Math.abs(payment.debtInfo.debtTotal.toFixed(2)) ? 1 : 0
-                        }]
+        this.setState(
+            {
+                submittingSale: true,
+            },
+            async () => {
+                let products = [];
+                let paymentInfo = this.state.paymentInfo;
+                let salePayments = [];
+                this.props.products.forEach((product) => {
+                    products.push({
+                        id: product.id,
+                        quantity: product.quantity,
+                        price: product.price,
+                        profitPercent: product.profitPercent,
+                        discount: product.discount.length ? product.discount[0].percent : 0,
                     });
-                }
-                else {
-                    salePayments.push(pm);
-                }
-            });
-            let client = this.state.currentSelectedClient;
-            if (client.sales) {
-                for (let debt of client.sales) {
-                    if (debt.markedToBePaid) {
-                        let higherPayment = getHigherAmountClientPayment(salePayments);
-                        let amountToBePaid = 0;
-                        if (higherPayment.currency === "USD") {
-                            amountToBePaid = debt.debtTotal / higherPayment.paymentDetails.dolarReference;
-                        }
-                        else if (higherPayment.currency === "Bs") {
-                            amountToBePaid = debt.debtTotal;
-                        }
-                        salePayments.forEach(payment => {
-                            let fullyPaid = false;
-                            if (higherPayment.currency === debt.debtCurrency) {
-                                fullyPaid = amountToBePaid == Math.abs(debt.debtTotal);
-                            }
-                            else if (higherPayment.currency === "USD" && debt.debtCurrency === "Bs") {
-                                fullyPaid = (amountToBePaid * higherPayment.paymentDetails.dolarReference) == Math.abs(debt.debtTotal);
-                            }
-                            else if (higherPayment.currency === "Bs" && debt.debtCurrency === "USD") {
-                                fullyPaid = (amountToBePaid / higherPayment.paymentDetails.dolarReference) == Math.abs(debt.debtTotal);
-                            }
-                            if (payment.id == higherPayment.id) {
-                                if (payment.payingDebtInfo) {
-                                    payment.payingDebtInfo.push({
-                                        saleId: debt.id,
-                                        amount: amountToBePaid,
-                                        fullyPaid
-                                    });
-                                }
-                                else {
-                                    payment.payingDebtInfo = [{
-                                        saleId: debt.id,
-                                        amount: amountToBePaid,
-                                        fullyPaid
-                                    }];
-                                }
-                                payment.amount -= amountToBePaid;
-                            }
+                });
+                paymentInfo.forEach((payment) => {
+                    let pm = {
+                        id: payment.id,
+                        paymentMethodId: payment.paymentMethodId,
+                        amount: payment.amount,
+                        currency: payment.currency,
+                    };
+                    if (payment.type.includes('PointOfSale')) {
+                        pm.paymentDetails = {
+                            ticketId: payment.ticketId,
+                        };
+                    } else if (payment.type.includes('Cash') && payment.currency === 'USD') {
+                        pm.paymentDetails = {
+                            dolarReference: payment.dolarReference,
+                        };
+                    } else if (payment.type.includes('Cash') && payment.currency === 'Bs') {
+                        pm.paymentDetails = {};
+                    } else if (payment.type.includes('BankTransfer')) {
+                        pm.paymentDetails = {
+                            referenceCode: payment.referenceCode,
+                            bankId: payment.bankId,
+                        };
+                    }
+                    if (payment.debtInfo) {
+                        salePayments.push({
+                            ...pm,
+                            payingDebtInfo: [
+                                {
+                                    saleId: payment.debtInfo.saleId,
+                                    amount: -pm.amount,
+                                    fullyPaid: payment.amount == Math.abs(payment.debtInfo.debtTotal.toFixed(2)) ? 1 : 0,
+                                },
+                            ],
                         });
+                    } else {
+                        salePayments.push(pm);
+                    }
+                });
+                let client = this.state.currentSelectedClient;
+                if (client.sales) {
+                    for (let debt of client.sales) {
+                        if (debt.markedToBePaid) {
+                            let higherPayment = getHigherAmountClientPayment(salePayments);
+                            let amountToBePaid = 0;
+                            if (higherPayment.currency === 'USD') {
+                                amountToBePaid = debt.debtTotal / higherPayment.paymentDetails.dolarReference;
+                            } else if (higherPayment.currency === 'Bs') {
+                                amountToBePaid = debt.debtTotal;
+                            }
+                            salePayments.forEach((payment) => {
+                                let fullyPaid = false;
+                                if (higherPayment.currency === debt.debtCurrency) {
+                                    fullyPaid = amountToBePaid == Math.abs(debt.debtTotal);
+                                } else if (higherPayment.currency === 'USD' && debt.debtCurrency === 'Bs') {
+                                    fullyPaid = amountToBePaid * higherPayment.paymentDetails.dolarReference == Math.abs(debt.debtTotal);
+                                } else if (higherPayment.currency === 'Bs' && debt.debtCurrency === 'USD') {
+                                    fullyPaid = amountToBePaid / higherPayment.paymentDetails.dolarReference == Math.abs(debt.debtTotal);
+                                }
+                                if (payment.id == higherPayment.id) {
+                                    if (payment.payingDebtInfo) {
+                                        payment.payingDebtInfo.push({
+                                            saleId: debt.id,
+                                            amount: amountToBePaid,
+                                            fullyPaid,
+                                        });
+                                    } else {
+                                        payment.payingDebtInfo = [
+                                            {
+                                                saleId: debt.id,
+                                                amount: amountToBePaid,
+                                                fullyPaid,
+                                            },
+                                        ];
+                                    }
+                                    payment.amount -= amountToBePaid;
+                                }
+                            });
+                        }
                     }
                 }
-            }
-            salePayments.forEach(payment => {
-                delete payment.id;
-            });
-            try {
-                let sale = await salesRequests.create({
-                    clientId: this.state.currentSelectedClient.id,
-                    products,
-                    dolarReference: this.props.dolarReference,
-                    isPaid: fullyPaid,
-                    fullyPaidDate: fullyPaid ? new Date() : null,
-                    payments: salePayments
+                salePayments.forEach((payment) => {
+                    delete payment.id;
                 });
-                if (sale.error) {
-                    console.log(sale.error);
-                    showMessageInfo(this, "error", sale.error.toString());
-                }
-                else {
-                    this.setState({
-                        submittingSale: false
-                    }, () => {
-                        window.$("#invoiceModal").modal("hide");
-                        this.props.onSaleSubmit();
+                try {
+                    let sale = await salesRequests.create({
+                        clientId: this.state.currentSelectedClient.id,
+                        products,
+                        dolarReference: this.props.dolarReference,
+                        isPaid: fullyPaid,
+                        fullyPaidDate: fullyPaid ? new Date() : null,
+                        payments: salePayments,
                     });
+                    if (sale.error) {
+                        console.log(sale.error);
+                        showMessageInfo(this, 'error', sale.error.toString());
+                    } else {
+                        this.setState(
+                            {
+                                submittingSale: false,
+                            },
+                            () => {
+                                window.$('#invoiceModal').modal('hide');
+                                this.props.onSaleSubmit();
+                            }
+                        );
+                    }
+                } catch (error) {
+                    showMessageInfo(this, 'error', error.toString());
                 }
-
-            } catch (error) {
-                showMessageInfo(this, "error", error.toString());
             }
-        });
+        );
     }
 
     paymentSubmitHandler() {
@@ -528,87 +537,83 @@ class InvoiceModalContainer extends Component {
             let expressedPaymentTotal = this.calculateExpressedPaymentTotal();
             let totalToBePaid = Math.abs(this.state.invoiceTotal);
             let dolarReference = null;
-            this.state.paymentInfo.map(payment => {
+            this.state.paymentInfo.map((payment) => {
                 if (payment.dolarReference) {
                     dolarReference = payment.dolarReference;
                 }
             });
-            if (this.state.invoiceCurrency === "USD") {
+            if (this.state.invoiceCurrency === 'USD') {
                 if (dolarReference) {
                     totalToBePaid = Math.abs(this.state.invoiceTotal) * dolarReference;
-                }
-                else {
-                    dolarReference = prompt("Por favor ingrese el valor actual del dolar");
+                } else {
+                    dolarReference = prompt('Por favor ingrese el valor actual del dolar');
 
                     if (dolarReference == null || isNaN(dolarReference)) {
                         this.setState({ submittingSale: false });
-                        showMessageInfo(this, "error", "Valor del dolar incorrecto");
+                        showMessageInfo(this, 'error', 'Valor del dolar incorrecto');
                         return;
-                    }
-                    else {
+                    } else {
                         totalToBePaid = Math.abs(this.state.invoiceTotal) * dolarReference;
                     }
                 }
-                this.setState({ invoiceTotal: totalToBePaid, invoiceCurrency: "Bs" });
+                this.setState({ invoiceTotal: totalToBePaid, invoiceCurrency: 'Bs' });
             }
-            let message = "";
+            let message = '';
             let canAcquireDebt = true;
             if (expressedPaymentTotal == totalToBePaid) {
-                message = "¿Está seguro que desea continuar?";
+                message = '¿Está seguro que desea continuar?';
                 canAcquireDebt = false;
+            } else if (expressedPaymentTotal < totalToBePaid) {
+                message =
+                    "<span class='font-weight-bold'>El pago total expresado es <span class='text-danger h5'>INFERIOR </span> al monto total a pagar. El cliente podría adquirir una <span class='text-danger'>DEUDA</span> con la empresa. ¿Cómo desea continuar?</span>";
+            } else if (expressedPaymentTotal > totalToBePaid) {
+                message =
+                    "<span class='font-weight-bold'>El pago total expresado es <span class='text-success h5'>SUPERIOR </span> al monto total a pagar. La empresa podría adquirir una <span class='text-success'>DEUDA</span> con el cliente. ¿Cómo desea continuar?</span>";
             }
-            else if (expressedPaymentTotal < totalToBePaid) {
-                message = "<span class='font-weight-bold'>El pago total expresado es <span class='text-danger h5'>INFERIOR </span> al monto total a pagar. El cliente podría adquirir una <span class='text-danger'>DEUDA</span> con la empresa. ¿Cómo desea continuar?</span>";
-            }
-            else if (expressedPaymentTotal > totalToBePaid) {
-                message = "<span class='font-weight-bold'>El pago total expresado es <span class='text-success h5'>SUPERIOR </span> al monto total a pagar. La empresa podría adquirir una <span class='text-success'>DEUDA</span> con el cliente. ¿Cómo desea continuar?</span>";
-            }
-            this.setState({
-                confirmingSale: true
-            }, () => {
-                this.showSaleConfirmDialog(message, canAcquireDebt, (fullyPaid) => {
-                    this.payCurrentDebt(fullyPaid);
-                });
-            });
+            this.setState(
+                {
+                    confirmingSale: true,
+                },
+                () => {
+                    this.showSaleConfirmDialog(message, canAcquireDebt, (fullyPaid) => {
+                        this.payCurrentDebt(fullyPaid);
+                    });
+                }
+            );
         }
     }
 
     async payCurrentDebt(fullyPaid) {
         if (this.props.saleId == null) {
-            showMessageInfo(this, "error", "ID de venta no especificado");
+            showMessageInfo(this, 'error', 'ID de venta no especificado');
             return;
         }
 
         try {
             let paymentInfo = this.state.paymentInfo;
             let paymentsArray = [];
-            paymentInfo.forEach(payment => {
+            paymentInfo.forEach((payment) => {
                 let pm = {
                     id: payment.id,
                     paymentMethodId: payment.paymentMethodId,
                     amount: this.props.invoiceTotal < 0 ? -payment.amount : payment.amount,
                     currency: payment.currency,
                 };
-                if (payment.type.includes("PointOfSale")) {
+                if (payment.type.includes('PointOfSale')) {
                     pm.paymentDetails = {
-                        ticketId: payment.ticketId
+                        ticketId: payment.ticketId,
                     };
-                }
-                else if (payment.type.includes("Cash") && payment.currency === "USD") {
+                } else if (payment.type.includes('Cash') && payment.currency === 'USD') {
                     pm.paymentDetails = {
-                        dolarReference: payment.dolarReference
+                        dolarReference: payment.dolarReference,
                     };
-
-                }
-                else if (payment.type.includes("Cash") && payment.currency === "Bs") {
+                } else if (payment.type.includes('Cash') && payment.currency === 'Bs') {
                     pm.paymentDetails = {};
-                }
-                else if (payment.type.includes("BankTransfer")) {
+                } else if (payment.type.includes('BankTransfer')) {
                     pm.paymentDetails = {
                         referenceCode: payment.referenceCode,
-                        bankId: payment.bankId
+                        bankId: payment.bankId,
                     };
-
                 }
                 paymentsArray.push(pm);
             });
@@ -620,105 +625,109 @@ class InvoiceModalContainer extends Component {
                     fullyPaid,
                 });
                 if (pm.error) {
-                    showMessageInfo(this, "error", pm.error.toString());
+                    showMessageInfo(this, 'error', pm.error.toString());
+                } else {
+                    this.setState(
+                        {
+                            submittingSale: false,
+                        },
+                        () => {
+                            window.$('#invoiceModal').modal('hide');
+                            this.props.onPaymentSubmit();
+                        }
+                    );
                 }
-                else {
-                    this.setState({
-                        submittingSale: false
-                    }, () => {
-                        window.$("#invoiceModal").modal("hide");
-                        this.props.onPaymentSubmit();
-                    });
-                }
-
             }
         } catch (error) {
-            showMessageInfo(this, "error", error.toString());
+            showMessageInfo(this, 'error', error.toString());
         }
     }
 
     showSaleConfirmDialog(message, isDebt, cb) {
         let buttons = isDebt
-            ?
-            {
-                close: {
-                    label: "Cerrar",
-                    className: "btn-secondary",
-                    callback: function () {
-                        dialog.modal("hide");
-                    }
-                },
-                storeAsDebt: {
-                    label: "Guardar deuda",
-                    className: "btn-warning",
-                    callback: function () {
-                        cb(false);
-                    }
-                },
-                confirm: {
-                    label: "Continuar sin guardar deuda",
-                    className: "btn btn-primary btn-success",
-                    callback: function () {
-                        cb(true);
-                    }
-                }
-            }
-            :
-            {
-                close: {
-                    label: "Cerrar",
-                    className: "btn-secondary",
-                    callback: function () {
-                        dialog.modal("hide");
-                    }
-                },
-                confirm: {
-                    label: "Confirmar",
-                    className: "btn btn-primary btn-success",
-                    autoFocus: true,
-                    callback: function () {
-                        cb(true);
-                    }
-                }
-            };
+            ? {
+                  close: {
+                      label: 'Cerrar',
+                      className: 'btn-secondary',
+                      callback: function () {
+                          dialog.modal('hide');
+                      },
+                  },
+                  storeAsDebt: {
+                      label: 'Guardar deuda',
+                      className: 'btn-warning',
+                      callback: function () {
+                          cb(false);
+                      },
+                  },
+                  confirm: {
+                      label: 'Continuar sin guardar deuda',
+                      className: 'btn btn-primary btn-success',
+                      callback: function () {
+                          cb(true);
+                      },
+                  },
+              }
+            : {
+                  close: {
+                      label: 'Cerrar',
+                      className: 'btn-secondary',
+                      callback: function () {
+                          dialog.modal('hide');
+                      },
+                  },
+                  confirm: {
+                      label: 'Confirmar',
+                      className: 'btn btn-primary btn-success',
+                      autoFocus: true,
+                      callback: function () {
+                          cb(true);
+                      },
+                  },
+              };
         let dialog = bootbox.dialog({
-            title: "Confirmación",
+            title: 'Confirmación',
             message,
-            size: "large",
+            size: 'large',
             onEscape: true,
             closeButton: true,
             centerVertical: true,
             animate: false,
             backdrop: true,
-            buttons
+            buttons,
         });
     }
 
     onNewClientSubmitHandler(client) {
-        client.label = client.name ? client.name : "";
-        client.cedula = client.cedula ? parseInt(client.cedula) : "";
-        this.setState({
-            currentSelectedClient: client
-        }, () => {
-            console.log(this.state.currentSelectedClient);
-            window.$("#newClientModal").modal("hide");
-            window.$("#invoiceModal").find("input").focus();
-        });
-
+        client.label = client.name ? client.name : '';
+        client.cedula = client.cedula ? parseInt(client.cedula) : '';
+        this.setState(
+            {
+                currentSelectedClient: client,
+            },
+            () => {
+                console.log(this.state.currentSelectedClient);
+                window.$('#newClientModal').modal('hide');
+                window.$('#invoiceModal').find('input').focus();
+            }
+        );
     }
 
     openNewClientFormModal(cedulaToBeCreated) {
-        this.setState({
-            showNewClientFormModal: true,
-            cedulaToBeCreated
-        }, () => {
-            window.$("#newClientModal").modal("show");
-        });
+        this.setState(
+            {
+                showNewClientFormModal: true,
+                cedulaToBeCreated,
+            },
+            () => {
+                window.$('#newClientModal').modal('show');
+            }
+        );
     }
 
     closeNewClientFormModal() {
         this.setState({
-            showNewClientFormModal: false
+            showNewClientFormModal: false,
         });
     }
 
