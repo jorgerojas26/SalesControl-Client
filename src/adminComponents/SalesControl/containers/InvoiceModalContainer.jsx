@@ -258,6 +258,10 @@ class InvoiceModalContainer extends Component {
     }
 
     saleSubmitValidationsPassed() {
+        if (this.state.currentSelectedClient.sales.length) {
+            showMessageInfo(this, 'error', 'El cliente no puede tener más de 1 deuda.');
+            return;
+        }
         if (!this.state.currentSelectedClient) {
             showMessageInfo(this, 'error', 'Por favor seleccione un cliente');
             return false;
@@ -646,45 +650,45 @@ class InvoiceModalContainer extends Component {
     showSaleConfirmDialog(message, isDebt, cb) {
         let buttons = isDebt
             ? {
-                  close: {
-                      label: 'Cerrar',
-                      className: 'btn-secondary',
-                      callback: function () {
-                          dialog.modal('hide');
-                      },
-                  },
-                  storeAsDebt: {
-                      label: 'Guardar deuda',
-                      className: 'btn-warning',
-                      callback: function () {
-                          cb(false);
-                      },
-                  },
-                  confirm: {
-                      label: 'Continuar sin guardar deuda',
-                      className: 'btn btn-primary btn-success',
-                      callback: function () {
-                          cb(true);
-                      },
-                  },
-              }
+                close: {
+                    label: 'Cerrar',
+                    className: 'btn-secondary',
+                    callback: function () {
+                        dialog.modal('hide');
+                    },
+                },
+                storeAsDebt: {
+                    label: 'Guardar deuda',
+                    className: 'btn-warning',
+                    callback: function () {
+                        cb(false);
+                    },
+                },
+                confirm: {
+                    label: 'Continuar sin guardar deuda',
+                    className: 'btn btn-primary btn-success',
+                    callback: function () {
+                        cb(true);
+                    },
+                },
+            }
             : {
-                  close: {
-                      label: 'Cerrar',
-                      className: 'btn-secondary',
-                      callback: function () {
-                          dialog.modal('hide');
-                      },
-                  },
-                  confirm: {
-                      label: 'Confirmar',
-                      className: 'btn btn-primary btn-success',
-                      autoFocus: true,
-                      callback: function () {
-                          cb(true);
-                      },
-                  },
-              };
+                close: {
+                    label: 'Cerrar',
+                    className: 'btn-secondary',
+                    callback: function () {
+                        dialog.modal('hide');
+                    },
+                },
+                confirm: {
+                    label: 'Confirmar',
+                    className: 'btn btn-primary btn-success',
+                    autoFocus: true,
+                    callback: function () {
+                        cb(true);
+                    },
+                },
+            };
         let dialog = bootbox.dialog({
             title: 'Confirmación',
             message,
