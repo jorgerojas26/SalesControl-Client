@@ -258,10 +258,6 @@ class InvoiceModalContainer extends Component {
     }
 
     saleSubmitValidationsPassed() {
-        if (this.state.currentSelectedClient.sales.length) {
-            showMessageInfo(this, 'error', 'El cliente no puede tener más de 1 deuda.');
-            return;
-        }
         if (!this.state.currentSelectedClient) {
             showMessageInfo(this, 'error', 'Por favor seleccione un cliente');
             return false;
@@ -503,10 +499,13 @@ class InvoiceModalContainer extends Component {
                         }
                     }
                 }
+
                 salePayments.forEach((payment) => {
                     delete payment.id;
                 });
+
                 try {
+                    console.log(salePayments);
                     let sale = await salesRequests.create({
                         clientId: this.state.currentSelectedClient.id,
                         products,
@@ -516,7 +515,6 @@ class InvoiceModalContainer extends Component {
                         payments: salePayments,
                     });
                     if (sale.error) {
-                        console.log(sale.error);
                         showMessageInfo(this, 'error', sale.error.toString());
                     } else {
                         this.setState(
@@ -660,7 +658,21 @@ class InvoiceModalContainer extends Component {
                 storeAsDebt: {
                     label: 'Guardar deuda',
                     className: 'btn-warning',
-                    callback: function () {
+                    callback: () => {
+                        let markedToBePaidCounter = 0;
+                        let debtCount = 0;
+                        this.state.currentSelectedClient.sales.map(debt => {
+                            debtCount++;
+                            if (debt.markedToBePaid) {
+                                markedToBePaidCounter++;
+                            }
+                        });
+
+                        if (this.state.currentSelectedClient.sales.length
+                            && markedToBePaidCounter != debtCount) {
+                            showMessageInfo(this, 'error', 'El cliente no puede tener más de 1 deuda.');
+                            return;
+                        }
                         cb(false);
                     },
                 },
