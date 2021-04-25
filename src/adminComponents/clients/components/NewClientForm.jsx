@@ -15,7 +15,7 @@ const NewClientForm = (props) => {
                         <div className="modal-body">
                             <div className="form-group">
                                 <label>* Nombre: </label>
-                                <input ref={props.nameInputRef} onChange={props.onChangeHandler} value={props.clientData.name || ""} type="text" className="form-control" name="name" id="name" required />
+                                <input ref={props.nameInputRef} onChange={props.onChangeHandler} value={props.clientData.name || ""} type="text" className="form-control text-capitalize" name="name" id="name" required />
                             </div>
                             <div className="form-group">
                                 <label>* Cédula: </label>

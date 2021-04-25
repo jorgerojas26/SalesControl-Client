@@ -9,7 +9,7 @@ const ClientSearch = (props) => {
                 loadOptions={props.onSearch}
                 ref={props.clientSelectRef}
                 onInputChange={props.onInputChange}
-                className="w-100"
+                className="w-100 text-capitalize"
                 placeholder="Buscar cliente"
                 isClearable
                 inputId="clientSelect"

@@ -48,7 +48,6 @@ class ClientSearchContainer extends Component {
     onClientSelect(selectedClient, action) {
         if (action.action == "select-option") {
             if (selectedClient) {
-                console.log(selectedClient);
                 /*
                 selectedClient.sales.forEach(sale => {
                     let nonFreezedSaleTotal = calculateSaleTotal(sale, false, this.props.dolarReference).invoiceTotal;

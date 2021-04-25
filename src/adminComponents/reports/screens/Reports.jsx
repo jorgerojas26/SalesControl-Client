@@ -252,7 +252,7 @@ const Reports = (props) => {
                                                     return (
                                                         <tr key={debt.id}>
                                                             <td onClick={props.onDebtIdClick} role="button" className="btn-link" data-debtid={debt.id}>{debt.id}</td>
-                                                            <td>{debt.client.name}</td>
+                                                            <td className="text-capitalize">{debt.client.name}</td>
                                                             <td scope="col">{debt.client.cedula}</td>
                                                             <td>{debt.payment.map((payment, index) => {
                                                                 return <div><span className={payment.amount < 0 ? "text-danger" : "text-success"}>{`${payment.amount.toLocaleString("es-VE")} ${payment.currency}`}</span><br /></div>;

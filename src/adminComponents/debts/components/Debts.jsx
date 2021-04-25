@@ -34,7 +34,7 @@ const Debts = (props) => {
                             return (
                                 <tr key={sale.id}>
                                     <th onClick={() => props.openDebtDetails(sale.id)} role="button" className="btn-link">{sale.id}</th>
-                                    <th>{sale.client.name}</th>
+                                    <th className="text-capitalize">{sale.client.name}</th>
                                     <th>{sale.client.cedula}</th>
                                     <th className={sale.debtTotal < 0 ? "text-success" : "text-danger"}>{sale.debtCurrency == "Bs" ? Math.abs(sale.debtTotal).toLocaleString("es-VE") : Math.abs(sale.debtTotal).toFixed(2).toLocaleString("es-VE")}</th>
                                     <th>{sale.createdAt}</th>

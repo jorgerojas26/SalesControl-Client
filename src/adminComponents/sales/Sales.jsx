@@ -101,7 +101,7 @@ class Sales extends Component {
                                 defaultContent: '<button class="btn btn-success">Ver Productos</button>'
                             },
                             */
-                            { title: "Cliente", data: "client.name" },
+                            { title: "Cliente", data: "client.name", className: "text-capitalize" },
                             { title: "Cédula", data: "client.cedula" },
                             { title: "Fecha creación", data: "createdAt" }
 

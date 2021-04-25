@@ -81,7 +81,7 @@ class Clients extends Component {
                 data: response,
                 columns: [
                     { title: "ID", data: "id" },
-                    { title: "Nombre", data: "name" },
+                    { title: "Nombre", data: "name", className: "text-capitalize" },
                     { title: "Cédula", data: "cedula" },
                     { title: "Teléfono", data: "phoneNumber" },
                     { title: "Fecha creación", data: "createdAt" }
